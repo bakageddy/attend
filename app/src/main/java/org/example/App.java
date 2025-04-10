@@ -6,10 +6,14 @@ package org.example;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
+import java.util.Properties;
 
-import com.zaxxer.hikari.HikariDataSource;
+// import com.zaxxer.hikari.HikariDataSource;
 
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,6 +22,25 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(name = "home", urlPatterns = "/", loadOnStartup = 1)
 public class App extends HttpServlet  {
+	// @Override
+	// public void init(ServletConfig config) throws ServletException {
+	// 	super.init(config);
+	// }
+	
+	public static Optional<Connection> getDBConnection() {
+		try {
+			String url = "jdbc:postgresql://localhost/college";
+			Properties props = new Properties();
+			String password = System.getenv().get("PGSQL_DB_PASSWORD");
+			props.setProperty("user", "postgres");
+			props.setProperty("password", password);
+			Connection cnx = DriverManager.getConnection(url, props);
+			return Optional.of(cnx);
+		} catch (Exception e) {
+			return Optional.empty();
+		}
+	}
+
 	public void doGet(
 		HttpServletRequest req,
 		HttpServletResponse resp
@@ -46,6 +69,32 @@ public class App extends HttpServlet  {
 		// } finally {
 		// 	out.close();
 		// }
+		// TODO: Rewrite the db class to make it clean (Remove Exceptions by wrapping it in Optional)
+		try (
+			var cnx = DriverManager.getConnection("jdbc:postgresql://localhost/college", "postgres", "Dineshkumar4u!");
+			Statement stmt = cnx.createStatement();
+			PrintWriter out = resp.getWriter();
+		){
+			resp.setContentType("text/plain");
+			String id = req.getParameter("id");
+			out.println("You gave an id");
+			var query = String.format("SELECT Name FROM Student WHERE RollNo=%d;", id);
+			ResultSet resultSet = stmt.executeQuery(query);
+
+			if (resultSet.next()) {
+				String name = resultSet.getString("Name");
+				String msg = String.format("Hello, %s!", name);
+				resp.setContentLength(msg.length());
+				out.println(msg);
+			} else {
+				String msg = "Sorry I don't know who you are!";
+				resp.setContentLength(msg.length());
+				out.println(msg);
+			}
+
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+		}
 
 	}
 }
