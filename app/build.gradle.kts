@@ -30,6 +30,8 @@ dependencies {
 	compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
 	// https://mvnrepository.com/artifact/org.postgresql/postgresql
 	implementation("org.postgresql:postgresql:42.7.5")
+	// https://mvnrepository.com/artifact/com.google.code.gson/gson
+	implementation("com.google.code.gson:gson:2.12.1")
 	// https://mvnrepository.com/artifact/com.zaxxer/HikariCP
 	implementation("com.zaxxer:HikariCP:6.3.0")
 }

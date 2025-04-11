@@ -27,19 +27,19 @@ public class App extends HttpServlet  {
 	// 	super.init(config);
 	// }
 	
-	public static Optional<Connection> getDBConnection() {
-		try {
-			String url = "jdbc:postgresql://localhost/college";
-			Properties props = new Properties();
-			String password = System.getenv().get("PGSQL_DB_PASSWORD");
-			props.setProperty("user", "postgres");
-			props.setProperty("password", password);
-			Connection cnx = DriverManager.getConnection(url, props);
-			return Optional.of(cnx);
-		} catch (Exception e) {
-			return Optional.empty();
-		}
-	}
+	// public static Optional<Connection> getDBConnection() {
+	// 	try {
+	// 		String url = "jdbc:postgresql://localhost/college";
+	// 		Properties props = new Properties();
+	// 		String password = System.getenv().get("PGSQL_DB_PASSWORD");
+	// 		props.setProperty("user", "postgres");
+	// 		props.setProperty("password", password);
+	// 		Connection cnx = DriverManager.getConnection(url, props);
+	// 		return Optional.of(cnx);
+	// 	} catch (Exception e) {
+	// 		return Optional.empty();
+	// 	}
+	// }
 
 	public void doGet(
 		HttpServletRequest req,
@@ -77,8 +77,7 @@ public class App extends HttpServlet  {
 		){
 			resp.setContentType("text/plain");
 			String id = req.getParameter("id");
-			out.println("You gave an id");
-			var query = String.format("SELECT Name FROM Student WHERE RollNo=%d;", id);
+			String query = String.format("SELECT Name FROM Student WHERE RollNo=%d;", id);
 			ResultSet resultSet = stmt.executeQuery(query);
 
 			if (resultSet.next()) {
