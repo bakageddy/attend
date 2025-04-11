@@ -1,6 +1,7 @@
 package org.example.util;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class Result<T, E> {
 	enum Variant {
@@ -23,7 +24,7 @@ public class Result<T, E> {
 		return data;
 	}
 
-	public E err_msg() throws Exception {
+	public E err_msg() throws NoSuchElementException {
 		if (type == Variant.Ok) {
 			throw new NoSuchElementException();
 		}
@@ -31,31 +32,27 @@ public class Result<T, E> {
 	}
 
 	public boolean isOk() {
-		switch (type) {
-			case Variant.Ok:
-				return true;
-			default:
-				return false;
-		}
+		return type == Variant.Ok;
 	}
 
 	public boolean isErr() {
-		switch (type) {
-			case Variant.Err:
-				return true;
-			default:
-				return false;
-		}
+		return type == Variant.Err;
 	}
 
-	public static<T, E> Result<T, E> ok(T data) {
-		Result result = new Result(Variant.Ok);
+	public Optional<T> asOption() {
+		return type == Variant.Ok ? Optional.of(this.data) : Optional.empty();
+	}
+
+	public static <T, E> Result<T, E> ok(T data) {
+		Result<T, E> result = new Result<>(Variant.Ok);
 		result.data = data;
 		return result;
 	}
-	public static<T, E> Result<T, E> err(E err) {
-		Result result = new Result(Variant.Err);
+
+	public static <T, E> Result<T, E> err(E err) {
+		Result<T, E> result = new Result<>(Variant.Err);
 		result.err = err;
 		return result;
 	}
+
 }

@@ -3,17 +3,22 @@ package org.example.api;
 import org.example.util.Result;
 import org.example.Teacher;
 
-import com.google.code.Gson;
+import com.google.gson.Gson;
 
 import java.sql.PreparedStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.DriverManager;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 
@@ -30,7 +35,7 @@ public class TeacherSearch extends HttpServlet {
 	}
 
 	@Override
-	protected void goGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// TODO: Setup tomcat's environment
 		String password = "Dineshkumar4u!";
 
@@ -39,17 +44,17 @@ public class TeacherSearch extends HttpServlet {
 			Connection cnx = DriverManager.getConnection(
 				"jdbc:postgresql://localhost/college",
 				"postgres",
-				password;
+				password
 			);
 			PrintWriter out = resp.getWriter();
 		) {
 			String pattern_param = req.getParameter("pattern");
 			if (pattern_param != null) {
-				Result<String, Result> payload = search_by_pattern(cnx, pattern_param);
+				Result<String, String> payload = search_by_pattern(cnx, pattern_param);
 				if (payload.isErr()) {
 					resp.sendError(
 						HttpServletResponse.SC_BAD_REQUEST,
-						payload.err_msg();
+						payload.err_msg()
 					);
 					resp.flushBuffer();
 					return;
@@ -78,22 +83,25 @@ public class TeacherSearch extends HttpServlet {
 				resp.flushBuffer();
 				return;
 			}
-			Result<String, String> payload = search_by_id(id.get());
+			Result<String, String> payload = search_by_id(cnx, id.get());
 			if (payload.isErr()) {
 				resp.sendError(
 					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					payload.err_msg();
+					payload.err_msg()
 				);
 				resp.flushBuffer();
 				return;
 			}
 
-			out.write(payload);
+			out.write(payload.unwrap());
 			out.flush();
 			return;
 
 		} catch (Exception e) {
-			resp.sendError(e.getMessage());
+			resp.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				e.getMessage()
+			);
 			resp.flushBuffer();
 			return;
 		}
@@ -106,8 +114,7 @@ public class TeacherSearch extends HttpServlet {
 		}
 		try {
 			PreparedStatement stmt = cnx.prepareStatement(
-				"SELECT TeacherID, Name FROM Teacher WHERE Name LIKE ? LIMIT 20;"
-			);
+					"SELECT TeacherID, Name FROM Teacher WHERE Name LIKE ? LIMIT 20;");
 
 			stmt.setString(1, result.get());
 			ResultSet rst = stmt.executeQuery();
@@ -127,14 +134,13 @@ public class TeacherSearch extends HttpServlet {
 		}
 	}
 
-	protected Result<String, String> search_by_id(Connection cnx, long id) {
+	protected Result<String, String> search_by_id(Connection cnx, Long id) {
 		try {
 			PreparedStatement stmt = cnx.prepareStatement(
-				"SELECT Name FROM Teacher WHERE TeacherID = ?;"
-			);
+					"SELECT Name FROM Teacher WHERE TeacherID = ?;");
 			stmt.setLong(1, id);
 
-			ResultSet rst = stmt.executeQuery(stmt);
+			ResultSet rst = stmt.executeQuery();
 			// Expect only one result!
 			if (rst.next()) {
 				String name = rst.getString(1);
@@ -144,19 +150,26 @@ public class TeacherSearch extends HttpServlet {
 			} else {
 				return Result.err("No such id");
 			}
-		// TODO: You can do better than this dinesh
+			// TODO: You can do better than this dinesh
 		} catch (Exception e) {
 			return Result.err("Beep Boop, Error at search by id");
 		}
 	}
 
+	private Optional<Long> parse_long(String input) {
+		try {
+			return Optional.of(Long.parseLong(input));
+		} catch (NumberFormatException e) {
+			return Optional.empty();
+		}
+	}
+
 	public static Optional<String> validate_sql(String input) {
-		if (input.contains("DROP") || 
-			input.contains("SELECT") || 
-			input.contains("UPDATE") ||	
-			input.contains("INSERT") ||	
-			input.contains(";"))
-		{
+		if (input.contains("DROP") ||
+				input.contains("SELECT") ||
+				input.contains("UPDATE") ||
+				input.contains("INSERT") ||
+				input.contains(";")) {
 			return Optional.empty();
 		} else {
 			return Optional.of(input);

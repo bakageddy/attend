@@ -13,6 +13,9 @@ import java.sql.Statement;
 import java.util.Optional;
 import java.util.Properties;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+
 // import com.zaxxer.hikari.HikariDataSource;
 
 import jakarta.servlet.annotation.WebServlet;
@@ -20,58 +23,20 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "home", urlPatterns = "/", loadOnStartup = 1)
+@WebServlet(name = "home", urlPatterns = "/main/", loadOnStartup = 1)
 public class App extends HttpServlet  {
-	// @Override
-	// public void init(ServletConfig config) throws ServletException {
-	// 	super.init(config);
-	// }
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+	}
 	
-	// public static Optional<Connection> getDBConnection() {
-	// 	try {
-	// 		String url = "jdbc:postgresql://localhost/college";
-	// 		Properties props = new Properties();
-	// 		String password = System.getenv().get("PGSQL_DB_PASSWORD");
-	// 		props.setProperty("user", "postgres");
-	// 		props.setProperty("password", password);
-	// 		Connection cnx = DriverManager.getConnection(url, props);
-	// 		return Optional.of(cnx);
-	// 	} catch (Exception e) {
-	// 		return Optional.empty();
-	// 	}
-	// }
-
 	public void doGet(
 		HttpServletRequest req,
 		HttpServletResponse resp
-	) throws IOException {
-		// PrintWriter out = resp.getWriter();
-		// try {
-		// 	HikariDataSource ds = (HikariDataSource) this.getServletContext().getAttribute("dbpool");
-		// 	if (ds.isClosed()) {
-		// 		out.println("Datasource is closed");
-		// 		resp.setStatus(501);
-		// 		return;
-		// 	}
-		// 	Connection cnx = ds.getConnection();
-		// 	Statement s = cnx.createStatement();
-		// 	boolean executed = s.execute("SELECT 'hello, world'");
-		// 	if (executed) {
-		// 		resp.setStatus(200);
-		// 		out.println("Connection to DB successful");
-		// 	} else {
-		// 		resp.setStatus(501);
-		// 		out.println("Cannot execute statement");
-		// 	}
-		// } catch (SQLException e) {
-		// 	resp.setStatus(500);
-		// 	out.println(e.getMessage());
-		// } finally {
-		// 	out.close();
-		// }
-		// TODO: Rewrite the db class to make it clean (Remove Exceptions by wrapping it in Optional)
+	) throws ServletException, IOException {
+		// TODO: Rewrite the db class to make it clean (Remove Exceptions by wrapping it in Optional/Result)
 		try (
-			var cnx = DriverManager.getConnection("jdbc:postgresql://localhost/college", "postgres", "Dineshkumar4u!");
+			Connection cnx = DriverManager.getConnection("jdbc:postgresql://localhost/college", "postgres", "Dineshkumar4u!");
 			Statement stmt = cnx.createStatement();
 			PrintWriter out = resp.getWriter();
 		){

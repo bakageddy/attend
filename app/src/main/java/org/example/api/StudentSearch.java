@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.Student;
+import org.example.util.Result;
 
 import com.google.gson.Gson;
 
@@ -81,8 +82,8 @@ public class StudentSearch extends HttpServlet {
 		) {
 			String pattern_param = req.getParameter("pattern");
 			if (pattern_param != null) {
-				Optional<String> payload = search_by_pattern(cnx, pattern_param);
-				if (payload.isEmpty()) {
+				Result<String, String> payload = search_by_pattern(cnx, pattern_param);
+				if (payload.isErr()) {
 					resp.sendError(
 						HttpServletResponse.SC_BAD_REQUEST,
 						"Failed to generate payload"
@@ -90,7 +91,7 @@ public class StudentSearch extends HttpServlet {
 					resp.flushBuffer();
 					return;
 				}
-				out.write(payload.get());
+				out.write(payload.unwrap());
 				out.flush();
 				return;
 			}
@@ -115,16 +116,16 @@ public class StudentSearch extends HttpServlet {
 				return;
 			}
 
-			Optional<String> payload = search_by_id(cnx, id.get());
-			if (payload.isEmpty()) {
+			Result<String, String> payload = search_by_id(cnx, id.get());
+			if (payload.isErr()) {
 				resp.sendError(
 					HttpServletResponse.SC_BAD_REQUEST,
-					"Failed to generate payload"
+					payload.err_msg()
 				);
 				resp.flushBuffer();
 				return;
 			}
-			out.write(payload.get());
+			out.write(payload.unwrap());
 			out.flush();
 
 		} catch (Exception e) {
@@ -137,7 +138,7 @@ public class StudentSearch extends HttpServlet {
 		}
 	}
 
-	public static Optional<String> search_by_id(Connection cnx, Long id) {
+	public static Result<String, String> search_by_id(Connection cnx, Long id) {
 		String payload;
 
 		try {
@@ -153,22 +154,22 @@ public class StudentSearch extends HttpServlet {
 				String name = rst.getString(1);
 				Gson serializer = new Gson();
 				payload = serializer.toJson(new Student(id, name));
-				return Optional.of(payload);
+				return Result.ok(payload);
 			} else {
-				return Optional.empty();
+				return Result.err("RollNo not found");
 			}
 		// TODO: You can do better than this dinesh
 		} catch (Exception e) {
-			return Optional.empty();
+			return Result.err(e.getMessage());
 		}
 	}
 
 	// TODO: Implement Inset pagination
-	public Optional<String> search_by_pattern(Connection cnx, String pattern) {
+	public Result<String, String> search_by_pattern(Connection cnx, String pattern) {
 		String payload;
 		Optional<String> result = validate_sql(pattern);
 		if (result.isEmpty()) {
-			return Optional.empty();
+			return Result.err("Pattern must be alphanumeric, not SQL -__-");
 		}
 		try {
 			PreparedStatement stmt = cnx.prepareStatement(
@@ -188,16 +189,16 @@ public class StudentSearch extends HttpServlet {
 			Gson serializer = new Gson();
 			payload = serializer.toJson(names.toArray());
 
-			return Optional.of(payload);
+			return Result.ok(payload);
 		} catch (Exception e) {
-			return Optional.empty();
+			return Result.err(e.getMessage());
 		}
 	}
 
 	public static Optional<Long> parse_long(String input) {
 		try {
 			return Optional.of(Long.parseLong(input));
-		} catch (Exception e) {
+		} catch (NumberFormatException e) {
 			return Optional.empty();
 		}
 	}

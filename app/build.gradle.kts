@@ -43,6 +43,10 @@ java {
     }
 }
 
+tasks.war {
+    webAppDirectory.set(file("src/main/ui"))
+}
+
 application {
     // Define the main class for the application.
     mainClass = "org.example.App"
