@@ -8,3 +8,4 @@ build
 .project
 .settings/
 ./app/build/
+./app/bin/
