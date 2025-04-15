@@ -5,13 +5,12 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Optional;
 
 import org.example.util.Result;
+import org.postgresql.Driver;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -129,7 +128,6 @@ public class Attendance extends HttpServlet {
 				"Dineshkumar4u!"
 			);
 		) {
-			// TODO: Set Attendance
 			Result<Void, String> result = set_attendance(
 				cnx, 
 				parsed_rollno.get(), 
@@ -144,16 +142,173 @@ public class Attendance extends HttpServlet {
 				resp.flushBuffer();
 				return;
 			}
+
+			resp.setStatus(HttpServletResponse.SC_OK);
+			resp.flushBuffer();
+			return;
 		} catch (SQLException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+			resp.flushBuffer();
 			return;
 		}
 
 	} 
 
-	// TODO: Delete attendance;
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED);
+		String rollno_param = req.getParameter("rollno");
+		if (rollno_param == null) {
+			resp.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"Cannot set attendance without req"
+			);
+			resp.flushBuffer();
+			return;
+		}
+
+		Optional<Long> parsed_rollno = parse_long(rollno_param);
+		if (parsed_rollno.isEmpty()) {
+			resp.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"RollNo must be numeric"
+			);
+			resp.flushBuffer();
+			return;
+		}
+
+		String subject_id_param = req.getParameter("subjectid");
+		if (subject_id_param == null) {
+			resp.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"Cannot set attendance without subjectid"
+			);
+			resp.flushBuffer();
+			return;
+		}
+
+		Optional<Long> parsed_subjectid = parse_long(subject_id_param);
+		if (parsed_subjectid.isEmpty()) {
+			resp.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"Subject ID must be numeric"
+			);
+			resp.flushBuffer();
+			return;
+		}
+
+		String teacher_id_param = req.getParameter("teacherid");
+		if (teacher_id_param == null) {
+			resp.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"Teacher ID is required for attendance"
+			);
+			resp.flushBuffer();
+			return;
+		}
+
+		Optional<Long> parsed_teacherid = parse_long(teacher_id_param);
+		if (parsed_teacherid.isEmpty()) {
+			resp.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"Teacher ID must be numeric"
+			);
+			resp.flushBuffer();
+			return;
+		}
+
+		String period = req.getParameter("period");
+		if (period == null) {
+			period = "I";  // TODO: Refactor Default period
+		}
+		if (!valid_period(period)) {
+			resp.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"Period must be uppercase roman numeral => 'I' to 'VII'"
+			);
+			resp.flushBuffer();
+			return;
+		}
+
+		String date = req.getParameter("date");
+		if (date == null) {
+			date = default_date();
+		}
+
+		Optional<String> valid_date = validate_date(date);
+		if (valid_date.isEmpty()) {
+			resp.sendError(
+				HttpServletResponse.SC_BAD_REQUEST,
+				"Date must be in YYYY-MM-DD format"
+			);
+			resp.flushBuffer();
+			return;
+		}
+
+		try (
+			Connection cnx = DriverManager.getConnection(
+				"jdbc:postgresql://localhost/college",
+				"postgres",
+				"Dineshkumar4u!"
+			);
+		) {
+			Result<Void, String> result = delete_attendance(
+				cnx,
+				parsed_rollno.get(),
+				parsed_teacherid.get(),
+				parsed_subjectid.get(),
+				period,
+				valid_date.get()
+			);
+
+			if (result.isErr()) {
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				resp.flushBuffer();
+				return;
+			}
+
+			resp.setStatus(HttpServletResponse.SC_OK);
+			resp.flushBuffer();
+			return;
+		} catch (SQLException e) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+			resp.flushBuffer();
+			return;
+		}
+	}
+
+	private static Result<Void, String> delete_attendance(
+		Connection cnx,
+		Long student_id,
+		Long teacher_id,
+		Long subject_id,
+		String period
+	) {
+		String date = default_date();
+		return delete_attendance(cnx, student_id, teacher_id, subject_id, period, date);
+	}
+
+	private static Result<Void, String> delete_attendance(
+		Connection cnx,
+		Long student_id,
+		Long teacher_id,
+		Long subject_id,
+		String period,
+		String date
+	) {
+		try {
+			PreparedStatement stmt = cnx.prepareStatement(
+				"DELETE FROM Attendance WHERE Day=? AND RollNo=? AND TeacherID=? AND SubjectID=? AND Period=?;"
+			);
+			stmt.setString(1, date);
+			stmt.setLong(2, student_id);
+			stmt.setLong(3, teacher_id);
+			stmt.setLong(4, subject_id);
+			stmt.setString(5, period);
+			stmt.executeUpdate();
+			return Result.ok(null);
+		} catch (Exception e) {
+			return Result.err(e.getMessage());
+		}
 	}
 
 	private static Result<Void, String> set_attendance(
