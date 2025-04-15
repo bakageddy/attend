@@ -1,29 +1,58 @@
 <!DOCTYPE html>
 
 <html>
-	<head>
-		<link rel="stylesheet" type="text/css" href="/app/css/index.css" />
-		<script src="/app/js/htmx.min.js"></script>
-		<title>Home</title>
-	</head>
 
-	<body>
-		<header>
-			<nav class="navbar">
-				<div class="navbar--links">
-					<ul>
-						<li><a href="about.html">About</a></li>
-						<li><a href="https://github.com/bakageddy">View</a></li>
-					</ul>
-				</div>
-			</nav>
-		</header>
-		<main>
-			<section>
-				Hello, world!
-			</section>
-		</main>
-		<footer>
-		</footer>
-	</body>
+<head>
+	<link rel="stylesheet" type="text/css" href="/app/css/index.css" />
+	<link rel="stylesheet" type="text/css" href="/app/css/navbar.css" />
+	<link rel="stylesheet" type="text/css" href="/app/css/search.css" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Gudea:ital,wght@0,400;0,700;1,400&display=swap"
+		rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
+	<script src="/app/js/htmx.min.js"></script>
+	<title>Home</title>
+</head>
+
+<body>
+	<header>
+		<nav class="navbar">
+			<img class="navbar__left" src="/app/svg/menu.svg" />
+			<h2 class="navbar__middle">ATTEN</h3>
+				<ul class="navbar__right">
+					<li><a class="navbar__link" href="https://github.com/bakageddy">GitHub</a></li>
+				</ul>
+		</nav>
+	</header>
+
+	<main>
+		<section class="student search">
+			<form class="search__form" method="GET" action="/app/api/student/search">
+				<input class="search__element" name="rollno" type="number" placeholder="Student ID" />
+				<input class="search__element" name="pattern" type="text" placeholder="Student Name" />
+				<button class="search__element" type="submit">Search</button>
+			</form>
+		</section>
+
+		<section class="subject search">
+			<form class="search__form" method="GET" action="/app/api/subject/search">
+				<input class="search__element" name="subjectid" type="number" placeholder="Subject ID" />
+				<input class="search__element" name="subjectcode" type="text" placeholder="Subject Code" />
+				<input class="search__element" name="subjectname" type="text" placeholder="Subject Name" />
+			</form>
+		</section>
+
+		<section class="teacher search">
+			<form class="search__form" method="GET" action="/app/api/subject/search">
+				<input class="search__element" name="teacherid" type="number" placeholder="Teacher ID" />
+				<input class="search__element" name="teachername" type="text" placeholder="Teacher Name" />
+			</form>
+		</section>
+	</main>
+
+	<footer>
+	</footer>
+</body>
+
 </html>

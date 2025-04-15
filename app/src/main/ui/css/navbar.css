@@ -1,0 +1,27 @@
+.navbar {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: space-between;
+	/* padding: 0.4rem; */
+	/* margin-top: 0.25rem; */
+	border-radius: 0.25rem;
+	background-color: #8ba0a4;
+}
+
+.navbar__middle {
+	font-family: "Koulen", monospace;
+}
+
+.navbar__right {
+	font-family: "Koulen", monospace;
+	list-style: none;
+	padding-left: unset;
+}
+
+.navbar__link, .navbar__link:visited{
+	font-size: 0.8rem;
+	text-decoration: none;
+	background-color: #183e4b;
+	color: #151515;
+}
