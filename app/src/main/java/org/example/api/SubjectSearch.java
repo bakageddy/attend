@@ -193,7 +193,7 @@ public class SubjectSearch extends HttpServlet {
 		}
 		try {
 			PreparedStatement stmt = cnx.prepareStatement(
-				"SELECT SubjectID, SubjectCode, Name FROM Subject WHERE SubjectName LIKE ? LIMIT 20;"
+				"SELECT SubjectID, SubjectCode, Name FROM Subject WHERE Name LIKE ? LIMIT 20;"
 			);
 			stmt.setString(1, result.get());
 			ResultSet rst = stmt.executeQuery();
