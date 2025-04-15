@@ -29,9 +29,11 @@
 
 	<main>
 		<section class="search">
-			<form class="search__form" method="GET" action="/app/api/student/search">
-				<input id="search__student__id" class="search__element" name="rollno" type="number" placeholder="Student ID" />
-				<input id="search__student__name" class="search__element" name="pattern" type="text" placeholder="Student Name" />
+
+
+			<form class="search__form" method="GET" action="/app/api/teacher/search">
+				<input id="search__teacher__id" class="search__element" name="teacherid" type="number" placeholder="Teacher ID" />
+				<input id="search__teacher__name" class="search__element" name="teachername" type="text" placeholder="Teacher Name" />
 			</form>
 
 			<form class="search__form" method="GET" action="/app/api/subject/search">
@@ -40,9 +42,9 @@
 				<input id="search__subject__name" class="search__element" name="subjectname" type="text" placeholder="Subject Name" />
 			</form>
 
-			<form class="search__form" method="GET" action="/app/api/subject/search">
-				<input id="search__teacher__id" class="search__element" name="teacherid" type="number" placeholder="Teacher ID" />
-				<input id="search__teacher__name" class="search__element" name="teachername" type="text" placeholder="Teacher Name" />
+			<form class="search__form" method="GET" action="/app/api/student/search">
+				<input id="search__student__id" class="search__element" name="rollno" type="number" placeholder="Student ID" />
+				<input id="search__student__name" class="search__element" name="pattern" type="text" placeholder="Student Name" />
 			</form>
 		</section>
 
