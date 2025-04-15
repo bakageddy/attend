@@ -6,12 +6,13 @@
 	<link rel="stylesheet" type="text/css" href="/app/css/index.css" />
 	<link rel="stylesheet" type="text/css" href="/app/css/navbar.css" />
 	<link rel="stylesheet" type="text/css" href="/app/css/search.css" />
+	<link rel="stylesheet" type="text/css" href="/app/css/results.css" />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Gudea:ital,wght@0,400;0,700;1,400&display=swap"
 		rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
-	<script src="/app/js/htmx.min.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
 	<title>Home</title>
 </head>
 
@@ -19,7 +20,7 @@
 	<header>
 		<nav class="navbar">
 			<img class="navbar__left" src="/app/svg/menu.svg" />
-			<h2 class="navbar__middle">ATTEN</h3>
+			<h2 class="navbar__middle">atten</h3>
 				<ul class="navbar__right">
 					<li><a class="navbar__link" href="https://github.com/bakageddy">GitHub</a></li>
 				</ul>
@@ -27,32 +28,36 @@
 	</header>
 
 	<main>
-		<section class="student search">
+		<section class="search">
 			<form class="search__form" method="GET" action="/app/api/student/search">
-				<input class="search__element" name="rollno" type="number" placeholder="Student ID" />
-				<input class="search__element" name="pattern" type="text" placeholder="Student Name" />
-				<button class="search__element" type="submit">Search</button>
+				<input id="search__student__id" class="search__element" name="rollno" type="number" placeholder="Student ID" />
+				<input id="search__student__name" class="search__element" name="pattern" type="text" placeholder="Student Name" />
+			</form>
+
+			<form class="search__form" method="GET" action="/app/api/subject/search">
+				<input id="search__subject__id" class="search__element" name="subjectid" type="number" placeholder="Subject ID" />
+				<input id="search__subject__code" class="search__element" name="subjectcode" type="text" placeholder="Subject Code" />
+				<input id="search__subject__name" class="search__element" name="subjectname" type="text" placeholder="Subject Name" />
+			</form>
+
+			<form class="search__form" method="GET" action="/app/api/subject/search">
+				<input id="search__teacher__id" class="search__element" name="teacherid" type="number" placeholder="Teacher ID" />
+				<input id="search__teacher__name" class="search__element" name="teachername" type="text" placeholder="Teacher Name" />
 			</form>
 		</section>
 
-		<section class="subject search">
-			<form class="search__form" method="GET" action="/app/api/subject/search">
-				<input class="search__element" name="subjectid" type="number" placeholder="Subject ID" />
-				<input class="search__element" name="subjectcode" type="text" placeholder="Subject Code" />
-				<input class="search__element" name="subjectname" type="text" placeholder="Subject Name" />
-			</form>
+		<section class="results" id="result_display">
 		</section>
 
-		<section class="teacher search">
-			<form class="search__form" method="GET" action="/app/api/subject/search">
-				<input class="search__element" name="teacherid" type="number" placeholder="Teacher ID" />
-				<input class="search__element" name="teachername" type="text" placeholder="Teacher Name" />
-			</form>
+		<section class="attendance">
 		</section>
 	</main>
 
 	<footer>
 	</footer>
+
+	<script src="/app/js/student.js"></script>
+	<script src="/app/js/subject.js"></script>
 </body>
 
 </html>

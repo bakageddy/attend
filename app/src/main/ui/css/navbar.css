@@ -10,7 +10,9 @@
 }
 
 .navbar__middle {
-	font-family: "Koulen", monospace;
+	font-family: "Comfortaa", monospace;
+	font-size: 1.75rem;
+	font-weight: 800;
 }
 
 .navbar__right {
@@ -22,6 +24,6 @@
 .navbar__link, .navbar__link:visited{
 	font-size: 0.8rem;
 	text-decoration: none;
-	background-color: #183e4b;
+	/* background-color: #183e4b; */
 	color: #151515;
 }

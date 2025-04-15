@@ -1,0 +1,15 @@
+section.results {
+	display: flex;
+	width: 100%;
+}
+
+.result__element {
+	font-family: 'Koulen';
+	display: flex;
+	width: 50%;
+	flex-direction: row;
+	flex-grow: 1;
+	justify-content: space-between;
+	align-items: center;
+
+}
