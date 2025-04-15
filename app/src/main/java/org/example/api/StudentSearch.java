@@ -105,9 +105,9 @@ public class StudentSearch extends HttpServlet {
 				resp.flushBuffer();
 				return;
 			}
+
 			Optional<Long> id = parse_long(id_param);
 			if (id.isEmpty()) {
-				// TODO: Handle error path
 				resp.sendError(
 					HttpServletResponse.SC_BAD_REQUEST,
 					"ID is not numeric"
