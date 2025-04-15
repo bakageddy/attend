@@ -1,0 +1,23 @@
+# Lucario
+
+1. #6EA4BB
+2. #E7E7E6
+3. #464646
+4. #C04C4B
+5. #F0DBA5
+
+# Venusaur
+
+1. #3F9490
+2. #7BB7B7
+3. #E86E7F
+4. #EAC787
+5. #5F9569
+
+# Retro
+1. #76A5AF
+2. #89A283
+3. #BE5C5C
+4. #936D69
+5. #DFD0BD
+6. #DAAC88
