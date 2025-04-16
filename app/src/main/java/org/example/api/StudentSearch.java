@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,29 +36,6 @@ public class StudentSearch extends HttpServlet {
 	}
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// String param = req.getParameter("pattern");
-		// if (param == null) {
-		// 	resp.sendError(
-		// 		HttpServletResponse.SC_BAD_REQUEST,
-		// 		"Provide a pattern to search"
-		// 	);
-		// 	resp.setStatus(400);
-		// 	resp.flushBuffer();
-		// 	return;
-		// }
-		//
-		// Optional<String> oparam = validate_sql(param);
-		//
-		// if (oparam.isEmpty()) {
-		// 	resp.sendError(
-		// 		HttpServletResponse.SC_BAD_REQUEST,
-		// 		"Provide a valid pattern to search"
-		// 	);
-		// 	resp.flushBuffer();
-		// 	return;
-		// }
-
-
 		// String password = System.getenv("PGSQL_DB_PASSWORD"); -- Not working, I do not know why
 		// if (password == null) {
 		// 	resp.sendError(
@@ -84,9 +61,17 @@ public class StudentSearch extends HttpServlet {
 			if (pattern_param != null) {
 				Result<String, String> payload = search_by_pattern(cnx, pattern_param);
 				if (payload.isErr()) {
+
+					String err = payload.err_msg();
+					if (err.equals("No results for such pattern")) {
+						resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+						resp.flushBuffer();
+						return;
+					}
+
 					resp.sendError(
 						HttpServletResponse.SC_BAD_REQUEST,
-						"Failed to generate payload"
+						err
 					);
 					resp.flushBuffer();
 					return;
@@ -138,6 +123,7 @@ public class StudentSearch extends HttpServlet {
 		}
 	}
 
+	// TODO: Implement Error enums
 	public static Result<String, String> search_by_id(Connection cnx, Long id) {
 		String payload;
 
@@ -154,8 +140,15 @@ public class StudentSearch extends HttpServlet {
 				String name = rst.getString(1);
 				Gson serializer = new Gson();
 				payload = serializer.toJson(new Student(id, name));
+
+				// TODO: Duplicate code. Do something?
+				stmt.close();
+				rst.close();
 				return Result.ok(payload);
 			} else {
+				// TODO: Duplicate code. Do something?
+				stmt.close();
+				rst.close();
 				return Result.err("RollNo not found");
 			}
 		// TODO: You can do better than this dinesh
@@ -165,6 +158,7 @@ public class StudentSearch extends HttpServlet {
 	}
 
 	// TODO: Implement Inset pagination
+	// TODO: Implement Error enums
 	public Result<String, String> search_by_pattern(Connection cnx, String pattern) {
 		String payload;
 		Optional<String> result = validate_sql(pattern);
@@ -172,11 +166,25 @@ public class StudentSearch extends HttpServlet {
 			return Result.err("Pattern must be alphanumeric, not SQL -__-");
 		}
 		try {
+			String validated_pattern = result.get();
+			if (!validated_pattern.endsWith("%"))
+				validated_pattern += "%"; // Anchor the pattern
+			
+			PreparedStatement exists = cnx.prepareStatement(
+				"SELECT 1 FROM Student WHERE Name LIKE ? LIMIT 1;"
+			);
+			exists.setString(1, validated_pattern);
+
+			ResultSet exists_rst = exists.executeQuery();
+			if (!exists_rst.next()) {
+				return Result.err("No results for such pattern");
+			}
+			
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT RollNo, Name FROM Student WHERE Name LIKE ? ORDER BY RollNo LIMIT 20;"
 			);
+			stmt.setString(1, validated_pattern);
 
-			stmt.setString(1, result.get());
 			ResultSet rst = stmt.executeQuery();
 
 			List<Student> names = new ArrayList<>();
@@ -189,6 +197,10 @@ public class StudentSearch extends HttpServlet {
 			Gson serializer = new Gson();
 			payload = serializer.toJson(names.toArray());
 
+			rst.close();
+			exists_rst.close();
+			exists.close();
+			stmt.close();
 			return Result.ok(payload);
 		} catch (Exception e) {
 			return Result.err(e.getMessage());
@@ -204,7 +216,7 @@ public class StudentSearch extends HttpServlet {
 	}
 
 	public static Optional<String> validate_sql(String input) {
-		if (input.contains("DROP") || 
+		if (input.contains("DROP")   || 
 			input.contains("SELECT") || 
 			input.contains("UPDATE") ||	
 			input.contains("INSERT") ||	
