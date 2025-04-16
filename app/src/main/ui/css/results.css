@@ -1,15 +1,96 @@
 section.results {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-template-rows: repeat(20, 1fr);
+}
+
+
+.search__element {
 	display: flex;
-	width: 100%;
+	font-family: 'Gudea';
+	flex-direction: row;
+	flex-grow: 1;
+	justify-content: center;
+	align-items: center;
 }
 
 .result__element {
+	display: grid;
 	font-family: 'Koulen';
-	display: flex;
-	width: 50%;
-	flex-direction: row;
-	flex-grow: 1;
-	justify-content: space-between;
-	align-items: center;
-
+	text-align: center;
+	background-color: black;
+	color: white;
+	border-radius: 1rem;
+	margin: 0.25rem;
 }
+
+
+.student__element {
+	/* display: grid; */
+	/* width: 100%; */
+	grid-column: span 3;
+	grid-row: span 1;
+}
+
+.student__element__rollno {
+	display: inline-block;
+	text-align: center;
+	grid-column: 1 / 2;
+	grid-row: span 1;
+}
+
+.student__element__name {
+	display: inline-block;
+	grid-column: 3 / 4;
+	grid-row: span 1;
+}
+
+.teacher__element {
+	grid-column: span 3;
+	grid-row: span 1;
+}
+
+.teacher__element__id {
+	display: inline-block;
+	grid-column: 1 / 2;
+	grid-row: span 1;
+}
+
+.teacher__element__name {
+	display: inline-block;
+	grid-column: 3 / 4;
+	grid-row: span 1;
+}
+
+.subject__element {
+	grid-column: span 3;
+	grid-row: span 1;
+}
+
+.subject__element__id {
+	display: inline-block;
+	grid-column: 1 / 2;
+	grid-row: span 1;
+}
+
+.subject__element__code {
+	display: inline-block;
+	grid-column: 2 / 3;
+	grid-row: span 1;
+}
+
+.subject__element__name {
+	display: inline-block;
+	grid-column: 3 / 4;
+	grid-row: span 1;
+}
+
+/* .result__element { */
+/* 	font-family: 'Koulen'; */
+/* 	display: flex; */
+/* 	width: 50%; */
+/* 	flex-direction: row; */
+/* 	flex-grow: 1; */
+/* 	justify-content: space-between; */
+/* 	align-items: center; */
+/* } */
