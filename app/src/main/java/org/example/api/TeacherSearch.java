@@ -52,9 +52,17 @@ public class TeacherSearch extends HttpServlet {
 			if (pattern_param != null) {
 				Result<String, String> payload = search_by_pattern(cnx, pattern_param);
 				if (payload.isErr()) {
+
+					String err = payload.err_msg();
+					if (err.equals("No results for such pattern")) {
+						resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+						resp.flushBuffer();
+						return;
+					}
+
 					resp.sendError(
 						HttpServletResponse.SC_BAD_REQUEST,
-						payload.err_msg()
+						err
 					);
 					resp.flushBuffer();
 					return;
@@ -113,8 +121,21 @@ public class TeacherSearch extends HttpServlet {
 			return Result.err("Need valid pattern. Not SQL T_T");
 		}
 		try {
+			String validated_pattern = result.get();
+			PreparedStatement exists = cnx.prepareStatement(
+				"SELECT 1 FROM Teacher WHERE Name LIKE ? LIMIT 1;"
+			);
+			exists.setString(1, validated_pattern);
+			ResultSet exists_rst = exists.executeQuery();
+			if (!exists_rst.next()) {
+				exists.close();
+				exists_rst.close();
+				return Result.err("No results for such pattern");
+			}
+
 			PreparedStatement stmt = cnx.prepareStatement(
-					"SELECT TeacherID, Name FROM Teacher WHERE Name LIKE ? LIMIT 20;");
+				"SELECT TeacherID, Name FROM Teacher WHERE Name LIKE ? LIMIT 20;"
+			);
 
 			stmt.setString(1, result.get());
 			ResultSet rst = stmt.executeQuery();
@@ -128,6 +149,11 @@ public class TeacherSearch extends HttpServlet {
 
 			Gson serializer = new Gson();
 			String payload = serializer.toJson(teachers);
+
+			exists_rst.close();
+			exists.close();
+			rst.close();
+			stmt.close();
 			return Result.ok(payload);
 		} catch (Exception e) {
 			return Result.err("Beep Boop, Error at search by pattern");
