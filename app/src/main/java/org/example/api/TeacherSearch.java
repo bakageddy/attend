@@ -176,7 +176,7 @@ public class TeacherSearch extends HttpServlet {
 			} else {
 				return Result.err("No such id");
 			}
-			// TODO: You can do better than this dinesh
+		// TODO: You can do better than this dinesh
 		} catch (Exception e) {
 			return Result.err("Beep Boop, Error at search by id");
 		}

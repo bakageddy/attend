@@ -33,7 +33,7 @@ teacher_name_handle.addEventListener('input', async (event) => {
 	);
 
 	let results = await fetch(
-		"/app/api/subject/search?" + url_params.toString(),
+		"/app/api/teacher/search?" + url_params.toString(),
 		{ method: "GET" }
 	);
 	let json_results = results.json();
