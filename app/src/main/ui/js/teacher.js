@@ -1,28 +1,28 @@
 let result_teacher_handle = document.getElementById("result_display");
 let teacher_id_handle = document.getElementById("search__teacher__id");
-let teacher_name_handle = document.getElementById("search__subject__name");
+let teacher_name_handle = document.getElementById("search__teacher__name");
 
-teacher_id_handle.addEventListener('input', async (event) => {
+
+const handleTeacherIdSearch = async (event) => {
 	let search_string = event.target.value;
 	if (search_string.length === 0) {
 		return;
 	}
 	let url_params = new URLSearchParams(
-		{ teacherid: search_string }
+		{ id: search_string }
 	);
 
 	let result = await fetch(
 		"/app/api/teacher/search?" + url_params.toString(),
 		{ method: "GET" }
 	);
-	let json_results = await result.json();
+	let json_result = await result.json();
 
-	console.log(json_results);
-	result_teacher_handle.innerText = json_results.toString();
+	result_teacher_handle.innerHTML = render_teacher(json_result);
 	return;
-});
+}
 
-teacher_name_handle.addEventListener('input', async (event) => {
+const handleTeacherNameSearch = async (event) => {
 	let search_string = event.target.value;
 	if (search_string.length === 0) {
 		return;
@@ -36,10 +36,27 @@ teacher_name_handle.addEventListener('input', async (event) => {
 		"/app/api/teacher/search?" + url_params.toString(),
 		{ method: "GET" }
 	);
-	let json_results = results.json();
 
-	console.log(json_results);
-	result_teacher_handle.innerText = json_results.toString();
+	if (result.status == 204) {
+		// TODO: Implement Not found for names
+	}
+	let json_results = await results.json();
 
+	result_teacher_handle.innerHTML = '';
+	json_results.forEach(element => {
+		result_teacher_handle.innerHTML += render_teacher(element);
+	});
 	return;
-})
+}
+
+const render_teacher = (json_data) => {
+	return `
+		<div class="teacher__element result__element">
+			<h3 class="teacher__element__id">${json_data.teacher_id}</h3>
+			<h4 class="teacher__element__name">${json_data.name}</h4>
+		</div>
+	`
+}
+
+teacher_id_handle.addEventListener('input', debounce(async (event) => await handleTeacherIdSearch(event)), 500);
+teacher_name_handle.addEventListener('input', debounce(async (event) => await handleTeacherNameSearch(event)), 500); 

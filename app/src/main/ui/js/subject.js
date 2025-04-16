@@ -3,7 +3,7 @@ let subject_id_search = document.getElementById("search__subject__id");
 let subject_code_search = document.getElementById("search__subject__code");
 let subject_name_search = document.getElementById("search__subject__name");
 
-subject_name_search.addEventListener('input', async (event) => {
+const handleSubjectIdSearch = async (event) => {
 	let search_string = event.target.value;
 	if (search_string.length === 0) {
 		return;
@@ -13,15 +13,21 @@ subject_name_search.addEventListener('input', async (event) => {
 	});
 
 	let result = await fetch("/app/api/subject/search?" + url_params.toString(), { method: "GET" });
+
+	if (result.status == 204) {
+		// TODO: Implement Not found for names
+	}
+
 	let json_results = await result.json();
 
-	console.log(json_results)
-	result_subject_handle.innerText = json_results.toString();
-
+	result_subject_handle.innerHTML = '';
+	json_results.forEach(element => {
+		result_subject_handle.innerHTML += render_subject(element);
+	});
 	return;
-});
+}
 
-subject_code_search.addEventListener('input', async (event) => {
+const handleSubjectCodeSearch = async (event) => {
 	let search_string = event.target.value;
 	if (search_string.length === 0) {
 		return;
@@ -31,15 +37,20 @@ subject_code_search.addEventListener('input', async (event) => {
 	);
 
 	let result = await fetch("/app/api/subject/search?" + url_params.toString(), { method: "GET" });
+
+	if (result.status == 204) {
+		// TODO: Implement Not found for names
+	}
 	let json_results = await result.json();
 
-	console.log(json_results);
-	result_subject_handle.innerText = json_results.toString();
-
+	result_subject_handle.innerHTML = '';
+	json_results.forEach(element => {
+		result_subject_handle.innerHTML += render_subject(element);
+	});
 	return;
-});
+}
 
-subject_id_search.addEventListener('input', async (event) => {
+const handleSubjectNameSearch = async (event) => {
 	let search_string = event.target.value;
 	if (search_string.length === 0) {
 		return;
@@ -49,9 +60,26 @@ subject_id_search.addEventListener('input', async (event) => {
 		{ id: search_string }
 	);
 	let result = await fetch("/app/api/subject/search?" + url_params.toString(), { method: "GET" });
+
+	if (result.status == 204) {
+		// TODO: Implement Not found for names
+	}
 	let json_results = await result.json();
 
-	console.log(json_results);
-	result_subject_handle.innerText = json_results.toString();
+	result_subject_handle.innerHTML = render_subject(json_results);
 	return;
-});
+}
+
+subject_name_search.addEventListener('input', debounce((event) => handleSubjectIdSearch(event), 500)); 
+subject_code_search.addEventListener('input', debounce((event) => handleSubjectCodeSearch(event), 500));
+subject_id_search.addEventListener('input', debounce((event) => handleTeacherNameSearch(event), 500));
+
+const render_subject = (json_data) => {
+	return `
+		<div class="subject__element result__element">
+			<h3 class="subject__element__id">${json_data.subject_id}</h3>
+			<h3 class="subject__element__code">${json_data.subject_code}</h3>
+			<h3 class="subject__element__name">${json_data.name}</h3>
+		</div>
+	`;
+}
