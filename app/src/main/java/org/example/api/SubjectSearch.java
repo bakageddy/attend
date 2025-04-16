@@ -147,6 +147,8 @@ public class SubjectSearch extends HttpServlet {
 			}
 		} catch (SQLException e) {
 			return Result.err(e.getMessage());
+		} catch (Exception e) {
+			return Result.err("Beep boop, error at subject:search_by_id");
 		}
 	}
 
@@ -160,10 +162,16 @@ public class SubjectSearch extends HttpServlet {
 			return Result.err("Pattern must be alphanumeric, NOT SQL -__-");
 		}
 		try {
+			String validated_code = result.get();
+			if (!validated_code.endsWith("%")) {
+				validated_code += '%';
+			}
+
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT SubjectID, SubjectCode, Name FROM Subject WHERE SubjectCode LIKE ? LIMIT 20;"
 			);
-			stmt.setString(1, result.get());
+
+			stmt.setString(1, validated_code);
 			ResultSet rst = stmt.executeQuery();
 
 			List<Subject> subjects = new ArrayList<>();
@@ -177,8 +185,10 @@ public class SubjectSearch extends HttpServlet {
 			String payload = serializer.toJson(subjects);
 			return Result.ok(payload);
 		// TODO: Better than this please
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			return Result.err(e.getMessage());
+		} catch (Exception e) {
+			return Result.err("Beep boop, error at subject:search_by_code");
 		}
 	}
 
@@ -192,12 +202,16 @@ public class SubjectSearch extends HttpServlet {
 			return Result.err("Pattern must be alphanumeric, NOT SQL -_-");
 		}
 		try {
+			String valid = valid_pattern.get();
+			if (!valid.endsWith("%")) {
+				valid += '%';
+			}
+
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT SubjectID, SubjectCode, Name FROM Subject WHERE Name LIKE ? LIMIT 20;"
 			);
-			stmt.setString(1, valid_pattern.get());
+			stmt.setString(1, valid);
 			ResultSet rst = stmt.executeQuery();
-
 
 			List<Subject> subjects = new ArrayList<>();
 			while (rst.next()) {
@@ -206,9 +220,13 @@ public class SubjectSearch extends HttpServlet {
 				String subjectname = rst.getString(3);
 				subjects.addLast(new Subject(subjectid, subjectcode, subjectname));
 			}
+
 			Gson serializer = new Gson();
 			String payload = serializer.toJson(subjects);
 			return Result.ok(payload);
+
+		} catch(SQLException e) {
+			return Result.err(e.getMessage());
 		} catch(Exception e) {
 			return Result.err(e.getMessage());
 		}

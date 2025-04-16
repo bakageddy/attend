@@ -72,7 +72,7 @@ public class TeacherSearch extends HttpServlet {
 				return;
 			}
 
-			String id_param = req.getParameter("teacherid");
+			String id_param = req.getParameter("id");
 			if (id_param == null) {
 				resp.sendError(
 					HttpServletResponse.SC_BAD_REQUEST,
@@ -91,6 +91,7 @@ public class TeacherSearch extends HttpServlet {
 				resp.flushBuffer();
 				return;
 			}
+
 			Result<String, String> payload = search_by_id(cnx, id.get());
 			if (payload.isErr()) {
 				resp.sendError(
@@ -104,7 +105,6 @@ public class TeacherSearch extends HttpServlet {
 			out.write(payload.unwrap());
 			out.flush();
 			return;
-
 		} catch (Exception e) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -122,6 +122,10 @@ public class TeacherSearch extends HttpServlet {
 		}
 		try {
 			String validated_pattern = result.get();
+			if (!validated_pattern.contains("%")) {
+				validated_pattern += "%"; // Anchor the pattern
+			}
+
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Teacher WHERE Name LIKE ? LIMIT 1;"
 			);
@@ -172,8 +176,16 @@ public class TeacherSearch extends HttpServlet {
 				String name = rst.getString(1);
 				Gson serializer = new Gson();
 				String payload = serializer.toJson(new Teacher(id, name));
+
+				stmt.close();
+				rst.close();
+
 				return Result.ok(payload);
 			} else {
+
+				stmt.close();
+				rst.close();
+
 				return Result.err("No such id");
 			}
 		// TODO: You can do better than this dinesh
