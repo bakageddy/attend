@@ -187,15 +187,15 @@ public class SubjectSearch extends HttpServlet {
 			return Result.err("Pattern cannot be null");
 		}
 
-		Optional<String> result = validate_sql(pattern);
-		if (result.isEmpty()) {
+		Optional<String> valid_pattern = validate_sql(pattern);
+		if (valid_pattern.isEmpty()) {
 			return Result.err("Pattern must be alphanumeric, NOT SQL -_-");
 		}
 		try {
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT SubjectID, SubjectCode, Name FROM Subject WHERE Name LIKE ? LIMIT 20;"
 			);
-			stmt.setString(1, result.get());
+			stmt.setString(1, valid_pattern.get());
 			ResultSet rst = stmt.executeQuery();
 
 
@@ -215,6 +215,7 @@ public class SubjectSearch extends HttpServlet {
 
 	}
 
+	// TODO: Write bettern validation function and maybe a sanitization function!
 	public static Optional<String> validate_sql(String input) {
 		if (input.contains("DROP") || 
 			input.contains("SELECT") || 
