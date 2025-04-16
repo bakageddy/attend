@@ -9,7 +9,7 @@ const handleSubjectIdSearch = async (event) => {
 		return;
 	}
 	let url_params = new URLSearchParams({
-		pattern: `${search_string}%`
+		id: search_string
 	});
 
 	let result = await fetch("/app/api/subject/search?" + url_params.toString(), { method: "GET" });
@@ -57,7 +57,7 @@ const handleSubjectNameSearch = async (event) => {
 	}
 
 	let url_params = new URLSearchParams(
-		{ id: search_string }
+		{ pattern: search_string }
 	);
 	let result = await fetch("/app/api/subject/search?" + url_params.toString(), { method: "GET" });
 
@@ -70,9 +70,9 @@ const handleSubjectNameSearch = async (event) => {
 	return;
 }
 
-subject_name_search.addEventListener('input', debounce((event) => handleSubjectIdSearch(event), 500)); 
+subject_id_search.addEventListener('input', debounce((event) => handleSubjectIdSearch(event), 500)); 
 subject_code_search.addEventListener('input', debounce((event) => handleSubjectCodeSearch(event), 500));
-subject_id_search.addEventListener('input', debounce((event) => handleTeacherNameSearch(event), 500));
+subject_name_search.addEventListener('input', debounce((event) => handleTeacherNameSearch(event), 500));
 
 const render_subject = (json_data) => {
 	return `
