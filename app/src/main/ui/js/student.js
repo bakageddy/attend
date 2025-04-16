@@ -58,9 +58,29 @@ const handleStudentNameSearch = async (event) => {
 	});
 }
 
+const student_select_event = (event) => {
+	let node = event.target
+	let children;
+	if (node.childNodes.length !== 3) {
+		children = node.parentNode.childNodes;
+	} else {
+		children = node.childNodes;
+	}
+
+	children.filter((element) => {
+	});
+	let rollno = children[0];
+	let name = children[2];
+	// let rollno = node.childNodes[0].value;
+	// let name = node.childNodes[1].value;
+	console.log(children);
+	return;
+}
+
+
 const render_student_id = (json_data) => {
 	return `
-		<div class="result__element student__element">
+		<div class="result__element student__element" onclick="student_select_event(event); return false;">
 			<h3 class="student__element__rollno">${json_data.rollNo}</h3>
 			<span></span>
 			<h3 class="student__element__name">${json_data.name}</h3>
