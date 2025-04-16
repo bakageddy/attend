@@ -31,19 +31,26 @@
 	<main>
 		<section class="search">
 			<form class="search__form" method="GET" action="/app/api/teacher/search">
-				<input id="search__teacher__id" class="search__element" name="teacherid" type="number" placeholder="Teacher ID" />
-				<input id="search__teacher__name" class="search__element" name="teachername" type="text" placeholder="Teacher Name" />
+				<input id="search__teacher__id" class="search__element" name="teacherid" type="number"
+					placeholder="Teacher ID" />
+				<input id="search__teacher__name" class="search__element" name="teachername" type="text"
+					placeholder="Teacher Name" />
 			</form>
 
 			<form class="search__form" method="GET" action="/app/api/subject/search">
-				<input id="search__subject__id" class="search__element" name="subjectid" type="number" placeholder="Subject ID" />
-				<input id="search__subject__code" class="search__element" name="subjectcode" type="text" placeholder="Subject Code" />
-				<input id="search__subject__name" class="search__element" name="name" type="text" placeholder="Subject Name" />
+				<input id="search__subject__id" class="search__element" name="subjectid" type="number"
+					placeholder="Subject ID" />
+				<input id="search__subject__code" class="search__element" name="subjectcode" type="text"
+					placeholder="Subject Code" />
+				<input id="search__subject__name" class="search__element" name="name" type="text"
+					placeholder="Subject Name" />
 			</form>
 
 			<form class="search__form" method="GET" action="/app/api/student/search">
-				<input id="search__student__id" class="search__element" name="rollno" type="number" placeholder="Student ID" />
-				<input id="search__student__name" class="search__element" name="pattern" type="text" placeholder="Student Name" />
+				<input id="search__student__id" class="search__element" name="rollno" type="number"
+					placeholder="Student ID" />
+				<input id="search__student__name" class="search__element" name="pattern" type="text"
+					placeholder="Student Name" />
 			</form>
 		</section>
 
@@ -57,20 +64,8 @@
 	<footer>
 	</footer>
 
-	<script src="/app/js/handlebars.js"></script>
 	<script src="/app/js/student.js"></script>
 	<script src="/app/js/subject.js"></script>
 </body>
-
-<script id="idempotent__student" type="text/x-handlebars-template">
-	<div class="student_element">
-		<div class="student_id">
-			{{ rollNo }}
-		</div>
-		<div class="student_name">
-			{{ name }}
-		</div>
-	</div>
-</script>
 
 </html>
