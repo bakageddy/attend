@@ -7,6 +7,7 @@
 	<link rel="stylesheet" type="text/css" href="/app/css/navbar.css" />
 	<link rel="stylesheet" type="text/css" href="/app/css/search.css" />
 	<link rel="stylesheet" type="text/css" href="/app/css/results.css" />
+	<link rel="stylesheet" type="text/css" href="/app/css/attendance.css" />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Gudea:ital,wght@0,400;0,700;1,400&display=swap"
@@ -58,11 +59,40 @@
 		</section>
 
 		<section class="attendance">
+			<h2>Set Attendance</h2>
+			<form class="attendance__form" onsubmit="attendanceFormHandle(event)" action="/app/api/attendance/"
+				method="POST">
+				<input class="attendance__input__element" id="attendance__input__rollno"
+					placeholder="Student Roll Number" name="rollno" type="number" />
+				<input class="attendance__input__element" id="attendance__input__teacherid" placeholder="Teacher ID"
+					name="teacherid" type="number" />
+				<input class="attendance__input__element" id="attendance__input__subjectid" placeholder="Subject ID"
+					name="subjectid" type="number" />
+				<input class="attendance__input__element" id="attendance__input__date" placeholder="Date" name="day" type="date" />
+				<select name="period" class="attendance__input__element" id="attendance__input__period">
+					<option value="I">I</option>
+					<option value="II">II</option>
+					<option value="III">III</option>
+					<option value="IV">IV</option>
+					<option value="V">V</option>
+					<option value="VI">VI</option>
+					<option value="VII">VII</option>
+					<option value="VIII">VIII</option>
+				</select>
+				<div class="attendance__input__submit__group">
+					<button class="attendance__input__element" formaction="/app/api/attendance/" formmethod="post"
+						type="submit">Set</button>
+					<button class="attendance__input__element" formaction="/app/api/attendance/" formmethod="delete"
+						type="submit">Delete</button>
+				</div>
+			</form>
 		</section>
 	</main>
 
 	<footer>
 	</footer>
+
+	<script src="/app/js/attendance.js"></script>
 
 	<script src="/app/js/student.js"></script>
 	<script src="/app/js/subject.js"></script>
