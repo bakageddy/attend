@@ -28,7 +28,10 @@ const handleSubjectIdSearch = async (event) => {
 			if (!subjectid)
 				return;
 			let value = Number.parseInt(subjectid.textContent);
-			let detail_event = new CustomEvent('subjectid_selected', { detail: { subjectid: value } });
+			let detail_event = new CustomEvent(
+				'subjectid_selected',
+				{ bubbles: true, detail: { subjectid: value } }
+			);
 			event.target.dispatchEvent(detail_event);
 		})
 	});
@@ -63,7 +66,10 @@ const handleSubjectCodeSearch = async (event) => {
 			if (!subjectid)
 				return;
 			let value = Number.parseInt(subjectid.textContent);
-			let detail_event = new CustomEvent('subjectid_selected', { detail: { subjectid: value } });
+			let detail_event = new CustomEvent(
+				'subjectid_selected',
+				{ bubbles: true, detail: { subjectid: value } }
+			);
 			event.target.dispatchEvent(detail_event);
 		});
 	});
@@ -99,7 +105,10 @@ const handleSubjectNameSearch = async (event) => {
 			if (!subjectid)
 				return;
 			let value = Number.parseInt(subjectid.textContent);
-			let detail_event = new CustomEvent('subjectid_selected', { detail: { subjectid: value } });
+			let detail_event = new CustomEvent(
+				'subjectid_selected',
+				{ bubbles: true, detail: { subjectid: value } }
+			);
 			event.target.dispatchEvent(detail_event);
 		});
 	});

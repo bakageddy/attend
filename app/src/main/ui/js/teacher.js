@@ -24,8 +24,12 @@ const handleTeacherIdSearch = async (event) => {
 			let teacherid = event.target.querySelector('div.teacher__element__id');
 			if (!teacherid)
 				return;
+
 			let value = Number.parseInt(teacherid);
-			let detail_event = new CustomEvent('teacherid_selected', {detail: {teacherid: value}});
+			let detail_event = new CustomEvent(
+				'teacherid_selected',
+				{ bubbles: true, detail: { teacherid: value } }
+			);
 			event.target.dispatchEvent(detail_event);
 		});
 	});
@@ -66,7 +70,10 @@ const handleTeacherNameSearch = async (event) => {
 			if (!teacherid)
 				return;
 			let value = Number.parseInt(teacherid.textContent);
-			let detail_event = new CustomEvent('teacherid_selected', {detail: {teacherid: value}});
+			let detail_event = new CustomEvent(
+				'teacherid_selected',
+				{ bubbles: true, detail: { teacherid: value } }
+			);
 			event.target.dispatchEvent(detail_event);
 		});
 	});

@@ -39,7 +39,10 @@ const handleStudentIdSearch = async (event) => {
 			if (!rollno)
 				return;
 			let value = Number.parseInt(rollno.textContent);
-			let detail_event = new CustomEvent('rollno_selected', {detail: {rollno: value}})
+			let detail_event = new CustomEvent(
+				'rollno_selected', 
+				{ bubbles: true, detail: { rollno: value } }
+			);
 			event.target.dispatchEvent(detail_event);
 		});
 	});
@@ -77,7 +80,7 @@ const handleStudentNameSearch = async (event) => {
 				return;
 			}
 			let value = Number.parseInt(rollno.textContent);
-			let detail_event = new CustomEvent('rollno_selected', {detail: {rollno: value}});
+			let detail_event = new CustomEvent('rollno_selected', { bubbles: true, detail: { rollno: value } });
 			event.target.dispatchEvent(detail_event);
 		});
 	});
