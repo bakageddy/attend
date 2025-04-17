@@ -32,6 +32,17 @@ const handleStudentIdSearch = async (event) => {
 	// Reset the result div
 	result_student_handle.innerHTML = '';
 	result_student_handle.innerHTML = render_student_id(results_json);
+
+	document.querySelectorAll('.student__element').forEach((element) => {
+		element.addEventListener("click", (event) => {
+			let rollno = event.target.querySelector(".student__element__rollno");
+			if (!rollno)
+				return;
+			let value = Number.parseInt(rollno.textContent);
+			let detail_event = new CustomEvent('rollno_selected', {detail: {rollno: value}})
+			event.target.dispatchEvent(detail_event);
+		});
+	});
 }
 
 const handleStudentNameSearch = async (event) => {
@@ -52,38 +63,32 @@ const handleStudentNameSearch = async (event) => {
 	let results_json = await search_results.json();
 
 	result_student_handle.innerHTML = '';
+	let html = "";
 	results_json.map(student => {
 		console.log(student);
-		result_student_handle.innerHTML += render_student_id(student);
+		html += render_student_id(student);
 	});
-}
+	result_student_handle.innerHTML = html;
 
-const student_select_event = (event) => {
-	let node = event.target
-	let children;
-	if (node.childNodes.length !== 3) {
-		children = node.parentNode.childNodes;
-	} else {
-		children = node.childNodes;
-	}
-
-	children.filter((element) => {
+	document.querySelectorAll('.student__element').forEach(element => {
+		element.addEventListener("click", event => {
+			let rollno = event.target.querySelector('div.student__element__rollno');
+			if (!rollno) {
+				return;
+			}
+			let value = Number.parseInt(rollno.textContent);
+			let detail_event = new CustomEvent('rollno_selected', {detail: {rollno: value}});
+			event.target.dispatchEvent(detail_event);
+		});
 	});
-	let rollno = children[0];
-	let name = children[2];
-	// let rollno = node.childNodes[0].value;
-	// let name = node.childNodes[1].value;
-	console.log(children);
 	return;
 }
 
-
 const render_student_id = (json_data) => {
 	return `
-		<div class="result__element student__element" onclick="student_select_event(event); return false;">
-			<h3 class="student__element__rollno">${json_data.rollNo}</h3>
-			<span></span>
-			<h3 class="student__element__name">${json_data.name}</h3>
+		<div class="result__element student__element">
+			<div class="student__element__rollno">${json_data.rollNo}</div>
+			<div class="student__element__name">${json_data.name}</div>
 		</div>
 	`;
 }

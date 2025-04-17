@@ -19,6 +19,16 @@ const handleTeacherIdSearch = async (event) => {
 	let json_result = await result.json();
 
 	result_teacher_handle.innerHTML = render_teacher(json_result);
+	document.querySelectorAll('.teacher__element').forEach(element => {
+		element.addEventListener("click", event => {
+			let teacherid = event.target.querySelector('div.teacher__element__id');
+			if (!teacherid)
+				return;
+			let value = Number.parseInt(teacherid);
+			let detail_event = new CustomEvent('teacherid_selected', {detail: {teacherid: value}});
+			event.target.dispatchEvent(detail_event);
+		});
+	});
 	return;
 }
 
@@ -37,14 +47,28 @@ const handleTeacherNameSearch = async (event) => {
 		{ method: "GET" }
 	);
 
-	if (result.status == 204) {
+	if (results.status == 204) {
 		// TODO: Implement Not found for names
 	}
+
 	let json_results = await results.json();
 
 	result_teacher_handle.innerHTML = '';
-	json_results.forEach(element => {
-		result_teacher_handle.innerHTML += render_teacher(element);
+	let html = "";
+	json_results.map(element => {
+		html += render_teacher(element);
+	});
+	result_teacher_handle.innerHTML = html;
+
+	document.querySelectorAll('.teacher__element').forEach(element => {
+		element.addEventListener("click", event => {
+			let teacherid = event.target.querySelector('div.teacher__element__id');
+			if (!teacherid)
+				return;
+			let value = Number.parseInt(teacherid.textContent);
+			let detail_event = new CustomEvent('teacherid_selected', {detail: {teacherid: value}});
+			event.target.dispatchEvent(detail_event);
+		});
 	});
 	return;
 }

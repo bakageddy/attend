@@ -21,10 +21,17 @@ const handleSubjectIdSearch = async (event) => {
 	let json_results = await result.json();
 
 	result_subject_handle.innerHTML = '';
-	json_results.forEach(element => {
-		result_subject_handle.innerHTML += render_subject(element);
+	result_subject_handle.innerHTML = render_subject(json_results);
+	document.querySelectorAll(".subject__element").forEach(element => {
+		element.addEventListener("click", event => {
+			let subjectid = event.target.querySelector(".subject__element__id");
+			if (!subjectid)
+				return;
+			let value = Number.parseInt(subjectid.textContent);
+			let detail_event = new CustomEvent('subjectid_selected', { detail: { subjectid: value } });
+			event.target.dispatchEvent(detail_event);
+		})
 	});
-	return;
 }
 
 const handleSubjectCodeSearch = async (event) => {
@@ -44,8 +51,21 @@ const handleSubjectCodeSearch = async (event) => {
 	let json_results = await result.json();
 
 	result_subject_handle.innerHTML = '';
-	json_results.forEach(element => {
-		result_subject_handle.innerHTML += render_subject(element);
+	let html = '';
+	Array.of(json_results).map(element => {
+		html += render_subject(element);
+	});
+	result_subject_handle.innerHTML = html;
+
+	document.querySelectorAll(".subject__element").forEach(element => {
+		element.addEventListener("click", event => {
+			let subjectid = event.target.querySelector(".subject__element__id");
+			if (!subjectid)
+				return;
+			let value = Number.parseInt(subjectid.textContent);
+			let detail_event = new CustomEvent('subjectid_selected', { detail: { subjectid: value } });
+			event.target.dispatchEvent(detail_event);
+		});
 	});
 	return;
 }
@@ -66,11 +86,26 @@ const handleSubjectNameSearch = async (event) => {
 	}
 	let json_results = await result.json();
 
-	result_subject_handle.innerHTML = render_subject(json_results);
-	return;
+	result_subject_handle.innerHTML = '';
+	let html = '';
+	Array.of(json_results).forEach(element => {
+		html += render_subject(element);
+	});
+	result_subject_handle.innerHTML = html;
+
+	document.querySelectorAll(".subject__element").forEach(element => {
+		element.addEventListener("click", event => {
+			let subjectid = event.target.querySelector(".subject__element__id");
+			if (!subjectid)
+				return;
+			let value = Number.parseInt(subjectid.textContent);
+			let detail_event = new CustomEvent('subjectid_selected', { detail: { subjectid: value } });
+			event.target.dispatchEvent(detail_event);
+		});
+	});
 }
 
-subject_id_search.addEventListener('input', debounce((event) => handleSubjectIdSearch(event), 500)); 
+subject_id_search.addEventListener('input', debounce((event) => handleSubjectIdSearch(event), 500));
 subject_code_search.addEventListener('input', debounce((event) => handleSubjectCodeSearch(event), 500));
 subject_name_search.addEventListener('input', debounce((event) => handleTeacherNameSearch(event), 500));
 
