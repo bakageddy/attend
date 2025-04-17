@@ -141,7 +141,7 @@ public class TeacherSearch extends HttpServlet {
 				"SELECT TeacherID, Name FROM Teacher WHERE Name LIKE ? LIMIT 20;"
 			);
 
-			stmt.setString(1, result.get());
+			stmt.setString(1, validated_pattern);
 			ResultSet rst = stmt.executeQuery();
 
 			List<Teacher> teachers = new ArrayList<>();
