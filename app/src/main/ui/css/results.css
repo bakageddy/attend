@@ -1,29 +1,19 @@
 section.results {
 	display: grid;
+	width: 40%;
 	grid-template-columns: repeat(3, 1fr);
 	grid-template-rows: repeat(20, 1fr);
-}
-
-
-.search__element {
-	display: flex;
-	font-family: 'Gudea';
-	flex-direction: row;
-	flex-grow: 1;
-	justify-content: center;
-	align-items: center;
 }
 
 .result__element {
 	display: grid;
 	font-family: 'Koulen';
 	text-align: center;
-	background-color: black;
-	color: white;
+	background-color: #DAAC88;
+	color: #464646;
 	border-radius: 1rem;
 	margin: 0.25rem;
 }
-
 
 .student__element {
 	/* display: grid; */
@@ -84,13 +74,3 @@ section.results {
 	grid-column: 3 / 4;
 	grid-row: span 1;
 }
-
-/* .result__element { */
-/* 	font-family: 'Koulen'; */
-/* 	display: flex; */
-/* 	width: 50%; */
-/* 	flex-direction: row; */
-/* 	flex-grow: 1; */
-/* 	justify-content: space-between; */
-/* 	align-items: center; */
-/* } */
