@@ -17,9 +17,10 @@ const handleTeacherIdSearch = async (event) => {
 		"/app/api/teacher/search?" + url_params.toString(),
 		{ method: "GET" }
 	);
-	let json_result = await result.json();
 
+	let json_result = await result.json();
 	result_teacher_handle.innerHTML = render_teacher(json_result);
+
 	document.querySelectorAll('.teacher__element').forEach(element => {
 		element.addEventListener("click", event => {
 			let teacherid = event.target.querySelector('.teacher__element__id');
@@ -51,6 +52,7 @@ const handleTeacherNameSearch = async (event) => {
 
 	if (results.status == 204) {
 		// TODO: Implement Not found for names
+		alert("No results for this name");
 	}
 
 	let json_results = await results.json();
@@ -62,7 +64,7 @@ const handleTeacherNameSearch = async (event) => {
 	});
 	result_teacher_handle.innerHTML = html;
 
-	document.querySelectorAll('.teacher__element, .teacher__element__name, .teacher__element__id').forEach(element => {
+	document.querySelectorAll(".teacher__element").forEach(element => {
 		element.addEventListener("click", event => {
 			let teacherid = event.target.querySelector('.teacher__element__id');
 			if (!teacherid)
@@ -77,11 +79,11 @@ const handleTeacherNameSearch = async (event) => {
 
 const render_teacher = (json_data) => {
 	return `
-		<div class="teacher__element result__element">
-			<h3 class="teacher__element__id">${json_data.teacher_id}</h3>
-			<h4 class="teacher__element__name">${json_data.name}</h4>
+		<div class="result__element teacher__element">
+			<div class="teacher__element__id">${json_data.teacher_id}</div>
+			<div class="teacher__element__name">${json_data.name}</div>
 		</div>
-	`
+	`;
 }
 
 teacher_id_handle.addEventListener('input', debounce(async (event) => await handleTeacherIdSearch(event)), 500);
