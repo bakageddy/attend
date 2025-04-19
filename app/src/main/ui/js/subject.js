@@ -1,3 +1,4 @@
+"use strict";
 let result_subject_handle = document.getElementById("result_display");
 let subject_id_search = document.getElementById("search__subject__id");
 let subject_code_search = document.getElementById("search__subject__code");
@@ -28,11 +29,9 @@ const handleSubjectIdSearch = async (event) => {
 			if (!subjectid)
 				return;
 			let value = Number.parseInt(subjectid.textContent);
-			let detail_event = new CustomEvent(
-				'subjectid_selected',
-				{ bubbles: true, detail: { subjectid: value } }
-			);
-			event.target.dispatchEvent(detail_event);
+			let attendance_subjectid = document.getElementById("attendance__input__subjectid");
+			attendance_subjectid.value = value;
+			return;
 		})
 	});
 }
@@ -66,11 +65,8 @@ const handleSubjectCodeSearch = async (event) => {
 			if (!subjectid)
 				return;
 			let value = Number.parseInt(subjectid.textContent);
-			let detail_event = new CustomEvent(
-				'subjectid_selected',
-				{ bubbles: true, detail: { subjectid: value } }
-			);
-			event.target.dispatchEvent(detail_event);
+			let attendance_subjectid = document.getElementById("attendance__input__subjectid");
+			attendance_subjectid.value = value;
 		});
 	});
 	return;
@@ -105,11 +101,8 @@ const handleSubjectNameSearch = async (event) => {
 			if (!subjectid)
 				return;
 			let value = Number.parseInt(subjectid.textContent);
-			let detail_event = new CustomEvent(
-				'subjectid_selected',
-				{ bubbles: true, detail: { subjectid: value } }
-			);
-			event.target.dispatchEvent(detail_event);
+			let attendance_subjectid = document.getElementById("attendance__input__subjectid");
+			attendance_subjectid.value = value;
 		});
 	});
 }

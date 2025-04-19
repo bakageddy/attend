@@ -1,3 +1,4 @@
+"use strict";
 let result_teacher_handle = document.getElementById("result_display");
 let teacher_id_handle = document.getElementById("search__teacher__id");
 let teacher_name_handle = document.getElementById("search__teacher__name");
@@ -26,11 +27,8 @@ const handleTeacherIdSearch = async (event) => {
 				return;
 
 			let value = Number.parseInt(teacherid);
-			let detail_event = new CustomEvent(
-				'teacherid_selected',
-				{ bubbles: true, detail: { teacherid: value } }
-			);
-			event.target.dispatchEvent(detail_event);
+			let attendance_teacherid = document.getElementById("attendance__input__teacherid");
+			attendance_teacherid.value = value;
 		});
 	});
 	return;
@@ -70,11 +68,8 @@ const handleTeacherNameSearch = async (event) => {
 			if (!teacherid)
 				return;
 			let value = Number.parseInt(teacherid.textContent);
-			let detail_event = new CustomEvent(
-				'teacherid_selected',
-				{ bubbles: true, detail: { teacherid: value } }
-			);
-			event.target.dispatchEvent(detail_event);
+			let attendance_teacherid = document.getElementById("attendance__input__teacherid");
+			attendance_teacherid.value = value;
 		});
 	});
 	return;

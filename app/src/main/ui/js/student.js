@@ -1,3 +1,4 @@
+"use strict";
 let result_student_handle = document.getElementById("result_display");
 let student_id_search = document.getElementById("search__student__id");
 let student_name_search = document.getElementById("search__student__name");
@@ -39,11 +40,8 @@ const handleStudentIdSearch = async (event) => {
 			if (!rollno)
 				return;
 			let value = Number.parseInt(rollno.textContent);
-			let detail_event = new CustomEvent(
-				'rollno_selected', 
-				{ bubbles: true, detail: { rollno: value } }
-			);
-			event.target.dispatchEvent(detail_event);
+			let attendance_rollno = document.getElementById("attendance__input__rollno");
+			attendance_rollno.value = value;
 		});
 	});
 }
@@ -68,7 +66,6 @@ const handleStudentNameSearch = async (event) => {
 	result_student_handle.innerHTML = '';
 	let html = "";
 	results_json.map(student => {
-		console.log(student);
 		html += render_student_id(student);
 	});
 	result_student_handle.innerHTML = html;
@@ -80,8 +77,9 @@ const handleStudentNameSearch = async (event) => {
 				return;
 			}
 			let value = Number.parseInt(rollno.textContent);
-			let detail_event = new CustomEvent('rollno_selected', { bubbles: true, detail: { rollno: value } });
-			event.target.dispatchEvent(detail_event);
+			// Don't do events, they suck and they only propagate to the ancestor.
+			let attendance_rollno = document.getElementById("attendance__input__rollno");
+			attendance_rollno.value = value;
 		});
 	});
 	return;
