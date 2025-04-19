@@ -22,7 +22,7 @@ const handleTeacherIdSearch = async (event) => {
 	result_teacher_handle.innerHTML = render_teacher(json_result);
 	document.querySelectorAll('.teacher__element').forEach(element => {
 		element.addEventListener("click", event => {
-			let teacherid = event.target.querySelector('div.teacher__element__id');
+			let teacherid = event.target.querySelector('.teacher__element__id');
 			if (!teacherid)
 				return;
 
@@ -62,9 +62,9 @@ const handleTeacherNameSearch = async (event) => {
 	});
 	result_teacher_handle.innerHTML = html;
 
-	document.querySelectorAll('.teacher__element').forEach(element => {
+	document.querySelectorAll('.teacher__element, .teacher__element__name, .teacher__element__id').forEach(element => {
 		element.addEventListener("click", event => {
-			let teacherid = event.target.querySelector('div.teacher__element__id');
+			let teacherid = event.target.querySelector('.teacher__element__id');
 			if (!teacherid)
 				return;
 			let value = Number.parseInt(teacherid.textContent);

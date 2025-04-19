@@ -60,7 +60,7 @@
 
 		<section class="attendance">
 			<h2>Set Attendance</h2>
-			<form class="attendance__form" onsubmit="attendanceFormHandle(event)" action="/app/api/attendance/"
+			<form class="attendance__form" onsubmit="attendanceFormHandle(event)" action="/app/api/attendance"
 				method="POST">
 				<input class="attendance__input__element" id="attendance__input__rollno"
 					placeholder="Student Roll Number" name="rollno" type="number" />
@@ -82,7 +82,7 @@
 				<div class="attendance__input__submit__group">
 					<button class="attendance__input__element" formaction="/app/api/attendance/" formmethod="post"
 						type="submit">Set</button>
-					<button class="attendance__input__element" formaction="/app/api/attendance/" formmethod="delete"
+					<button class="attendance__input__element" onclick="attendanceFormDelete(); return false;"
 						type="submit">Delete</button>
 				</div>
 				<script src="/app/js/attendance.js"></script>

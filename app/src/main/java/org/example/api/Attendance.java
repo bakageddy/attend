@@ -2,15 +2,19 @@ package org.example.api;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Optional;
 
 import org.example.util.Result;
-import org.postgresql.Driver;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -19,7 +23,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(urlPatterns = "/api/attendance")
+@WebServlet(urlPatterns = "/api/attendance/")
 public class Attendance extends HttpServlet {
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -138,7 +142,10 @@ public class Attendance extends HttpServlet {
 			);
 
 			if (result.isErr()) {
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				resp.sendError(
+					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+					result.err_msg()
+				);
 				resp.flushBuffer();
 				return;
 			}
@@ -151,7 +158,6 @@ public class Attendance extends HttpServlet {
 			resp.flushBuffer();
 			return;
 		}
-
 	} 
 
 	@Override
@@ -297,7 +303,7 @@ public class Attendance extends HttpServlet {
 	) {
 		try {
 			PreparedStatement stmt = cnx.prepareStatement(
-				"DELETE FROM Attendance WHERE Day=? AND RollNo=? AND TeacherID=? AND SubjectID=? AND Period=?;"
+				"DELETE FROM Attendance WHERE Day=?::date AND RollNo=? AND TeacherID=? AND SubjectID=? AND Period=?::period;"
 			);
 			stmt.setString(1, date);
 			stmt.setLong(2, student_id);
@@ -332,8 +338,12 @@ public class Attendance extends HttpServlet {
 	) {
 		try {
 			PreparedStatement stmt = cnx.prepareStatement(
-				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?, ?, ?, ?, ?);"
+				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?::date, ?, ?::period, ?, ?);"
 			);
+			// You can do this in validation.
+			// DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+			// java.sql.Date d = new java.sql.Date(fmt.parse(date).getTime());
+
 			stmt.setString(1, date);
 			stmt.setLong(2, student_id);
 			stmt.setString(3, period);
@@ -345,6 +355,8 @@ public class Attendance extends HttpServlet {
 			}
 			return Result.ok(null);
 		} catch (SQLException e) {
+			return Result.err(e.getMessage());
+		} catch (Exception e) {
 			return Result.err(e.getMessage());
 		}
 	}
