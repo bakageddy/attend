@@ -17,7 +17,6 @@ import org.example.util.Result;
 import com.google.gson.Gson;
 import com.zaxxer.hikari.pool.HikariPool;
 
-import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -90,12 +89,9 @@ public class StudentSearch extends HttpServlet {
 			out.flush();
 
 		} catch (Exception e) {
-			out.write(e.getMessage());
-			resp.setStatus(500); // Internal Server Error
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage()); // Internal Server Error
 			resp.flushBuffer();
 			System.err.println(e.getMessage());
-		} finally {
-			out.close();
 		}
 	}
 
