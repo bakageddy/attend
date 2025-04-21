@@ -27,7 +27,8 @@ const handleTeacherIdSearch = async (event) => {
 			if (!teacherid)
 				return;
 
-			let value = Number.parseInt(teacherid);
+			console.log(teacherid.textContent);
+			let value = Number.parseInt(teacherid.textContent);
 			let attendance_teacherid = document.getElementById("attendance__input__teacherid");
 			attendance_teacherid.value = value;
 		});

@@ -9,3 +9,6 @@ build
 .settings/
 ./app/build/
 ./app/bin/
+*/.project
+*/.classpath
+*/.settings
