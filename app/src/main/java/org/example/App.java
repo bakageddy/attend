@@ -18,14 +18,12 @@ import com.zaxxer.hikari.pool.HikariPool;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 
-// import com.zaxxer.hikari.HikariDataSource;
-
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "home", urlPatterns = "/main/", loadOnStartup = 1)
+@WebServlet(name = "home", urlPatterns = "/main/")
 public class App extends HttpServlet  {
 	@Override
 	public void init(ServletConfig config) throws ServletException {

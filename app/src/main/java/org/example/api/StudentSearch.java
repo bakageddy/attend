@@ -13,11 +13,13 @@ import java.util.Optional;
 
 import org.example.Student;
 import org.example.util.Result;
+import org.example.util.LRU;
 
 import com.google.gson.Gson;
 import com.zaxxer.hikari.pool.HikariPool;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,32 +29,44 @@ import jakarta.servlet.http.HttpServletResponse;
 public class StudentSearch extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
+		ServletContext ctx = getServletContext();
+		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
+		LRU<String, String> pcache = (LRU) ctx.getAttribute("student_pattern_cache");
+		LRU<Long, String> icache = (LRU) ctx.getAttribute("student_id_cache");
 		try (
 			Connection cnx = pool.getConnection();
 			PrintWriter out = resp.getWriter();
 		) {
+
 			String pattern_param = req.getParameter("pattern");
 			if (pattern_param != null) {
+				Optional<String> cache_content = pcache.get(pattern_param);
+				if (!cache_content.isEmpty()) {
+					out.write(cache_content.get());
+					out.flush();
+					return;
+				}
+
 				Result<String, String> payload = search_by_pattern(cnx, pattern_param);
-				if (payload.isErr()) {
+				if (!payload.isErr()) {
+					out.write(payload.unwrap());
+					out.flush();
+					pcache.put(pattern_param, payload.unwrap());
+					return;
+				}
 
-					String err = payload.err_msg();
-					if (err.equals("No results for such pattern")) {
-						resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-						resp.flushBuffer();
-						return;
-					}
-
-					resp.sendError(
-						HttpServletResponse.SC_BAD_REQUEST,
-						err
-					);
+				String err = payload.err_msg();
+				if (err.equals("No results for such pattern")) {
+					resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
 					resp.flushBuffer();
 					return;
 				}
-				out.write(payload.unwrap());
-				out.flush();
+
+				resp.sendError(
+					HttpServletResponse.SC_BAD_REQUEST,
+					err
+				);
+				resp.flushBuffer();
 				return;
 			}
 
@@ -76,7 +90,8 @@ public class StudentSearch extends HttpServlet {
 				return;
 			}
 
-			Result<String, String> payload = search_by_id(cnx, id.get());
+			Long student_id = id.get();
+			Result<String, String> payload = search_by_id(cnx, student_id);
 			if (payload.isErr()) {
 				resp.sendError(
 					HttpServletResponse.SC_BAD_REQUEST,
@@ -85,9 +100,9 @@ public class StudentSearch extends HttpServlet {
 				resp.flushBuffer();
 				return;
 			}
+
 			out.write(payload.unwrap());
 			out.flush();
-
 		} catch (Exception e) {
 			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage()); // Internal Server Error
 			resp.flushBuffer();

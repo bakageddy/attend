@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.Subject;
+import org.example.util.LRU;
 import org.example.util.Result;
 
 import com.google.gson.Gson;
@@ -26,13 +27,24 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SubjectSearch extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
+
+		var ctx = getServletContext();
+		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
+		LRU<String, String> pcache = (LRU) ctx.getAttribute("subject_pattern_cache");
+
 		try (
 			Connection cnx = pool.getConnection();
 			PrintWriter out = resp.getWriter();
 		) {
 			String pattern_param = req.getParameter("pattern");
 			if (pattern_param != null) {
+				Optional<String> cache_content = pcache.get(pattern_param);
+				if (!cache_content.isEmpty()) {
+					out.write(cache_content.get());
+					out.flush();
+					return;
+				}
+
 				Result<String, String> result = search_by_name(cnx, pattern_param);
 				if (result.isErr()) {
 					resp.sendError(
@@ -44,6 +56,7 @@ public class SubjectSearch extends HttpServlet {
 				}
 				out.write(result.unwrap());
 				out.flush();
+				pcache.put(pattern_param, cache_content.get());
 				return;
 			}
 			String code_param = req.getParameter("code");

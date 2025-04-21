@@ -54,7 +54,7 @@ const handleSubjectCodeSearch = async (event) => {
 
 	result_subject_handle.innerHTML = '';
 	let html = '';
-	Array.of(json_results).map(element => {
+	json_results.map(element => {
 		html += render_subject(element);
 	});
 	result_subject_handle.innerHTML = html;
@@ -92,7 +92,7 @@ const handleSubjectNameSearch = async (event) => {
 
 	result_subject_handle.innerHTML = '';
 	let html = '';
-	Array.of(json_results).forEach(element => {
+	json_results.map(element => {
 		html += render_subject(element);
 	});
 	result_subject_handle.innerHTML = html;

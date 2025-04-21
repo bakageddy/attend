@@ -1,5 +1,6 @@
 package org.example.api;
 
+import org.example.util.LRU;
 import org.example.util.Result;
 import org.example.Teacher;
 
@@ -25,16 +26,24 @@ import jakarta.servlet.ServletException;
 public class TeacherSearch extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
+		var ctx = getServletContext();
+		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
+		LRU<String, String> pcache = (LRU) ctx.getAttribute("teacher_pattern_cache");
 		try (
 			Connection cnx = pool.getConnection();
 			PrintWriter out = resp.getWriter();
 		) {
 			String pattern_param = req.getParameter("pattern");
 			if (pattern_param != null) {
+				Optional<String> cache_content = pcache.get(pattern_param);
+				if (!cache_content.isEmpty()) {
+					out.write(cache_content.get());
+					out.flush();
+					return;
+				}
+
 				Result<String, String> payload = search_by_pattern(cnx, pattern_param);
 				if (payload.isErr()) {
-
 					String err = payload.err_msg();
 					if (err.equals("No results for such pattern")) {
 						resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -51,6 +60,7 @@ public class TeacherSearch extends HttpServlet {
 				}
 				out.write(payload.unwrap());
 				out.flush();
+				pcache.put(pattern_param, payload.unwrap());
 				return;
 			}
 
