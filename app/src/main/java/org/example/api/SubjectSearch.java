@@ -3,7 +3,6 @@ package org.example.api;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,8 +14,8 @@ import org.example.Subject;
 import org.example.util.Result;
 
 import com.google.gson.Gson;
+import com.zaxxer.hikari.pool.HikariPool;
 
-import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -26,27 +25,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet(urlPatterns = "/api/subject/search")
 public class SubjectSearch extends HttpServlet {
 	@Override
-	public void init(ServletConfig config) throws ServletException {
-		try {
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e) {
-			System.err.println(e.getMessage());
-			System.exit(1);
-		}
-	}
-
-	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// TODO: Setup up Tomcat's environment
-		String password = "Dineshkumar4u!";
-
-		// TODO: Setup a connection pool
+		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
 		try (
-			Connection cnx = DriverManager.getConnection(
-				"jdbc:postgresql://localhost/college",
-				"postgres",
-				password
-			);
+			Connection cnx = pool.getConnection();
 			PrintWriter out = resp.getWriter();
 		) {
 			String pattern_param = req.getParameter("pattern");

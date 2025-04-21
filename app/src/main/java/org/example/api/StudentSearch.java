@@ -15,6 +15,7 @@ import org.example.Student;
 import org.example.util.Result;
 
 import com.google.gson.Gson;
+import com.zaxxer.hikari.pool.HikariPool;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -26,36 +27,11 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet(urlPatterns = "/api/student/search")
 public class StudentSearch extends HttpServlet {
 	@Override
-	public void init(ServletConfig config) throws ServletException {
-		try {
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e) {
-			System.err.println(e.getMessage());
-			System.exit(1);
-		}
-	}
-	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// String password = System.getenv("PGSQL_DB_PASSWORD"); -- Not working, I do not know why
-		// if (password == null) {
-		// 	resp.sendError(
-		// 		HttpServletResponse.SC_BAD_REQUEST,
-		// 		"Internal Server Problems"
-		// 	);
-		// 	resp.flushBuffer();
-		// 	return;
-		// }
-		// NOTE: Maybe the tomcat user cannot see the same System.getenv as mine
-		String password = "Dineshkumar4u!"; // TODO: Setup Tomcat's environment
-
-		PrintWriter out = resp.getWriter();
-		// TODO: Setup a connection pool
+		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
 		try (
-			Connection cnx = DriverManager.getConnection(
-				"jdbc:postgresql://localhost/college",
-				"postgres",
-				password
-			);
+			Connection cnx = pool.getConnection();
+			PrintWriter out = resp.getWriter();
 		) {
 			String pattern_param = req.getParameter("pattern");
 			if (pattern_param != null) {

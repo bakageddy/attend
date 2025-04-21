@@ -13,6 +13,8 @@ import java.sql.Statement;
 import java.util.Optional;
 import java.util.Properties;
 
+import com.zaxxer.hikari.pool.HikariPool;
+
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 
@@ -35,8 +37,9 @@ public class App extends HttpServlet  {
 		HttpServletResponse resp
 	) throws ServletException, IOException {
 		// TODO: Rewrite the db class to make it clean (Remove Exceptions by wrapping it in Optional/Result)
+		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
 		try (
-			Connection cnx = DriverManager.getConnection("jdbc:postgresql://localhost/college", "postgres", "Dineshkumar4u!");
+			Connection cnx = pool.getConnection();
 			Statement stmt = cnx.createStatement();
 			PrintWriter out = resp.getWriter();
 		){

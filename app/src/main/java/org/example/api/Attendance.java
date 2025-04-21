@@ -2,19 +2,16 @@ package org.example.api;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Optional;
 
 import org.example.util.Result;
+
+import com.zaxxer.hikari.pool.HikariPool;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -25,15 +22,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = "/api/attendance/")
 public class Attendance extends HttpServlet {
-	@Override
-	public void init(ServletConfig config) throws ServletException {
-		try {
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e) {
-			System.err.println(e.getMessage());
-			System.exit(1);
-		}
-	}
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String rollno_param = req.getParameter("rollno");
@@ -125,12 +113,10 @@ public class Attendance extends HttpServlet {
 			return;
 		}
 
+
+		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
 		try (
-			Connection cnx = DriverManager.getConnection(
-				"jdbc:postgresql://localhost/college",
-				"postgres",
-				"Dineshkumar4u!"
-			);
+			Connection cnx = pool.getConnection();
 		) {
 			Result<Void, String> result = set_attendance(
 				cnx, 
@@ -250,12 +236,9 @@ public class Attendance extends HttpServlet {
 			return;
 		}
 
+		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
 		try (
-			Connection cnx = DriverManager.getConnection(
-				"jdbc:postgresql://localhost/college",
-				"postgres",
-				"Dineshkumar4u!"
-			);
+			Connection cnx = pool.getConnection();
 		) {
 			Result<Void, String> result = delete_attendance(
 				cnx,
