@@ -97,9 +97,15 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 			return Optional.empty();
 		}
 
+		// TODO: Implement Lockless Caching
+		// TODO: Implement Cache Invalidation
+	
 		// NOTE: I do not know if this is worth it :(
-		Node<Key,Value> value = cache.get(key);
-		synchronized(value) {
+		// locking the entire method so that we want to read is 
+		// a bit counter intuitive with the aspect of performance
+		// so implementing a lock-free version of LRU might be worth it!
+		synchronized (this) {
+			Node<Key,Value> value = cache.get(key);
 			Node.remove_self(value);
 			Node.insert_before(value, latest);
 			return value.unwrap();

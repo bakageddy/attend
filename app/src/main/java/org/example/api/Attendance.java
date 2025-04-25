@@ -2,18 +2,20 @@ package org.example.api;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Optional;
+import java.util.Date;
 
 import org.example.util.Result;
+import org.example.util.Parser;
+import org.example.util.Validator;
 
 import com.zaxxer.hikari.pool.HikariPool;
 
-import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -34,7 +36,7 @@ public class Attendance extends HttpServlet {
 			return;
 		}
 
-		Optional<Long> parsed_rollno = parse_long(rollno_param);
+		Optional<Long> parsed_rollno = Parser.parse_long(rollno_param);
 		if (parsed_rollno.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -54,7 +56,7 @@ public class Attendance extends HttpServlet {
 			return;
 		}
 
-		Optional<Long> parsed_subjectid = parse_long(subject_id_param);
+		Optional<Long> parsed_subjectid = Parser.parse_long(subject_id_param);
 		if (parsed_subjectid.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -74,7 +76,7 @@ public class Attendance extends HttpServlet {
 			return;
 		}
 
-		Optional<Long> parsed_teacherid = parse_long(teacher_id_param);
+		Optional<Long> parsed_teacherid = Parser.parse_long(teacher_id_param);
 		if (parsed_teacherid.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -89,7 +91,7 @@ public class Attendance extends HttpServlet {
 			period = "I"; // TODO: Refactor Default Period, there must be something better than this..
 		}
 
-		if (!valid_period(period)) {
+		if (!Validator.valid_period(period)) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
 				"Period must Uppercase Roman Numeral => 'I' to 'VIII'"
@@ -103,7 +105,7 @@ public class Attendance extends HttpServlet {
 			date = default_date();
 		}
 
-		Optional<String> valid_date = validate_date(date);
+		Optional<String> valid_date = Validator.validate_date(date);
 		if (valid_date.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -158,7 +160,7 @@ public class Attendance extends HttpServlet {
 			return;
 		}
 
-		Optional<Long> parsed_rollno = parse_long(rollno_param);
+		Optional<Long> parsed_rollno = Parser.parse_long(rollno_param);
 		if (parsed_rollno.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -178,7 +180,7 @@ public class Attendance extends HttpServlet {
 			return;
 		}
 
-		Optional<Long> parsed_subjectid = parse_long(subject_id_param);
+		Optional<Long> parsed_subjectid = Parser.parse_long(subject_id_param);
 		if (parsed_subjectid.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -198,7 +200,7 @@ public class Attendance extends HttpServlet {
 			return;
 		}
 
-		Optional<Long> parsed_teacherid = parse_long(teacher_id_param);
+		Optional<Long> parsed_teacherid = Parser.parse_long(teacher_id_param);
 		if (parsed_teacherid.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -212,7 +214,7 @@ public class Attendance extends HttpServlet {
 		if (period == null) {
 			period = "I";  // TODO: Refactor Default period
 		}
-		if (!valid_period(period)) {
+		if (!Validator.valid_period(period)) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
 				"Period must be uppercase roman numeral => 'I' to 'VII'"
@@ -226,7 +228,7 @@ public class Attendance extends HttpServlet {
 			date = default_date();
 		}
 
-		Optional<String> valid_date = validate_date(date);
+		Optional<String> valid_date = Validator.validate_date(date);
 		if (valid_date.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
@@ -353,46 +355,4 @@ public class Attendance extends HttpServlet {
 		return dateString;
 	}
 
-	public static boolean valid_period(String input) {
-		return (
-			input.equals("I")	||
-			input.equals("II")	||
-			input.equals("III") ||
-			input.equals("IV")	||
-			input.equals("V")	||
-			input.equals("VI")	||
-			input.equals("VII") ||
-			input.equals("VIII")
-		);
-	}
-
-	private static Optional<Long> parse_long(String input) {
-		try {
-			return Optional.of(Long.parseLong(input));
-		} catch (Exception e) {
-			return Optional.empty();
-		}
-	}
-
-	private static Optional<String> validate_date(String input) {
-		String[] delim_str = input.strip().split("-", 3);
-		int[] date = Arrays.stream(delim_str).mapToInt(num -> Integer.parseInt(num)).toArray();
-		if (date.length != 3)
-			return Optional.empty();
-
-		int year = date[0];
-		if (year < 1970) // Unix EPOCH
-			return Optional.empty();
-
-		int month = date[1];
-		if (month < 1 || month > 12)
-			return Optional.empty();
-
-		// TODO: Corner case: Invalid dates like 31-02-2004
-		int day = date[2];
-		if (day < 1 || day > 31)
-			return Optional.empty();
-
-		return Optional.of(input);
-	} 
 }

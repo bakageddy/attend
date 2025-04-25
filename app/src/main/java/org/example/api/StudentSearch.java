@@ -3,8 +3,6 @@ package org.example.api;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -14,6 +12,8 @@ import java.util.Optional;
 import org.example.Student;
 import org.example.util.Result;
 import org.example.util.LRU;
+import org.example.util.Parser;
+import org.example.util.Validator;
 
 import com.google.gson.Gson;
 import com.zaxxer.hikari.pool.HikariPool;
@@ -31,8 +31,8 @@ public class StudentSearch extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ServletContext ctx = getServletContext();
 		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
-		LRU<String, String> pcache = (LRU) ctx.getAttribute("student_pattern_cache");
-		LRU<Long, String> icache = (LRU) ctx.getAttribute("student_id_cache");
+		LRU<String, String> pcache = (LRU<String, String>) ctx.getAttribute("student_pattern_cache");
+		LRU<Long, String> icache = (LRU<Long, String>) ctx.getAttribute("student_id_cache");
 		try (
 			Connection cnx = pool.getConnection();
 			PrintWriter out = resp.getWriter();
@@ -80,7 +80,7 @@ public class StudentSearch extends HttpServlet {
 				return;
 			}
 
-			Optional<Long> id = parse_long(id_param);
+			Optional<Long> id = Parser.parse_long(id_param);
 			if (id.isEmpty()) {
 				resp.sendError(
 					HttpServletResponse.SC_BAD_REQUEST,
@@ -148,7 +148,7 @@ public class StudentSearch extends HttpServlet {
 	// TODO: Implement Error enums
 	public Result<String, String> search_by_pattern(Connection cnx, String pattern) {
 		String payload;
-		Optional<String> result = validate_sql(pattern);
+		Optional<String> result = Validator.validate_sql(pattern);
 		if (result.isEmpty()) {
 			return Result.err("Pattern must be alphanumeric, not SQL -__-");
 		}
@@ -184,34 +184,11 @@ public class StudentSearch extends HttpServlet {
 			Gson serializer = new Gson();
 			payload = serializer.toJson(names.toArray());
 
-			rst.close();
-			exists_rst.close();
 			exists.close();
 			stmt.close();
 			return Result.ok(payload);
 		} catch (Exception e) {
 			return Result.err(e.getMessage());
-		}
-	}
-
-	public static Optional<Long> parse_long(String input) {
-		try {
-			return Optional.of(Long.parseLong(input));
-		} catch (NumberFormatException e) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<String> validate_sql(String input) {
-		if (input.contains("DROP")   || 
-			input.contains("SELECT") || 
-			input.contains("UPDATE") ||	
-			input.contains("INSERT") ||	
-			input.contains(";"))
-		{
-			return Optional.empty();
-		} else {
-			return Optional.of(input);
 		}
 	}
 }

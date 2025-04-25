@@ -13,6 +13,8 @@ import java.util.Optional;
 import org.example.Subject;
 import org.example.util.LRU;
 import org.example.util.Result;
+import org.example.util.Parser;
+import org.example.util.Validator;
 
 import com.google.gson.Gson;
 import com.zaxxer.hikari.pool.HikariPool;
@@ -85,7 +87,7 @@ public class SubjectSearch extends HttpServlet {
 				return;
 			}
 
-			Optional<Long> parsed_long = parse_long(id_param);
+			Optional<Long> parsed_long = Parser.parse_long(id_param);
 			if (parsed_long.isEmpty()) {
 				resp.sendError(
 					HttpServletResponse.SC_BAD_REQUEST,
@@ -106,18 +108,9 @@ public class SubjectSearch extends HttpServlet {
 			out.write(result.unwrap());
 			out.flush();
 		} catch (Exception e) {
-			resp.sendError(500, e.getMessage());
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 			resp.flushBuffer();
 			return;
-		}
-	}
-
-	private Optional<Long> parse_long(String input) {
-		try {
-			Long parsed = Long.parseLong(input);
-			return Optional.of(parsed);
-		} catch (NumberFormatException e) {
-			return Optional.empty();
 		}
 	}
 
@@ -152,7 +145,7 @@ public class SubjectSearch extends HttpServlet {
 			return Result.err("Pattern cannot be null");
 		}
 
-		Optional<String> result = validate_sql(pattern);
+		Optional<String> result = Validator.validate_sql(pattern);
 		if (result.isEmpty()) {
 			return Result.err("Pattern must be alphanumeric, NOT SQL -__-");
 		}
@@ -192,7 +185,7 @@ public class SubjectSearch extends HttpServlet {
 			return Result.err("Pattern cannot be null");
 		}
 
-		Optional<String> valid_pattern = validate_sql(pattern);
+		Optional<String> valid_pattern = Validator.validate_sql(pattern);
 		if (valid_pattern.isEmpty()) {
 			return Result.err("Pattern must be alphanumeric, NOT SQL -_-");
 		}
@@ -227,19 +220,4 @@ public class SubjectSearch extends HttpServlet {
 		}
 
 	}
-
-	// TODO: Write bettern validation function and maybe a sanitization function!
-	public static Optional<String> validate_sql(String input) {
-		if (input.contains("DROP") || 
-			input.contains("SELECT") || 
-			input.contains("UPDATE") ||	
-			input.contains("INSERT") ||	
-			input.contains(";"))
-		{
-			return Optional.empty();
-		} else {
-			return Optional.of(input);
-		}
-	}
-
 }

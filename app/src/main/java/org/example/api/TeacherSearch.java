@@ -2,6 +2,8 @@ package org.example.api;
 
 import org.example.util.LRU;
 import org.example.util.Result;
+import org.example.util.Parser;
+import org.example.util.Validator;
 import org.example.Teacher;
 
 import com.google.gson.Gson;
@@ -74,7 +76,7 @@ public class TeacherSearch extends HttpServlet {
 				return;
 			}
 
-			Optional<Long> id = parse_long(id_param);
+			Optional<Long> id = Parser.parse_long(id_param);
 			if (id.isEmpty()) {
 				resp.sendError(
 					HttpServletResponse.SC_BAD_REQUEST,
@@ -108,7 +110,7 @@ public class TeacherSearch extends HttpServlet {
 	}
 
 	protected Result<String, String> search_by_pattern(Connection cnx, String pattern) {
-		Optional<String> result = validate_sql(pattern);
+		Optional<String> result = Validator.validate_sql(pattern);
 		if (result.isEmpty()) {
 			return Result.err("Need valid pattern. Not SQL T_T");
 		}
@@ -170,39 +172,14 @@ public class TeacherSearch extends HttpServlet {
 				String payload = serializer.toJson(new Teacher(id, name));
 
 				stmt.close();
-				rst.close();
-
 				return Result.ok(payload);
 			} else {
-
 				stmt.close();
-				rst.close();
-
 				return Result.err("No such id");
 			}
 		// TODO: You can do better than this dinesh
 		} catch (Exception e) {
 			return Result.err("Beep Boop, Error at search by id");
-		}
-	}
-
-	private Optional<Long> parse_long(String input) {
-		try {
-			return Optional.of(Long.parseLong(input));
-		} catch (NumberFormatException e) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<String> validate_sql(String input) {
-		if (input.contains("DROP") ||
-				input.contains("SELECT") ||
-				input.contains("UPDATE") ||
-				input.contains("INSERT") ||
-				input.contains(";")) {
-			return Optional.empty();
-		} else {
-			return Optional.of(input);
 		}
 	}
 }
