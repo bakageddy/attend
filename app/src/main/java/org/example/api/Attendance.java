@@ -91,7 +91,7 @@ public class Attendance extends HttpServlet {
 			period = "I"; // TODO: Refactor Default Period, there must be something better than this..
 		}
 
-		if (!Validator.valid_period(period)) {
+		if (!Validator.validate_period(period)) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
 				"Period must Uppercase Roman Numeral => 'I' to 'VIII'"
@@ -214,7 +214,7 @@ public class Attendance extends HttpServlet {
 		if (period == null) {
 			period = "I";  // TODO: Refactor Default period
 		}
-		if (!Validator.valid_period(period)) {
+		if (!Validator.validate_period(period)) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
 				"Period must be uppercase roman numeral => 'I' to 'VII'"

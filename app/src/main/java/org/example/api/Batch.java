@@ -185,7 +185,11 @@ public class Batch extends HttpServlet {
 
 	private static Result<Long, String> create_batch(Connection cnx, Long teacherid, String name) {
 		try {
-			PreparedStatement stmt = cnx.prepareStatement("INSERT INTO Batch(Name, TeacherID) VALUES(?, ?)");
+
+			PreparedStatement stmt = cnx.prepareStatement("INSERT INTO Batch(Name, TeacherID) VALUES(?, ?) RETURNING BatchID;");
+			stmt.setString(1, name);
+			stmt.setLong(2, teacherid);
+
 			ResultSet rst = stmt.executeQuery();
 			Optional<Long> batchid = Optional.empty();
 			if (rst.next()) {
@@ -197,6 +201,7 @@ public class Batch extends HttpServlet {
 			} else {
 				return Result.ok(batchid.get());
 			}
+			
 		} catch (SQLException e) {
 			return Result.err(e.getMessage());
 		}

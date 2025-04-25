@@ -31,7 +31,7 @@ public class Validator {
 		);
 	}
 
-	private static Optional<String> validate_date(String input) {
+	public static Optional<String> validate_date(String input) {
 		try {
 			DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
 			Date _ignore = fmt.parse(input);
