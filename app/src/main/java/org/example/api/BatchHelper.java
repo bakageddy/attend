@@ -70,7 +70,7 @@ public class BatchHelper extends HttpServlet {
 			PrintWriter out = resp.getWriter();
 		) {
 
-			Result<Void, String> result = delete_value(cnx, batchid.get(), rollno.get());
+			Result<Void, String> result = delete_batch(cnx, batchid.get(), rollno.get());
 			if (result.isErr()) {
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.err_msg());
 				resp.flushBuffer();
@@ -87,7 +87,7 @@ public class BatchHelper extends HttpServlet {
 		}
 	}
 
-	private static Result<Void, String> delete_value(Connection cnx, Long batchid, Long rollno) {
+	private static Result<Void, String> delete_batch(Connection cnx, Long batchid, Long rollno) {
 		try {
 			PreparedStatement stmt = cnx.prepareStatement("DELETE FROM BatchData WHERE batchid=? AND rollno=?");
 			stmt.setLong(1, batchid);
@@ -150,7 +150,7 @@ public class BatchHelper extends HttpServlet {
 			Connection cnx = pool.getConnection();
 			PrintWriter out = resp.getWriter();
 		) {
-			Result<Void, String> result = insert_value(cnx, batchid.get(), rollno.get());
+			Result<Void, String> result = insert_batch(cnx, batchid.get(), rollno.get());
 			if (result.isErr()) {
 				resp.sendError(
 					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -173,7 +173,8 @@ public class BatchHelper extends HttpServlet {
 		} 
 
 	}
-	private static Result<Void, String> insert_value(Connection cnx, Long batchid, Long rollno) {
+
+	private static Result<Void, String> insert_batch(Connection cnx, Long batchid, Long rollno) {
 		try {
 			PreparedStatement stmt = cnx.prepareStatement("INSERT INTO BatchData(batchid, rollno) VALUES(?, ?);");
 			stmt.setLong(1, batchid);
