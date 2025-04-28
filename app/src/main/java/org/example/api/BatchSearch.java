@@ -20,10 +20,12 @@ import java.util.ArrayList;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@WebServlet(urlPatterns = "/api/batch/search")
 public class BatchSearch extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -182,7 +184,7 @@ public class BatchSearch extends HttpServlet {
 	private Result<String, String> search_pattern(Connection cnx, String pattern) {
 		try {
 			PreparedStatement stmt = cnx.prepareStatement(
-				"SELECT BatchID, Name, TeacherID FROM Batch WHERE Name LIKE ?;"
+				"SELECT BatchID, Name, TeacherID FROM Batch WHERE Name LIKE ? LIMIT 20;"
 			);
 
 			if (!pattern.endsWith("%")) {
