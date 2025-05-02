@@ -27,7 +27,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = "/api/batch")
 public class Batch extends HttpServlet {
-
 	// Fetch Batch
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
