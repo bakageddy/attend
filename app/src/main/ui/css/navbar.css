@@ -2,7 +2,7 @@
 	display: flex;
 	width: 100%;
 	align-items: center;
-	justify-content: space-around;
+	justify-content: space-between;
 	border-radius: 0.25rem;
 	background-color: #76A5AF;
 	color: #141414;
@@ -10,7 +10,7 @@
 
 .navbar__middle {
 	font-family: "Koulen", monospace;
-	font-size: 1.75rem;
+	font-size: 1.5rem;
 	font-weight: 800;
 }
 
@@ -26,4 +26,9 @@
 .navbar__link, .navbar__link:visited{
 	font-size: 0.8rem;
 	text-decoration: none;
+	color: #DFD0BD;
+	background-color: #464646;
+	border-radius: 0.3rem;
+	padding: 0.5rem 1rem;
+	margin: 0.5rem 0.3rem;
 }

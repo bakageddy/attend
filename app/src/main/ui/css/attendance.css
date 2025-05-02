@@ -12,25 +12,9 @@ section.attendance {
 	/* gap: 0.25rem; */
 }
 
-.attendance__input__element {
-	font-family: 'Gudea';
-	padding: 0.375rem;
-	margin: 0.375rem;
-}
-
 .attendance__input__submit__group {
 	display: flex;
 	flex-direction: row;
 	flex-grow: 1;
 	width: 100%;
-}
-
-button.attendance__input__element {
-	background-color: #89A283;
-	color: #161616;
-	font-family: Koulen;
-	padding: 0.5rem;
-	border-style: none;
-	border-radius: 0.4rem;
-	width: 50%;
 }

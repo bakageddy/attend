@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Gudea:ital,wght@0,400;0,700;1,400&display=swap"
+		rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Koulen&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="/app/css/navbar.css" />
+	<link rel="stylesheet" type="text/css" href="/app/css/index.css" />
+	<link rel="stylesheet" type="text/css" href="/app/css/batch_create.css" />
+	<link rel="stylesheet" type="text/css" href="/app/css/batch.css" />
+	<title>Batch Create - Atten</title>
+</head>
+
+<body>
+	<header>
+		<nav class="navbar">
+			<img class="navbar__left" src="/app/svg/menu.svg" />
+			<h2 class="navbar__middle">atten</h3>
+				<ul class="navbar__right">
+					<li><a class="navbar__link" href="/app/index.html">Batch</a></li>
+					<li><a class="navbar__link" href="https://github.com/bakageddy">About Me</a></li>
+				</ul>
+		</nav>
+	</header>
+	<main class="batch__container">
+		<section class="batch__search">
+			<input id="batch__search__batchid" class="input__element" placeholder="Search BatchID"/>
+			<input id="batch__search__name" class="input__element" placeholder="Search by Name"/>
+			<input id="batch__search__teacherid" class="input__element" placeholder="Search by TeacherID"/>
+		</section>
+
+		<section class="batch__results">
+		</section>
+
+		<section class="batch__crud">
+			<div class="batch__crud__form">
+				<div class="batch__crud__input__group">
+					<input id="batch__crud__batchid" class="input__element batch__crud__input__element" type="number"
+						name="batchid" placeholder="Batch ID">
+					<input id="batch__crud__name" class="input__element batch__crud__input__element" type="text"
+						name="name" placeholder="Batch Name" />
+					<input id="batch__crud__teacherid" class="input__element batch__crud__input__element" type="number"
+						name="teacherid" placeholder="Teacher ID" />
+				</div>
+
+				<div class="batch__crud__button__group">
+					<button id="batch__crud__create__button" class="submit__button batch__crud__button"
+						onclick="handle_batch_create(); return false;">
+						Create
+					</button>
+					<button id="batch__crud__delete__button" class="submit__button batch__crud__button"
+						onclick="handle_batch_delete(); return false;">
+						Delete
+					</button>
+				</div>
+			</div>
+		</section>
+	</main>
+</body>
+
+<script src="/app/js/batch_create.js"></script>
+<script src="/app/js/batch_search.js"></script>
+
+</html>
