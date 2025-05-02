@@ -23,8 +23,8 @@
 			<img class="navbar__left" src="/app/svg/menu.svg" />
 			<h2 class="navbar__middle">atten</h3>
 				<ul class="navbar__right">
-					<li><a class="navbar__link" href="https://github.com/bakageddy">GitHub</a></li>
 					<li><a class="navbar__link" href="/app/batch.html">Batch</a></li>
+					<li><a class="navbar__link" href="https://github.com/bakageddy">About Me</a></li>
 				</ul>
 		</nav>
 	</header>
@@ -80,9 +80,9 @@
 					<option value="VIII">VIII</option>
 				</select>
 				<div class="attendance__input__submit__group">
-					<button class="attendance__input__element" formaction="/app/api/attendance/" formmethod="post"
+					<button class="submit__button attendance__input__element" formaction="/app/api/attendance/" formmethod="post"
 						type="submit">Set</button>
-					<button class="attendance__input__element" onclick="attendanceFormDelete(); return false;"
+					<button class="submit__button attendance__input__element" onclick="attendanceFormDelete(); return false;"
 						type="submit">Delete</button>
 				</div>
 				<script src="/app/js/attendance.js"></script>
