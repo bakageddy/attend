@@ -236,13 +236,13 @@ public class BatchAttendance extends HttpServlet {
 
 		var len = students.size();
 		for (int i = 0; i < len; i++) {
-			query.append("(")
+			query.append("('")
 				.append(day)
-				.append(",")
+				.append("'::date,")
 				.append(students.get(i).rollNo)
-				.append(",")
+				.append(",'")
 				.append(period)
-				.append("::period,")
+				.append("'::period,")
 				.append(subjectid)
 				.append(",")
 				.append(teacherid);

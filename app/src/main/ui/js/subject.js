@@ -31,8 +31,9 @@ const handleSubjectIdSearch = async (event) => {
 				return;
 			let value = Number.parseInt(subjectid.textContent);
 			let attendance_subjectid = document.getElementById("attendance__input__subjectid");
+			let batch_subjectid = document.getElementById("batch__input__subjectid");
 			attendance_subjectid.value = value;
-			return;
+			batch_subjectid.value = value;
 		})
 	});
 }
@@ -67,7 +68,9 @@ const handleSubjectCodeSearch = async (event) => {
 				return;
 			let value = Number.parseInt(subjectid.textContent);
 			let attendance_subjectid = document.getElementById("attendance__input__subjectid");
+			let batch_subjectid = document.getElementById("batch__input__subjectid");
 			attendance_subjectid.value = value;
+			batch_subjectid.value = value;
 		});
 	});
 	return;
@@ -106,7 +109,9 @@ const handleSubjectNameSearch = async (event) => {
 				return;
 			let value = Number.parseInt(subjectid.textContent);
 			let attendance_subjectid = document.getElementById("attendance__input__subjectid");
+			let batch_subjectid = document.getElementById("batch__input__subjectid");
 			attendance_subjectid.value = value;
+			batch_subjectid.value = value;
 		});
 	});
 }
