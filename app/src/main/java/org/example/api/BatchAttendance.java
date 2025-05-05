@@ -13,6 +13,8 @@ import org.example.Student;
 import org.example.util.Parser;
 import org.example.util.Result;
 import org.example.util.Validator;
+import org.example.util.Cache;
+import org.example.util.LRU;
 
 import com.zaxxer.hikari.pool.HikariPool;
 
@@ -23,9 +25,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * BatchAttendance
- */
 @WebServlet(urlPatterns = "/api/attendance/batch")
 public class BatchAttendance extends HttpServlet {
 	@Override
@@ -165,9 +164,16 @@ public class BatchAttendance extends HttpServlet {
 		}
 	}
 
-	// TODO: this is cachable :)
 	private Result<List<Student>, String> fetch_students(Connection cnx, long batchid) {
 		try {
+			ServletContext ctx = getServletContext();
+			Cache<Long, List<Student>> batchid_cache = (LRU) ctx.getAttribute("batch_id_cache");
+
+			Optional<List<Student>> cache_contents = batchid_cache.get(batchid);
+			if (!cache_contents.isEmpty()) {
+				return Result.ok(cache_contents.get());
+			}
+
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT RollNo FROM Batch JOIN BatchData ON Batch.BatchID = BatchData.BatchID WHERE Batch.BatchID = ?;"
 			);
@@ -179,6 +185,8 @@ public class BatchAttendance extends HttpServlet {
 				long rollno = rst.getLong(1);
 				students.addLast(new Student(rollno, null));
 			}
+
+			batchid_cache.put(batchid, students);
 			return Result.ok(students);
 		} catch (SQLException e) {
 			return Result.err(e.getMessage());

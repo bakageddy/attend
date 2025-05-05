@@ -1,6 +1,7 @@
 package org.example;
 
 import org.example.util.LRU;
+import org.example.util.Cache;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.pool.HikariPool;
@@ -8,6 +9,8 @@ import com.zaxxer.hikari.pool.HikariPool;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+
+import java.util.List;
 
 @WebListener
 public class Context implements ServletContextListener {
@@ -28,14 +31,16 @@ public class Context implements ServletContextListener {
 
 			// NOTE: Research whether student_id_cache is important or not...
 			// TODO: Must refactor to use Student, Teacher, Subject :(
-			LRU<String, String> student_pattern_cache = new LRU<>(30);
+			Cache<String, String> student_pattern_cache = new LRU<>(30);
 			// LRU<Long, String> student_id_cache = new LRU<>(30);
 
-			LRU<String, String> teacher_pattern_cache = new LRU<>(30);
+			Cache<String, String> teacher_pattern_cache = new LRU<>(30);
 			// LRU<Long, String> teacher_id_cache = new LRU<>(30);
 
-			LRU<String, String> subject_pattern_cache = new LRU<>(30);
+			Cache<String, String> subject_pattern_cache = new LRU<>(30);
 			// LRU<Long, String> subject_id_cache = new LRU<>(30);
+			
+			Cache<Long, List<Student>> batch_id_cache = new LRU<>(30);
 
 			var ctx = sce.getServletContext();
 			ctx.setAttribute("cnx_pool", cpool);
@@ -48,6 +53,8 @@ public class Context implements ServletContextListener {
 
 			ctx.setAttribute("subject_pattern_cache", subject_pattern_cache);
 			// ctx.setAttribute("subject_id_cache", subject_id_cache);
+			
+			ctx.setAttribute("batch_id_cache", batch_id_cache);
 		} catch (ClassNotFoundException e) {
 			System.err.println(e.getMessage());
 		}
