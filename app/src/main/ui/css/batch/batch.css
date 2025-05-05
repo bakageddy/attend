@@ -1,0 +1,26 @@
+.batch {
+	display: grid;
+	grid-template-rows: repeat(2, 1fr);
+	grid-template-columns: repeat(3, 1fr);
+}
+
+.batch__crud {
+	grid-column: 1 / 2;
+	display: flex;
+}
+
+.batch__data__crud {
+	grid-row: 2 / 3;
+	grid-column: span 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.batch__data__scratchpad {
+	grid-column: span 1;
+	grid-row: span 2;
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	align-self: center;
+}

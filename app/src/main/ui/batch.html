@@ -11,7 +11,7 @@
 	<link rel="stylesheet" type="text/css" href="/app/css/navbar.css" />
 	<link rel="stylesheet" type="text/css" href="/app/css/attendance.css" />
 	<link rel="stylesheet" type="text/css" href="/app/css/index.css" />
-	<link rel="stylesheet" type="text/css" href="/app/css/batch.css" />
+	<link rel="stylesheet" type="text/css" href="/app/css/batch/batch.css" />
 	<title>Batch - Attend</title>
 </head>
 
@@ -26,17 +26,57 @@
 				</ul>
 		</nav>
 	</header>
-	<main>
-		<section class="batch__crud__redirect">
-			<a href="/app/batch_create.html" class="submit__button batch__submit__button">
-				Create/Delete Batch
-			</a>
+
+	<main class="batch">
+		<section class="batch__crud">
+			<div class="batch__crud__form">
+				<div class="batch__crud__input__group">
+					<input id="batch__crud__batchid" class="input__element batch__crud__input__element" type="number"
+						name="batchid" placeholder="Batch ID">
+					<input id="batch__crud__name" class="input__element batch__crud__input__element" type="text"
+						name="name" placeholder="Batch Name" />
+					<input id="batch__crud__teacherid" class="input__element batch__crud__input__element" type="number"
+						name="teacherid" placeholder="Teacher ID" />
+				</div>
+
+				<div class="batch__crud__button__group">
+					<button id="batch__crud__create__button" class="submit__button batch__crud__button"
+						onclick="handle_batch_create(); return false;">
+						Create
+					</button>
+					<button id="batch__crud__delete__button" class="submit__button batch__crud__button"
+						onclick="handle_batch_delete(); return false;">
+						Delete
+					</button>
+				</div>
+			</div>
 		</section>
 
-		<section class="batch__search">
+		<section class="batch__data__crud">
+			<div>
+				<input id="batch__data__studentid__search" class="input__element" placeholder="StudentID" name="rollno"/>
+				<input id="batch__data__studentname__search" class="input__element" placeholder="Student Name" name="name"/>
+			</div>
+			<div>
+				<input id="batch__data__teacherid__search" class="input__element" placeholder="TeacherID" name="teacherid"/>
+				<input id="batch__data__teachername__search" class="input__element" placeholder="Teacher Name" name="teachername"/>
+			</div>
 		</section>
 
-		<section class="batch__attendance">
+		<section class="batch__data__results">
+			<!-- GRID BASED DRAG and DROPPABLE RESULTS -->
+		</section>
+
+		<section class="batch__data__scratchpad">
+			<input class="input__element" placeholder="BatchID" name="batchid"/>
+
+			<div class="batch__data__selected__students">
+			</div>
+
+			<div class="batch__data__button__group">
+				<button class=" submit__button">Add to Batch</button>
+				<button class=" submit__button">Remove from Batch</button>
+			</div>
 		</section>
 	</main>
 	<footer>
