@@ -1,57 +1,8 @@
 package org.example.util;
 
-import java.security.InvalidParameterException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-
-class Node<K, V> {
-	K key;
-	V val;
-	Node<K, V> prev;
-	Node<K, V> next;
-
-	@Override
-	public String toString() {
-		return key.toString() + " : " + val.toString();
-	}
-
-	public Node() {
-		this.key = null;
-		this.val = null;
-		this.prev = null;
-		this.next = null;
-	}
-
-	public Node(K key, V val) {
-		this.key = key;
-		this.val = val;
-		this.prev = null;
-		this.next = null;
-	}
-
-	public Optional<V> unwrap() {
-		if (key == null) return Optional.empty();
-		return Optional.of(this.val);
-	}
-
-	public static<K, V> void remove_self(Node<K, V> node) {
-		Node<K, V> prev = node.prev;
-		Node<K, V> next = node.next;
-
-		prev.next = next;
-		next.prev = prev;
-	}
-
-	public static<K, V> void insert_before(Node<K, V> node, Node<K, V> before) {
-		Node<K, V> before_prev = before.prev;
-		node.prev = before_prev;
-		node.next = before;
-
-		before_prev.next = node;
-		before.prev = node;
-	}
-}
 
 public class LRU<Key, Value> implements Cache<Key, Value> {
 	private long size;
@@ -84,32 +35,30 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 		System.out.println("newest");
 	}
 
-	public void resize_cache(long new_size) {
-		if (new_size <= 0) {
-			throw new InvalidParameterException();
-		}
-		this.size = new_size;
-	}
+	// I do not wanna resize the cache. If i can, i will just use ConcurrentHashMap
+	// public void resize_cache(long new_size) {
+	// 	if (new_size <= 0) {
+	// 		throw new InvalidParameterException();
+	// 	}
+	// 	this.size = new_size;
+	// }
 
 	@Override
-	public Optional<Value> get(Key key) {
-		if (!cache.containsKey(key)) {
-			return Optional.empty();
-		}
-
-		// TODO: Implement Lockless Caching
-		// TODO: Implement Cache Invalidation
-	
+	public synchronized Optional<Value> get(Key key) {
 		// NOTE: I do not know if this is worth it :(
 		// locking the entire method so that we want to read is 
 		// a bit counter intuitive with the aspect of performance
 		// so implementing a lock-free version of LRU might be worth it!
-		synchronized (this) {
-			Node<Key,Value> value = cache.get(key);
-			Node.remove_self(value);
-			Node.insert_before(value, latest);
-			return value.unwrap();
+		
+		if (!cache.containsKey(key)) {
+			return Optional.empty();
 		}
+		// TODO: Implement Lockless Caching
+		// TODO: Implement Cache Invalidation
+		Node<Key,Value> value = cache.get(key);
+		Node.remove_self(value);
+		Node.insert_before(value, latest);
+		return value.unwrap();
 	}
 
 	@Override
@@ -130,4 +79,3 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 		}
 	}
 }
-
