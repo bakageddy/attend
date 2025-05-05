@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 // add to latest
 
 // TODO: Implement Lockless Caching
-// TODO: Implement Cache invalidation
 public class MRU<Key, Value> implements Cache<Key, Value> {
 	private long size;
 	private Map<Key, Node<Key, Value>> cache;

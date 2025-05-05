@@ -1,6 +1,5 @@
 package org.example.util;
 
-import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,12 +56,14 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 	// 	this.size = new_size;
 	// }
 
+	// NOTE: I do not know if this is worth it :(
+	// locking the entire method so that we want to read is 
+	// a bit counter intuitive with the aspect of performance
+	// so implementing a lock-free version of LRU might be worth it!
+	// or any algorithm that is lock-free and/or is optimal for the access patterns
+
 	@Override
 	public synchronized Optional<Value> get(Key key) {
-		// NOTE: I do not know if this is worth it :(
-		// locking the entire method so that we want to read is 
-		// a bit counter intuitive with the aspect of performance
-		// so implementing a lock-free version of LRU might be worth it!
 		
 		if (!cache.containsKey(key)) {
 			return Optional.empty();
@@ -88,6 +89,7 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 			Node.remove_self(old_value);
 		}
 
+		// Create new object to update TTL
 		Node<Key,Value> new_value = new Node<>(key,val);
 		cache.put(key, new_value);
 		Node.insert_before(new_value, latest);
