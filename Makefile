@@ -1,3 +1,3 @@
 all:
-	gradle build war
+	gradle clean build war
 	./migrate.sh
