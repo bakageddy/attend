@@ -1,5 +1,6 @@
 package org.example.util;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +40,15 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 		System.out.println("newest");
 	}
 
+	public synchronized void purge() {
+		for (var item : this.cache.values()) {
+			if (item.is_stale()) {
+				Node.remove_self(item);
+				this.cache.remove(item.key);
+			}
+		}
+	}
+
 	// I do not wanna resize the cache. If i can, i will just use ConcurrentHashMap
 	// public void resize_cache(long new_size) {
 	// 	if (new_size <= 0) {
@@ -57,9 +67,15 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 		if (!cache.containsKey(key)) {
 			return Optional.empty();
 		}
+
 		// TODO: Implement Lockless Caching
-		// TODO: Implement Cache Invalidation
 		Node<Key,Value> value = cache.get(key);
+		if (value.is_stale()) {
+			Node.remove_self(value);
+			cache.remove(value.key);
+			return Optional.empty();
+		}
+
 		Node.remove_self(value);
 		Node.insert_before(value, latest);
 		return value.unwrap();

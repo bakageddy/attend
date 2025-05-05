@@ -31,6 +31,15 @@ public class MRU<Key, Value> implements Cache<Key, Value> {
 		return cache.toString();
 	}
 
+	public synchronized void purge() {
+		for (var item : this.cache.values()) {
+			if (item.is_stale()) {
+				Node.remove_self(item);
+				this.cache.remove(item.key);
+			}
+		}
+	}
+
 	@Override
 	public synchronized Optional<Value> get(Key key) {
 		if (!cache.containsKey(key)) {
@@ -38,6 +47,12 @@ public class MRU<Key, Value> implements Cache<Key, Value> {
 		}
 
 		Node<Key, Value> node = cache.get(key);
+		if (node.is_stale()) {
+			Node.remove_self(node);
+			cache.remove(node.key);
+			return Optional.empty();
+		}
+
 		Node.remove_self(node);
 		Node.insert_before(node, this.latest);
 		return node.unwrap();
