@@ -1,15 +1,18 @@
 section.attendance {
-	display: inline-block;
+	display: flex;
+	flex-direction: column;
 	width: 35%;
 	font-family: Koulen;
+	flex-grow: 1;
 	/* background-color: black; */
 }
 
 .attendance__form {
 	display: flex;
 	flex-direction: column;
+	flex-grow: 1;
+	width: 100%;
 	padding: 0.50rem;
-	/* gap: 0.25rem; */
 }
 
 .attendance__input__submit__group {
@@ -17,4 +20,19 @@ section.attendance {
 	flex-direction: row;
 	flex-grow: 1;
 	width: 100%;
+}
+
+button.attendance__input__element {
+	margin: 0.75rem;
+	width: 50%;
+}
+
+.batch__form {
+	display: flex;
+	flex-direction: column;
+	padding: 0.5rem;
+}
+
+.batch__button {
+	margin: 0.75rem;
 }

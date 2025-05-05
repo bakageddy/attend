@@ -36,7 +36,7 @@ const handleStudentIdSearch = async (event) => {
 
 	document.querySelectorAll('.student__element').forEach((element) => {
 		element.addEventListener("click", (event) => {
-			let rollno = event.target.querySelector(".student__element__rollno");
+			let rollno = event.currentTarget.querySelector(".student__element__rollno");
 			if (!rollno)
 				return;
 			let value = Number.parseInt(rollno.textContent);
@@ -72,7 +72,7 @@ const handleStudentNameSearch = async (event) => {
 
 	document.querySelectorAll('.student__element').forEach(element => {
 		element.addEventListener("click", event => {
-			let rollno = event.target.querySelector('div.student__element__rollno');
+			let rollno = event.currentTarget.querySelector('div.student__element__rollno');
 			if (!rollno) {
 				return;
 			}

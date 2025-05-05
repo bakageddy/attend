@@ -53,40 +53,71 @@
 				<input id="search__student__name" class="search__element" name="pattern" type="text"
 					placeholder="Student Name" />
 			</form>
+
+			<form class="search__form" method="GET" action="/app/api/batch/search">
+				<input id="search__batch__id" class="search__element" name="id" type="number" placeholder="Batch ID"/>
+				<input id="search__batch__name" class="search__element" name="name" type="text" placeholder="Batch Name"/>
+				<input id="search__batch__teacherid" class="search__element" name="teacherid" type="number" placeholder="Batch Owner ID / Teacher ID"/>
+			</form>
 		</section>
 
 		<section class="results" id="result_display">
 		</section>
 
 		<section class="attendance">
-			<h2>Set Attendance</h2>
-			<form class="attendance__form" onsubmit="attendanceFormHandle(event)" action="/app/api/attendance"
-				method="POST">
-				<input class="attendance__input__element" id="attendance__input__rollno"
-					placeholder="Student Roll Number" name="rollno" type="number" />
-				<input class="attendance__input__element" id="attendance__input__teacherid" placeholder="Teacher ID"
-					name="teacherid" type="number" />
-				<input class="attendance__input__element" id="attendance__input__subjectid" placeholder="Subject ID"
-					name="subjectid" type="number" />
-				<input class="attendance__input__element" id="attendance__input__date" placeholder="Date" name="day" type="date" />
-				<select name="period" class="attendance__input__element" id="attendance__input__period">
-					<option value="I">I</option>
-					<option value="II">II</option>
-					<option value="III">III</option>
-					<option value="IV">IV</option>
-					<option value="V">V</option>
-					<option value="VI">VI</option>
-					<option value="VII">VII</option>
-					<option value="VIII">VIII</option>
-				</select>
-				<div class="attendance__input__submit__group">
-					<button class="submit__button attendance__input__element" formaction="/app/api/attendance/" formmethod="post"
-						type="submit">Set</button>
-					<button class="submit__button attendance__input__element" onclick="attendanceFormDelete(); return false;"
-						type="submit">Delete</button>
-				</div>
-				<script src="/app/js/attendance.js"></script>
-			</form>
+			<div class="attendance__group">
+				<h2>Set Attendance</h2>
+				<form class="attendance__form"  action="/app/api/attendance" method="POST">
+					<input class="input__element attendance__input__element" id="attendance__input__rollno"
+						placeholder="Student Roll Number" name="rollno" type="number" />
+					<input class="input__element attendance__input__element" id="attendance__input__teacherid" placeholder="Teacher ID"
+						name="teacherid" type="number" />
+					<input class="input__element attendance__input__element" id="attendance__input__subjectid" placeholder="Subject ID"
+						name="subjectid" type="number" />
+					<input class="input__element attendance__input__element" id="attendance__input__date" placeholder="Date" name="day"
+						type="date" />
+					<select name="period" class="input__element attendance__input__element" id="attendance__input__period">
+						<option value="I">I</option>
+						<option value="II">II</option>
+						<option value="III">III</option>
+						<option value="IV">IV</option>
+						<option value="V">V</option>
+						<option value="VI">VI</option>
+						<option value="VII">VII</option>
+						<option value="VIII">VIII</option>
+					</select>
+					<div class="attendance__input__submit__group">
+						<button class="submit__button attendance__input__element" formaction="/app/api/attendance/"
+							formmethod="post" type="submit">Set</button>
+						<button class="submit__button attendance__input__element"
+							onclick="attendanceFormDelete(); return false;" type="submit">Delete</button>
+					</div>
+				</form>
+			</div>
+			<div class="batch__group">
+				<form class="batch__form" action="/app/api/batch" method="POST">
+					<input class="batch__input__element input__element" id="batch__input__batchid" placeholder="Batch ID"
+						name="id" type="number" />
+					<input class="batch__input__element input__element" id="batch__input__teacherid"
+						placeholder="Teacher ID" name="teacherid" type="number" />
+					<input class="batch__input__element input__element" id="batch__input__subjectid"
+						placeholder="Subject ID" name="subjectid" type="number" />
+
+					<input class="batch__input__element input__element" id="batch__input__day" placeholder="Date"
+						name="date" type="date" />
+					<select name="period" class="batch__input__element input__element" id="batch__input__period" placeholder="Period">
+						<option value="I">I</option>
+						<option value="II">II</option>
+						<option value="III">III</option>
+						<option value="IV">IV</option>
+						<option value="V">V</option>
+						<option value="VI">VI</option>
+						<option value="VII">VII</option>
+						<option value="VIII">VIII</option>
+					</select>
+					<button class="submit__button batch__button" type="submit">Set</button>
+				</form>
+			</div>
 		</section>
 	</main>
 
@@ -94,8 +125,10 @@
 	</footer>
 
 
+	<script src="/app/js/attendance.js"></script>
 	<script src="/app/js/student.js"></script>
 	<script src="/app/js/subject.js"></script>
+	<script src="/app/js/batch_search.js"></script>
 	<script src="/app/js/teacher.js"></script>
 </body>
 

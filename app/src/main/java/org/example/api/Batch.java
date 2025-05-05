@@ -246,6 +246,7 @@ public class Batch extends HttpServlet {
 			resp.flushBuffer();
 			return;
 		}
+
 		ServletContext ctx = getServletContext();
 		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
 		try (

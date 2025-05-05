@@ -74,3 +74,26 @@ section.results {
 	grid-column: 3 / 4;
 	grid-row: span 1;
 }
+
+.batch__element {
+	grid-column: span 1;
+	grid-row: span 3;
+}
+
+.batch__element__batchid {
+	display: inline-block;
+	grid-column: span 1;
+	grid-row: span 1;
+}
+
+.batch__element__name {
+	display: inline-block;
+	grid-column: span 1;
+	grid-row: span 1;
+}
+
+.batch__element__teacherid {
+	display: inline-block;
+	grid-row: span 1;
+	grid-column: span 1;
+}

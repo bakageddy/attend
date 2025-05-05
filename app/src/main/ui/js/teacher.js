@@ -23,7 +23,7 @@ const handleTeacherIdSearch = async (event) => {
 
 	document.querySelectorAll('.teacher__element').forEach(element => {
 		element.addEventListener("click", event => {
-			let teacherid = event.target.querySelector('.teacher__element__id');
+			let teacherid = event.currentTarget.querySelector('.teacher__element__id');
 			if (!teacherid)
 				return;
 
@@ -67,7 +67,7 @@ const handleTeacherNameSearch = async (event) => {
 
 	document.querySelectorAll(".teacher__element").forEach(element => {
 		element.addEventListener("click", event => {
-			let teacherid = event.target.querySelector('.teacher__element__id');
+			let teacherid = event.currentTarget.querySelector('.teacher__element__id');
 			if (!teacherid)
 				return;
 			let value = Number.parseInt(teacherid.textContent);

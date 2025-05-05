@@ -1,4 +1,5 @@
 "use strict";
+
 let result_subject_handle = document.getElementById("result_display");
 let subject_id_search = document.getElementById("search__subject__id");
 let subject_code_search = document.getElementById("search__subject__code");
@@ -25,7 +26,7 @@ const handleSubjectIdSearch = async (event) => {
 	result_subject_handle.innerHTML = render_subject(json_results);
 	document.querySelectorAll(".subject__element").forEach(element => {
 		element.addEventListener("click", event => {
-			let subjectid = event.target.querySelector(".subject__element__id");
+			let subjectid = event.currentTarget.querySelector(".subject__element__id");
 			if (!subjectid)
 				return;
 			let value = Number.parseInt(subjectid.textContent);
@@ -61,7 +62,7 @@ const handleSubjectCodeSearch = async (event) => {
 
 	document.querySelectorAll(".subject__element").forEach(element => {
 		element.addEventListener("click", event => {
-			let subjectid = event.target.querySelector(".subject__element__id");
+			let subjectid = event.currentTarget.querySelector(".subject__element__id");
 			if (!subjectid)
 				return;
 			let value = Number.parseInt(subjectid.textContent);
@@ -100,7 +101,7 @@ const handleSubjectNameSearch = async (event) => {
 
 	document.querySelectorAll(".subject__element").forEach(element => {
 		element.addEventListener("click", event => {
-			let subjectid = event.target.querySelector(".subject__element__id");
+			let subjectid = event.currentTarget.querySelector(".subject__element__id");
 			if (!subjectid)
 				return;
 			let value = Number.parseInt(subjectid.textContent);
