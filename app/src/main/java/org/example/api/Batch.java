@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import org.example.BatchData;
+import org.example.BatchDataMapping;
 import org.example.Student;
 import org.example.util.Result;
 import org.example.util.Parser;
@@ -96,7 +96,7 @@ public class Batch extends HttpServlet {
 				return Result.err("No such batch");
 			}
 
-			BatchData batch_data = new BatchData(batchid, teacherid, students);
+			BatchDataMapping batch_data = new BatchDataMapping(batchid, teacherid, students);
 			Gson serializer = new Gson();
 			String payload = serializer.toJson(batch_data);
 			stmt.close();
@@ -106,7 +106,7 @@ public class Batch extends HttpServlet {
 		}
 	}
 
-	// Create Batch
+	// Create Empty Batch
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String teacherid_param = req.getParameter("teacherid");
