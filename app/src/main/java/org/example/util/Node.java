@@ -1,12 +1,16 @@
 package org.example.util;
 
+import java.time.Instant;
 import java.util.Optional;
 
 public class Node<K, V> {
+	private static final long DEFAULT_TTL = 5 * 60; // 5 minutes
+	
 	K key;
 	V val;
 	Node<K, V> prev;
 	Node<K, V> next;
+	private long expiry_time;
 
 	@Override
 	public String toString() {
@@ -18,6 +22,7 @@ public class Node<K, V> {
 		this.val = null;
 		this.prev = null;
 		this.next = null;
+		this.expiry_time = Instant.now().getEpochSecond() + DEFAULT_TTL;
 	}
 
 	public Node(K key, V val) {
@@ -25,6 +30,7 @@ public class Node<K, V> {
 		this.val = val;
 		this.prev = null;
 		this.next = null;
+		this.expiry_time = Instant.now().getEpochSecond() + DEFAULT_TTL;
 	}
 
 	public Optional<V> unwrap() {
@@ -47,5 +53,13 @@ public class Node<K, V> {
 
 		before_prev.next = node;
 		before.prev = node;
+	}
+
+	public long get_expiry_time() {
+		return this.expiry_time;
+	}
+
+	public boolean is_stale() {
+		return this.expiry_time < Instant.now().getEpochSecond();
 	}
 }
