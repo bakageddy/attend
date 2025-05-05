@@ -4,6 +4,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+// oldest <-> node(s) <-> latest
+// remove from latest
+// add to latest
+
 public class LRU<Key, Value> implements Cache<Key, Value> {
 	private long size;
 	private Map<Key, Node<Key,Value>> cache;

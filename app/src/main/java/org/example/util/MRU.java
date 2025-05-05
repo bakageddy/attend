@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 // oldest <-> node(s) <-> latest
-// remove from oldest
+// remove from latest
 // add to latest
 
 // TODO: Implement Lockless Caching
