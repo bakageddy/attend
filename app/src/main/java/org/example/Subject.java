@@ -1,5 +1,5 @@
 package org.example;
-import org.example.util.Result;
+
 public class Subject {
 	public long subject_id;
 	public String subject_code;
