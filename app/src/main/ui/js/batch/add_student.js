@@ -1,17 +1,23 @@
-const handleBatchStudentUpdate = event => {
+const handleBatchStudentUpdate = async event => {
 	let batchid = document.getElementById("batch__data__scratchpad__batchid").value;
 	let dropzone = document.getElementById("student_dropzone");
-	let studentids = [];
-	dropzone.querySelectorAll(".student__element").forEach(element => {
-		let rollno = element.querySelector(".student__element__rollno").textContent;
-		studentids.push(rollno);
-	});
+
+	let elements = Array.from(
+		dropzone.querySelectorAll(".student__element__rollno")
+			.values()
+			.map(e => e.textContent)
+	);
 
 	let params = new URLSearchParams({
 		"batchid": batchid,
-		"rollno": rollno
+		"rollno[]": elements.join(",")
 	});
-	fetch("/app/api/batch/student?" + ur)
+	let result = await fetch("/app/api/batch/student?" + params.toString(), {method: "POST"});
+	if (result.status != 201) {
+		alert("Something wrong happened!");
+	} else {
+		alert("Batch Update Successful!");
+	}
 }
 
 document.getElementById('batch__data__crud__create__button').onclick = handleBatchStudentUpdate;
