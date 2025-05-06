@@ -26,7 +26,7 @@ const handleStudentIdInput = async event => {
 	student_search_result_container.innerHTML = render_student(results_json);
 
 	document.querySelectorAll('.student__element').forEach(element => {
-		element.addEventListener('', event => handleDrag(event));
+		element.addEventListener('dragstart', event => handleDrag(event));
 	});
 }
 

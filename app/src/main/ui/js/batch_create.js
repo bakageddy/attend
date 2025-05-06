@@ -1,7 +1,6 @@
 "use strict"
 
 async function handle_batch_delete() {
-	let batchname = document.getElementById("batch__crud__name").value;
 	let teacherid = document.getElementById("batch__crud__teacherid").value;
 	let batchid = document.getElementById("batch__crud__batchid").value;
 	let params = new URLSearchParams({
