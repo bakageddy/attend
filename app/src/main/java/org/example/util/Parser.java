@@ -10,4 +10,21 @@ public class Parser {
 			return Optional.empty();
 		}
 	}
+
+	public static Optional<Long[]> parse_long(String input[]) {
+		try {
+			Long[] result = new Long[input.length];
+			for (int i = 0; i < input.length; i++) {
+				Optional<Long> parsed_elem = parse_long(input[i]);
+				if (parsed_elem.isEmpty()) {
+					throw new NumberFormatException();
+				} else {
+					result[i] = parsed_elem.get();
+				}
+			}
+			return Optional.of(result);
+		} catch (NumberFormatException e) {
+			return Optional.empty();
+		}
+	}
 }

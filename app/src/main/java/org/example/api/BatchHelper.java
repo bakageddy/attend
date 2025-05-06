@@ -44,20 +44,37 @@ public class BatchHelper extends HttpServlet {
 		}
 
 		String rollno_param = req.getParameter("rollno");
-		if (rollno_param == null) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"rollno must be set"
-			);
-			resp.flushBuffer();
-			return;
+		Optional<Long> rollno = Optional.empty();
+		if (rollno_param != null) {
+			rollno = Parser.parse_long(rollno_param);
+			if (rollno.isEmpty()) {
+				resp.sendError(
+					HttpServletResponse.SC_BAD_REQUEST,
+					"rollno must be set"
+				);
+				resp.flushBuffer();
+				return;
+			}
 		}
 
-		Optional<Long> rollno = Parser.parse_long(rollno_param);
-		if (rollno.isEmpty()) {
+		String rollno_group_param = req.getParameter("rollno[]");
+		Optional<Long[]> rollno_group = Optional.empty();
+		if (rollno_group_param != null) {
+			rollno_group = Parser.parse_long(rollno_group_param.split(","));
+			if (rollno_group.isEmpty()) {
+				resp.sendError(
+					HttpServletResponse.SC_BAD_REQUEST,
+					"rollno[] is messy"
+				);
+				resp.flushBuffer();
+				return;
+			}
+		}
+
+		if (rollno_group.isEmpty() && rollno.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
-				"rollno must be numeric"
+				"must set either rollno[] or rollno"
 			);
 			resp.flushBuffer();
 			return;
@@ -70,12 +87,21 @@ public class BatchHelper extends HttpServlet {
 			PrintWriter out = resp.getWriter();
 		) {
 
-			Result<Void, String> result = delete_batch(cnx, batchid.get(), rollno.get());
+			Result<Void, String> result;
+			if (rollno.isPresent()) {
+				result = delete_batch(cnx, batchid.get(), rollno.get());
+			} else if (rollno_group.isPresent()) {
+				result = delete_batch(cnx, batchid.get(), rollno_group.get());
+			} else {
+				result = Result.err("How do you get here?! This is unreachable");
+			}
+
 			if (result.isErr()) {
 				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.err_msg());
 				resp.flushBuffer();
 				return;
 			}
+
 			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.flushBuffer();
 			return;
@@ -95,6 +121,20 @@ public class BatchHelper extends HttpServlet {
 			int no = stmt.executeUpdate();
 			if (no != 1) {
 				return Result.err("BEEP BOOP, no elements deleted at BatchData.delete_value");
+			}
+			return Result.ok(null);
+		} catch (SQLException e) {
+			return Result.err(e.getMessage());
+		}
+	}
+
+	private static Result<Void, String> delete_batch(Connection cnx, Long batchid, Long[] rollnos) {
+		String query = prepare_delete(batchid, rollnos);
+		try {
+			PreparedStatement stmt = cnx.prepareStatement(query);
+			int no = stmt.executeUpdate();
+			if (no != rollnos.length) {
+				return Result.err("BEEP BOOP, no of elements is inconsistent");
 			}
 			return Result.ok(null);
 		} catch (SQLException e) {
@@ -125,20 +165,37 @@ public class BatchHelper extends HttpServlet {
 		}
 
 		String rollno_param = req.getParameter("rollno");
-		if (rollno_param == null) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"rollno must be set"
-			);
-			resp.flushBuffer();
-			return;
+		Optional<Long> rollno = Optional.empty();
+		if (rollno_param != null) {
+			rollno = Parser.parse_long(rollno_param);
+			if (rollno.isEmpty()) {
+				resp.sendError(
+					HttpServletResponse.SC_BAD_REQUEST,
+					"rollno must be set or rollno[] must be set"
+				);
+				resp.flushBuffer();
+				return;
+			}
 		}
 
-		Optional<Long> rollno = Parser.parse_long(rollno_param);
-		if (rollno.isEmpty()) {
+		String rollno_group_param = req.getParameter("rollno[]");
+		Optional<Long[]> rollnos = Optional.empty();
+		if (rollno_group_param != null) {
+			rollnos = Parser.parse_long(rollno_group_param.split(","));
+			if (rollnos.isEmpty()) {
+				resp.sendError(
+					HttpServletResponse.SC_BAD_REQUEST,
+					"rollno[] is messy"
+				);
+				resp.flushBuffer();
+				return;
+			}
+		}
+
+		if (rollnos.isEmpty() && rollno.isEmpty()) {
 			resp.sendError(
 				HttpServletResponse.SC_BAD_REQUEST,
-				"rollno must be numeric"
+				"must set either rollno[] or rollno"
 			);
 			resp.flushBuffer();
 			return;
@@ -150,7 +207,15 @@ public class BatchHelper extends HttpServlet {
 			Connection cnx = pool.getConnection();
 			PrintWriter out = resp.getWriter();
 		) {
-			Result<Void, String> result = insert_batch(cnx, batchid.get(), rollno.get());
+			Result<Void, String> result;
+			if (rollnos.isPresent()) {
+				result = insert_batch(cnx, batchid.get(), rollnos.get());
+			} else if (rollno.isPresent()){
+				result = insert_batch(cnx, batchid.get(), rollno.get());
+			} else {
+				result = Result.err("How did you get here?! It's unreachable");
+			}
+
 			if (result.isErr()) {
 				resp.sendError(
 					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
@@ -188,5 +253,51 @@ public class BatchHelper extends HttpServlet {
 		} catch (SQLException e) {
 			return Result.err(e.getMessage());
 		}
+	}
+
+	private static Result<Void, String> insert_batch(Connection cnx, Long batchid, Long[] rollnos) {
+		String query = construct_query(batchid, rollnos);
+		System.out.println(query);
+		try {
+			PreparedStatement stmt = cnx.prepareStatement(query);
+			int no_of_rows = stmt.executeUpdate();
+
+			if (no_of_rows != rollnos.length) {
+				return Result.err("BEEP BOOP, INSERT FAILED at BatchHelper.insert_value");
+			}
+			return Result.ok(null);
+		} catch (SQLException e) {
+			return Result.err(e.getMessage());
+		}
+	}
+
+	private static String construct_query(Long batchid, Long[] rollnos) {
+		StringBuilder s = new StringBuilder();
+		s.append("INSERT INTO BatchData(batchid, rollno) VALUES");
+		for (int i = 0; i < rollnos.length; i++) {
+			if (i != 0) s.append(",");
+
+			s.append("(")
+				.append(batchid)
+				.append(",")
+				.append(rollnos[i])
+				.append(")");
+		}
+		s.append(";");
+		return s.toString();
+	}
+
+	private static String prepare_delete(Long batchid, Long[] rollnos) {
+		StringBuilder s = new StringBuilder();
+		s.append("DELETE FROM BatchData WHERE batchid=")
+			.append(batchid)
+			.append(" AND (");
+		for (int i = 0; i < rollnos.length; i++) {
+			if (i != 0) s.append(" OR ");
+			s.append("rollno=")
+				.append(rollnos[i]);
+		}
+		s.append(");");
+		return s.toString();
 	}
 }
