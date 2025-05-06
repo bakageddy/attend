@@ -32,12 +32,12 @@
 			<section class="batch__crud">
 				<div class="batch__crud__form">
 					<div class="batch__crud__input__group">
-						<input id="batch__crud__batchid" class="input__element batch__crud__input__element" type="number"
-							name="batchid" placeholder="Batch ID">
+						<input id="batch__crud__batchid" class="input__element batch__crud__input__element"
+							type="number" name="batchid" placeholder="Batch ID">
 						<input id="batch__crud__name" class="input__element batch__crud__input__element" type="text"
 							name="name" placeholder="Batch Name" />
-						<input id="batch__crud__teacherid" class="input__element batch__crud__input__element" type="number"
-							name="teacherid" placeholder="Teacher ID" />
+						<input id="batch__crud__teacherid" class="input__element batch__crud__input__element"
+							type="number" name="teacherid" placeholder="Teacher ID" />
 					</div>
 
 					<div class="batch__crud__button__group">
@@ -55,8 +55,8 @@
 
 			<section class="batch__data__crud">
 				<div class="batch__search__input__group">
-					<input id="batch__data__studentid__search" class="input__element" placeholder="StudentID" type="number"
-						name="rollno" />
+					<input id="batch__data__studentid__search" class="input__element" placeholder="StudentID"
+						type="number" name="rollno" />
 					<input id="batch__data__studentname__search" class="input__element" placeholder="Student Name"
 						name="name" />
 				</div>
@@ -64,7 +64,7 @@
 					<input id="batch__data__batchid__search" class="input__element" placeholder="BatchID" name="batchid"
 						type="number" />
 					<input id="batch__data__batchname__search" class="input__element" placeholder="BatchName"
-						name="batchname" type="text"/>
+						name="batchname" type="text" />
 				</div>
 			</section>
 		</div>
@@ -83,8 +83,12 @@
 			</div>
 
 			<div class="batch__data__button__group">
-				<button class="batch__data__button submit__button">Add to Batch</button>
-				<button class="batch__data__button submit__button">Remove from Batch</button>
+				<button id="batch__data__crud__create__button" class="batch__data__button submit__button">
+					Add to Batch
+				</button>
+				<button id="batch__data__crud__delete__button" class="batch__data__button submit__button">
+					Remove from Batch
+				</button>
 			</div>
 		</section>
 	</main>
