@@ -1,22 +1,22 @@
 package org.example.api;
 
-import org.example.util.Result;
-import org.example.util.Validator;
-import org.example.BatchMapping;
-import org.example.util.Parser;
-
-import com.google.gson.Gson;
-import com.zaxxer.hikari.pool.HikariPool;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Optional;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import org.example.BatchMapping;
+import org.example.util.Parser;
+import org.example.util.Result;
+import org.example.util.Validator;
+
+import com.google.gson.Gson;
+import com.zaxxer.hikari.pool.HikariPool;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
