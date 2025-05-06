@@ -32,7 +32,6 @@ public class StudentSearch extends HttpServlet {
 		ServletContext ctx = getServletContext();
 		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
 		LRU<String, String> pcache = (LRU<String, String>) ctx.getAttribute("student_pattern_cache");
-		LRU<Long, String> icache = (LRU<Long, String>) ctx.getAttribute("student_id_cache");
 		try (
 			Connection cnx = pool.getConnection();
 			PrintWriter out = resp.getWriter();
