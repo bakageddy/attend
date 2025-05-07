@@ -4,10 +4,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.errorprone.annotations.ThreadSafe;
+import com.google.errorprone.annotations.concurrent.GuardedBy;
+
 // oldest <-> node(s) <-> latest
 // remove from latest
 // add to latest
 
+@ThreadSafe
 public class LRU<Key, Value> implements Cache<Key, Value> {
 	private long size;
 	private Map<Key, Node<Key,Value>> cache;
@@ -39,13 +43,12 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 		System.out.println("newest");
 	}
 
-	public synchronized void purge() {
-		for (var item : this.cache.values()) {
-			if (item.is_stale()) {
-				Node.remove_self(item);
-				this.cache.remove(item.key);
-			}
-		}
+	public long cache_capacity() {
+		return this.size;
+	}
+
+	public long cache_size() {
+		return this.cache.size();
 	}
 
 	// I do not wanna resize the cache. If i can, i will just use ConcurrentHashMap
@@ -61,7 +64,26 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 	// a bit counter intuitive with the aspect of performance
 	// so implementing a lock-free version of LRU might be worth it!
 	// or any algorithm that is lock-free and/or is optimal for the access patterns
+	
+	@GuardedBy("this")
+	public synchronized void purge() {
+		for (var item : this.cache.values()) {
+			if (item.is_stale()) {
+				Node.remove_self(item);
+				this.cache.remove(item.key);
+			}
+		}
+	}
 
+	@GuardedBy("this")
+	public synchronized void flush() {
+		for (var item : this.cache.values()) {
+			Node.remove_self(item);
+			this.cache.remove(item.key);
+		}
+	}
+
+	@GuardedBy("this")
 	@Override
 	public synchronized Optional<Value> get(Key key) {
 		
@@ -82,6 +104,7 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 		return value.unwrap();
 	}
 
+	@GuardedBy("this")
 	@Override
 	public synchronized void put(Key key, Value val) {
 		if (cache.containsKey(key)) {
