@@ -4,13 +4,17 @@ import java.time.Instant;
 import java.util.Optional;
 
 public class Node<K, V> {
-	private static final long DEFAULT_TTL = 5 * 60; // 5 minutes
+	private static long DEFAULT_TTL = 5 * 60; // 5 minutes
 	
 	K key;
 	V val;
 	Node<K, V> prev;
 	Node<K, V> next;
 	private long expiry_time;
+
+	public static void set_ttl(long ttl) {
+		DEFAULT_TTL = ttl;
+	}
 
 	@Override
 	public String toString() {
