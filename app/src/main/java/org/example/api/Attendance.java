@@ -264,16 +264,17 @@ public class Attendance extends HttpServlet {
 		}
 	}
 
-	private static Result<Void, String> delete_attendance(
-		Connection cnx,
-		Long student_id,
-		Long teacher_id,
-		Long subject_id,
-		String period
-	) {
-		String date = default_date();
-		return delete_attendance(cnx, student_id, teacher_id, subject_id, period, date);
-	}
+	// TODO: refactor the api to use this.
+	// private static Result<Void, String> delete_attendance(
+	// 	Connection cnx,
+	// 	Long student_id,
+	// 	Long teacher_id,
+	// 	Long subject_id,
+	// 	String period
+	// ) {
+	// 	String date = default_date();
+	// 	return delete_attendance(cnx, student_id, teacher_id, subject_id, period, date);
+	// }
 
 	private static Result<Void, String> delete_attendance(
 		Connection cnx,
