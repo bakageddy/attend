@@ -67,11 +67,12 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 	
 	@GuardedBy("this")
 	public synchronized void purge() {
-		for (var item : this.cache.values()) {
-			if (item.is_stale()) {
-				Node.remove_self(item);
-				this.cache.remove(item.key);
-			}
+		// Make sure to purge only a fixed amount of nodes
+		// instead of traversing all the nodes.
+		// to promote wait-free-ness of the cache
+		Node<Key, Value> lru = this.oldest.next;
+		if (lru.is_stale()) {
+			Node.remove_self(lru);
 		}
 	}
 
@@ -122,5 +123,8 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 			Node.remove_self(lru);
 			cache.remove(lru.key);
 		}
+
+		// Assuming that the cache is more frequently read and not written to
+		this.purge();
 	}
 }

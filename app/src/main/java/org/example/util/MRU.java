@@ -44,11 +44,12 @@ public class MRU<Key, Value> implements Cache<Key, Value> {
 
 	@GuardedBy("this")
 	public synchronized void purge() {
-		for (var item : this.cache.values()) {
-			if (item.is_stale()) {
-				Node.remove_self(item);
-				this.cache.remove(item.key);
-			}
+		// Make sure to purge only a fixed amount of nodes
+		// instead of traversing all the nodes.
+		// to promote wait-free-ness of the cache
+		Node<Key, Value> lru = this.oldest.next;
+		if (lru.is_stale()) {
+			Node.remove_self(lru);
 		}
 	}
 
@@ -97,5 +98,9 @@ public class MRU<Key, Value> implements Cache<Key, Value> {
 		Node<Key, Value> new_value = new Node<>(key, val);
 		cache.put(key, new_value);
 		Node.insert_before(new_value, latest);
+
+		// This makes sense??
+		// needs further testing
+		this.purge();
 	}
 }
