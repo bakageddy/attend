@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 public class Validator {
+	// TODO: better sql validation function
 	public static Optional<String> validate_sql(String input) {
 		if (input.contains("DROP") ||
 				input.contains("SELECT") ||
