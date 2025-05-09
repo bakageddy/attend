@@ -11,9 +11,9 @@ public class Parser {
 		}
 	}
 
-	public static Optional<Long[]> parse_long(String input[]) {
+	public static Optional<long[]> parse_long(String input[]) {
 		try {
-			Long[] result = new Long[input.length];
+			long[] result = new long[input.length];
 			for (int i = 0; i < input.length; i++) {
 				Optional<Long> parsed_elem = parse_long(input[i]);
 				if (parsed_elem.isEmpty()) {
