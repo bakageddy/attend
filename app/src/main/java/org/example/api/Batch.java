@@ -9,10 +9,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import org.example.BatchDataMapping;
-import org.example.Student;
+import org.example.data.Student;
+import org.example.data.BatchData;
 import org.example.util.Parser;
 import org.example.util.Result;
+import org.example.util.Serializer;
 import org.example.util.Validator;
 
 import com.google.gson.Gson;
@@ -28,6 +29,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @WebServlet(urlPatterns = "/api/batch")
 public class Batch extends HttpServlet {
 	// Fetch Batch
+	// TODO: implement using refactored BatchData
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String param = req.getParameter("batchid");
@@ -48,62 +50,25 @@ public class Batch extends HttpServlet {
 			);
 		}
 
-
-		ServletContext ctx = getServletContext();
-		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
-		try (
-			Connection cnx = pool.getConnection();
-			PrintWriter out = resp.getWriter();
-		) {
-
-			Result<String, String> payload = get_batch_members(cnx, batchid.get());
-			if (payload.isErr()) {
-				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					payload.err_msg()
-				);
-				resp.flushBuffer();
-				return;
-			}
-
-			out.write(payload.unwrap());
-			out.flush();
+		var result = BatchData.search(batchid.get());
+		if (result.isEmpty()) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No Batch Members found with the given ID");
+			resp.flushBuffer();
 			return;
-		} catch (SQLException exp) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exp.getMessage());
 		}
-	}
 
-	private Result<String, String> get_batch_members(Connection cnx, Long batchid) {
-		try {
-			PreparedStatement stmt = cnx.prepareStatement("SELECT Batch.BatchID, Batch.TeacherID, Student.RollNo, Student.Name FROM Batch JOIN BatchData ON Batch.BatchID = BatchData.BatchID JOIN Student ON BatchData.RollNo = Student.RollNo WHERE Batch.BatchID = ?;");
-			stmt.setLong(1, batchid);
-			ResultSet rst = stmt.executeQuery();
-
-			ArrayList<Student> students = new ArrayList<>();
-
-			Long teacherid = (Long) 0L;
-			while (rst.next()) {
-				teacherid = rst.getLong(1);
-				Long rollno = rst.getLong(3);
-				String name = rst.getString(4);
-				students.addLast(new Student(rollno, name));
-			}
-
-			// TODO: You can do better than this.. 
-			// make a explicit type invariant
-			if (teacherid == 0L) {
-				return Result.err("No such batch");
-			}
-
-			BatchDataMapping batch_data = new BatchDataMapping(batchid, teacherid, students);
-			Gson serializer = new Gson();
-			String payload = serializer.toJson(batch_data);
-			stmt.close();
-			return Result.ok(payload);
-		} catch (SQLException e) {
-			return Result.err(e.getMessage());
+		Result<String, String> payload = Serializer.serialize(result.get());
+		if (payload.isErr()) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, payload.err_msg());
+			resp.flushBuffer();
+			return;
 		}
+
+		PrintWriter out = resp.getWriter();
+		out.write(payload.unwrap());
+		out.flush();
+		out.close();
+		return;
 	}
 
 	// Create Empty Batch
@@ -139,71 +104,25 @@ public class Batch extends HttpServlet {
 			return;
 		}
 
-		Optional<String> name = Validator.validate_sql(name_param);
-		if (name.isEmpty()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Don't try to hack me T-T"
-			);
+		var result = org.example.data.Batch.create(teacherid.get(), name_param);
+		if (result.isErr()) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.err_msg());
 			resp.flushBuffer();
 			return;
 		}
 
-		ServletContext ctx = getServletContext();
-		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
-
-		try (
-			Connection cnx = pool.getConnection();
-			PrintWriter out = resp.getWriter();
-		) {
-			Result<Long, String> result = create_batch(cnx, teacherid.get(), name.get());
-			if (result.isErr()) {
-				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					result.err_msg()
-				);
-				resp.flushBuffer();
-				return;
-			}
-
-			resp.setStatus(HttpServletResponse.SC_CREATED);
-			out.write(
-				String.valueOf(result.unwrap())
-			);
-			resp.flushBuffer();
-			return;
-		} catch (SQLException e) {
-			resp.sendError(
-				HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-				e.getMessage()
-			);
+		Result<String, String> payload = Serializer.serialize(result.unwrap());
+		if (payload.isErr()) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, payload.err_msg());
 			resp.flushBuffer();
 			return;
 		}
-	}
 
-	private static Result<Long, String> create_batch(Connection cnx, Long teacherid, String name) {
-		try {
-
-			PreparedStatement stmt = cnx.prepareStatement("INSERT INTO Batch(Name, TeacherID) VALUES(?, ?) RETURNING BatchID;");
-			stmt.setString(1, name);
-			stmt.setLong(2, teacherid);
-
-			ResultSet rst = stmt.executeQuery();
-			Optional<Long> batchid = Optional.empty();
-			if (rst.next()) {
-				batchid = Optional.of(rst.getLong(1));
-			}
-
-			if (batchid.isEmpty()) {
-				return Result.err("Failed to create batch");
-			} else {
-				return Result.ok(batchid.get());
-			}
-			
-		} catch (SQLException e) {
-			return Result.err(e.getMessage());
-		}
+		PrintWriter out = resp.getWriter();
+		out.write(payload.unwrap());
+		out.flush();
+		out.close();
+		return;
 	}
 
 	// Delete Batch
@@ -247,48 +166,15 @@ public class Batch extends HttpServlet {
 			return;
 		}
 
-		ServletContext ctx = getServletContext();
-		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
-		try (
-			Connection cnx = pool.getConnection();
-			PrintWriter out = resp.getWriter();
-		) {
-			Result<Void, String> result = delete_batch(cnx, batchid.get(), teacherid.get());
-			if (result.isErr()) {
-				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					result.err_msg()
-				);
-				resp.flushBuffer();
-				return;
-			}
-			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.flushBuffer();
-			return;
-		} catch (SQLException e) {
-			resp.sendError(
-				HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-				e.getMessage()
-			);
+		var result = org.example.data.Batch.delete(batchid.get(), teacherid.get());
+		if (result.isErr()) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.err_msg());
 			resp.flushBuffer();
 			return;
 		}
-	}
 
-	private static Result<Void, String> delete_batch(Connection cnx, Long batchid, Long teacherid) {
-		try {
-			PreparedStatement stmt = cnx.prepareStatement(
-				"DELETE FROM Batch WHERE batchid=? AND teacherid=?"
-			);
-			stmt.setLong(1, batchid);
-			stmt.setLong(2, teacherid);
-			int no = stmt.executeUpdate();
-			if (no != 1) {
-				return Result.err("Failed to delete batch");
-			}
-			return Result.ok(null);
-		} catch (SQLException e) {
-			return Result.err(e.getMessage());
-		}
+		resp.setStatus(HttpServletResponse.SC_OK);
+		resp.flushBuffer();
+		return;
 	}
 }
