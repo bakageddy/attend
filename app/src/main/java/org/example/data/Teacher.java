@@ -18,9 +18,12 @@ import java.sql.SQLException;
  */
 public class Teacher {
 
-	private static LRU<String, List<Teacher>> cache;
+	private static LRU<String, List<Teacher>> cache = null;
 
 	public static void set_cache(LRU<String, List<Teacher>> cache) {
+		if (Teacher.cache == null) {
+			Teacher.cache.flush();
+		}
 		Teacher.cache = cache;
 	}
 

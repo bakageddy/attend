@@ -20,20 +20,26 @@ public class Subject {
 	private static LRU<String, List<Subject>> subject_name_cache;
 	private static LRU<String, List<Subject>> subject_code_cache;
 
-	private static void set_name_cache(LRU<String, List<Subject>> cache) {
+	public static void set_name_cache(LRU<String, List<Subject>> cache) {
+		if (Subject.subject_name_cache != null) {
+			Subject.subject_name_cache.flush();
+		}
 		Subject.subject_name_cache = cache;
 	}
 
-	private static void set_code_cache(LRU<String, List<Subject>> cache) {
+	public static void set_code_cache(LRU<String, List<Subject>> cache) {
+		if (Subject.subject_code_cache != null) {
+			Subject.subject_code_cache.flush();
+		}
 		Subject.subject_code_cache = cache;
 	}
 
-	private static void delete_name_cache() {
+	public static void delete_name_cache() {
 		Subject.subject_name_cache.flush();
 		Subject.subject_name_cache = null;
 	}
 
-	private static void delete_code_cache() {
+	public static void delete_code_cache() {
 		Subject.subject_code_cache.flush();
 		Subject.subject_code_cache = null;
 	}

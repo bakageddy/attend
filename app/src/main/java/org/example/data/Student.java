@@ -12,9 +12,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class Student {
-	private static LRU<String, List<Student>> cache;
+	private static LRU<String, List<Student>> cache = null;
 
 	public static void set_cache(LRU<String, List<Student>> cache) {
+		if (Student.cache != null) {
+			Student.cache.flush();
+		}
 		Student.cache = cache;
 	}
 
