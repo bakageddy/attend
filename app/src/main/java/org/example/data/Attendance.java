@@ -102,7 +102,79 @@ public class Attendance {
 		String period,
 		String date
 	) {
-		return Result.err("NOT IMPLEMENTED");
+		if (!Validator.validate_period(period)) {
+			return Result.err("Period must be roman-numeral: I-VIII");
+		}
+
+		Optional<String> valid_date = Validator.validate_date(date);
+		if (valid_date.isEmpty()) {
+			return Result.err("Date must be in the format YYYY-MM-DD");
+		}
+
+		Optional<Connection> optional_cnx = Database.get_connection();
+		if (optional_cnx.isEmpty()) {
+			return Result.err("Failed to acquire Connection from Database");
+		}
+		Optional<BatchData> opt_batchdata = BatchData.search(batchid);
+		if (opt_batchdata.isEmpty()) {
+			return Result.err("There is no batch with the given ID");
+		}
+
+		BatchData batchdata = opt_batchdata.get();
+		if (batchdata.teacherid != teacherid) {
+			return Result.err("You do not own this batch!");
+		}
+
+		String query = construct_query(
+			date,
+			period,
+			teacherid,
+			subjectid,
+			batchdata.students
+		);
+
+		try (
+			Connection cnx = optional_cnx.get();
+		) {
+
+			PreparedStatement stmt = cnx.prepareStatement(query);
+			int no = stmt.executeUpdate();
+			if (no != batchdata.students.size()) {
+				return Result.err("Failed to insert all the students");
+			}
+			return Result.err(null);
+		} catch (Exception e) {
+			return Result.err(e.getMessage());
+		}
+	}
+
+	private String construct_query(
+		String day,
+		String period,
+		long teacherid,
+		long subjectid,
+		List<Student> students
+	) {
+		StringBuilder query = new StringBuilder();
+		query.append("INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES");
+
+		var len = students.size();
+		for (int i = 0; i < len; i++) {
+			query.append("('")
+				.append(day)
+				.append("'::date,")
+				.append(students.get(i).rollNo)
+				.append(",'")
+				.append(period)
+				.append("'::period,")
+				.append(subjectid)
+				.append(",")
+				.append(teacherid);
+			String dec = i == len - 1 ? ");" : "),";
+			query.append(dec);
+		}
+		query.append(";");
+		return query.toString();
 	}
 
 	public static Result<Void, String> delete_batch(
