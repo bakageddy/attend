@@ -12,6 +12,7 @@ import org.example.util.Result;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
@@ -24,15 +25,18 @@ public class Context implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
-			File props_file_handle = new File("Application.properties");
-			FileReader props_reader = new FileReader(props_file_handle);
+			InputStream in = sce.getServletContext().getResourceAsStream("/WEB-INF/classes/config/Application.properties");
+			if (in == null) {
+				throw new IOException();
+			}
 
 			Properties props = new Properties();
-			props.load(props_reader);
+			props.load(in);
 			Database.init(props);
 		} catch (
 			IOException e
 		) {
+			// TODO: Refactor to have better database initialization
 			Result<Void, String> result = Database.init();
 			if (result.isErr()) {
 				System.err.println(result.err_msg());
