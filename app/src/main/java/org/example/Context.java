@@ -9,7 +9,11 @@ import org.example.data.Teacher;
 import org.example.util.LRU;
 import org.example.util.Result;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
+import java.util.Properties;
 
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -19,12 +23,21 @@ import jakarta.servlet.annotation.WebListener;
 public class Context implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		Result<Void, String> result = Database.init();
-		if (result.isErr()) {
-			System.err.println(result.err_msg());
-		}
+		try {
+			File props_file_handle = new File("Application.properties");
+			FileReader props_reader = new FileReader(props_file_handle);
 
-		System.out.println("Initialized Database Connection pool");
+			Properties props = new Properties();
+			props.load(props_reader);
+			Database.init(props);
+		} catch (
+			IOException e
+		) {
+			Result<Void, String> result = Database.init();
+			if (result.isErr()) {
+				System.err.println(result.err_msg());
+			}
+		}
 
 		Student.set_cache(new LRU<String, List<Student>>(30));
 		Teacher.set_cache(new LRU<String, List<Teacher>>(30));

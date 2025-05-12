@@ -1,6 +1,7 @@
 package org.example.data;
 
 import java.sql.Connection;
+import java.util.Properties;
 
 import org.example.util.Result;
 
@@ -11,7 +12,7 @@ public class Database {
 
 	private static HikariDataSource data_source = null;
 
-	public static synchronized Result<Void, String> init() throws NullPointerException {
+	public static synchronized Result<Void, String> init() {
 		try {
 			Class.forName("org.postgresql.Driver");
 			String password = System.getenv("PGSQL_DATABASE_PASSWORD");
@@ -29,6 +30,28 @@ public class Database {
 			data_source = new HikariDataSource(config);
 			if (data_source == null) {
 				return Result.err("Failed to initialize database");
+			}
+
+			return Result.ok(null);
+		} catch (Exception e) {
+			return Result.err(e.getMessage());
+		}
+	}
+
+	public static synchronized Result<Void, String> init(Properties props) {
+		try {
+			Class.forName("org.postgresql.Driver");
+
+			HikariConfig config = new HikariConfig();
+			config.setUsername(props.getProperty("db_username"));
+			config.setPassword(props.getProperty("db_password"));
+			config.setJdbcUrl(props.getProperty("db_url"));
+			config.setConnectionTimeout(Integer.parseInt(props.getProperty("db_connection_timeout")));
+			config.setMaximumPoolSize(Integer.parseInt(props.getProperty("db_max_pool")));
+
+			data_source = new HikariDataSource(config);
+			if (data_source == null) {
+				return Result.err("Failed to Initialize Database");
 			}
 
 			return Result.ok(null);
