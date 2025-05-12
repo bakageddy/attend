@@ -68,6 +68,11 @@ public class Teacher {
 		}
 
 		pattern = valid_pattern.get();
+		Optional<List<Teacher>> cache_contents = cache.get(pattern);
+		if (cache_contents.isPresent()) {
+			return Result.ok(cache_contents.get());
+		}
+
 		if (pattern.endsWith("%")) {
 			pattern = pattern.concat("%");
 		}
@@ -108,6 +113,8 @@ public class Teacher {
 
 			exists_rst.close();
 			rst.close();
+
+			cache.put(valid_pattern.get(), teachers);
 			return Result.ok(teachers);
 		} catch (SQLException e) {
 			return Result.err(e.getMessage());
