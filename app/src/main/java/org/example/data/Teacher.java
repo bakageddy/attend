@@ -67,6 +67,11 @@ public class Teacher {
 			return Result.err("Need Valid Pattern. Not SQL T-T");
 		}
 
+		pattern = valid_pattern.get();
+		if (pattern.endsWith("%")) {
+			pattern = pattern.concat("%");
+		}
+
 		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to obtain connection");
@@ -78,7 +83,7 @@ public class Teacher {
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Teacher WHERE Name LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, valid_pattern.get());
+			exists.setString(1, pattern);
 			ResultSet exists_rst = exists.executeQuery();
 
 			if (!exists_rst.next()) {

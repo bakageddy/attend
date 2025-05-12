@@ -65,6 +65,11 @@ public class Student {
 			return Result.err("Pattern must be alphanumeric, not SQL -___-");
 		}
 
+		pattern = valid_pattern.get();
+		if (!pattern.endsWith("%")) {
+			pattern = pattern.concat("%");
+		}
+
 		Result<Connection, String> optional_cnx = Database.get_connection();
 		if (optional_cnx.isErr()) {
 			return Result.err(optional_cnx.err_msg());
@@ -75,7 +80,7 @@ public class Student {
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Student WHERE Name LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, valid_pattern.get());
+			exists.setString(1, pattern);
 
 			ResultSet exists_result = exists.executeQuery();
 			if (!exists_result.next()) {
@@ -86,7 +91,7 @@ public class Student {
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT RollNo, Name FROM Student WHERE Name LIKE ? ORDER BY RollNo LIMIT 20;"
 			);
-			stmt.setString(1, valid_pattern.get());
+			stmt.setString(1, pattern);
 
 			ResultSet result = stmt.executeQuery();
 			List<Student> names = new ArrayList<>();

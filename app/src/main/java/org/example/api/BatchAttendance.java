@@ -1,12 +1,9 @@
 package org.example.api;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.example.data.Attendance;
-import org.example.data.Student;
 import org.example.util.Parser;
 import org.example.util.Result;
 

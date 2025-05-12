@@ -83,6 +83,12 @@ public class Subject {
 		if (valid_pattern.isEmpty()) {
 			return Result.err("Need Valid Pattern. Not SQL T-T");
 		}
+
+		pattern = valid_pattern.get();
+		if (!pattern.endsWith("%")) {
+			pattern = pattern.concat("%");
+		}
+
 		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
@@ -93,7 +99,7 @@ public class Subject {
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Teacher WHERE Name LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, valid_pattern.get());
+			exists.setString(1, pattern);
 			ResultSet exists_rst = exists.executeQuery();
 
 			if (!exists_rst.next()) {
@@ -131,6 +137,11 @@ public class Subject {
 		if (valid_pattern.isEmpty()) {
 			return Result.err("Need Valid Pattern. Not SQL T-T");
 		}
+		code_pattern = valid_pattern.get();
+		if (!code_pattern.endsWith("%")) {
+			code_pattern += "%";
+		}
+
 		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to obtain connection");
@@ -140,9 +151,9 @@ public class Subject {
 			Connection cnx = optional_cnx.get();
 		) {
 			PreparedStatement exists = cnx.prepareStatement(
-				"SELECT 1 FROM Teacher WHERE SubjectCode LIKE ? LIMIT 1;"
+				"SELECT 1 FROM Subject WHERE SubjectCode LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, valid_pattern.get());
+			exists.setString(1, code_pattern);
 			ResultSet exists_rst = exists.executeQuery();
 
 			if (!exists_rst.next()) {
@@ -166,6 +177,7 @@ public class Subject {
 				);
 			}
 
+			exists_rst.close();
 			stmt.close();
 			return Result.ok(subjects);
 

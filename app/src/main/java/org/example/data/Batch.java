@@ -78,13 +78,18 @@ public class Batch {
 			return Result.err("Failed to acquire connection");
 		}
 
+		pattern = validated_pattern.get();
+		if (!pattern.endsWith("%")) {
+			pattern += "%";
+		}
+
 		try (
 			Connection cnx = optional_cnx.get();
 		) {
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Batch WHERE Name LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, validated_pattern.get());
+			exists.setString(1, pattern);
 			ResultSet exists_rst = exists.executeQuery();
 
 			if (!exists_rst.next()) {
@@ -94,7 +99,7 @@ public class Batch {
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT BatchID, TeacherID, Name FROM Batch WHERE Name LIKE ? LIMIT 20;"
 			);
-			stmt.setString(1, validated_pattern.get());
+			stmt.setString(1, pattern);
 
 			ResultSet rst = stmt.executeQuery();
 			List<Batch> batches = new ArrayList<>();

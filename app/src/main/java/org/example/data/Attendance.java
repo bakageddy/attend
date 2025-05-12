@@ -168,7 +168,7 @@ public class Attendance {
 			query.append("('")
 				.append(day)
 				.append("'::date,")
-				.append(students.get(i).rollno)
+				.append(students.get(i).rollNo)
 				.append(",'")
 				.append(period)
 				.append("'::period,")
