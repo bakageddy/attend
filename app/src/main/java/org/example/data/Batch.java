@@ -12,9 +12,6 @@ import java.sql.ResultSet;
 import java.util.List;
 import java.util.ArrayList;
 
-/**
- * Batch
- */
 public class Batch {
 	private static LRU<Long, List<Batch>> batch_owner_cache = null;
 	private static LRU<String, List<Batch>> batch_pattern_cache = null;
@@ -34,11 +31,13 @@ public class Batch {
 	}
 
 	public static void delete_owner_cache() {
-		Batch.batch_owner_cache.flush();
+		if (batch_owner_cache != null)
+			Batch.batch_owner_cache.flush();
 	}
 
 	public static void delete_pattern_cache() {
-		Batch.batch_pattern_cache.flush();
+		if (batch_pattern_cache != null)
+			Batch.batch_pattern_cache.flush();
 	}
 
 	public static Result<Batch, String> search(long batchid) {

@@ -1,5 +1,10 @@
 package org.example;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Properties;
+
 import org.example.data.Batch;
 import org.example.data.BatchData;
 import org.example.data.Database;
@@ -8,13 +13,6 @@ import org.example.data.Subject;
 import org.example.data.Teacher;
 import org.example.util.LRU;
 import org.example.util.Result;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Properties;
 
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
