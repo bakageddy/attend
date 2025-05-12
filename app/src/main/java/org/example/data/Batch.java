@@ -79,6 +79,11 @@ public class Batch {
 		}
 
 		pattern = validated_pattern.get();
+		Optional<List<Batch>> cache_contents = batch_pattern_cache.get(pattern);
+		if (cache_contents.isPresent()) {
+			return Result.ok(cache_contents.get());
+		}
+
 		if (!pattern.endsWith("%")) {
 			pattern += "%";
 		}
@@ -110,6 +115,9 @@ public class Batch {
 				batches.addLast(new Batch(batchid, teacherid, name));
 			}
 
+			exists.close();
+			stmt.close();
+			batch_pattern_cache.put(validated_pattern.get(), batches);
 			return Result.ok(batches);
 		} catch (Exception e) {
 			return Result.err(e.getMessage());
@@ -121,6 +129,11 @@ public class Batch {
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
+		Optional<List<Batch>> cache_contents = batch_owner_cache.get(teacherid);
+		if (cache_contents.isPresent()) {
+			return Result.ok(cache_contents.get());
+		}
+
 		try (
 			Connection cnx = optional_cnx.get()
 		) {
