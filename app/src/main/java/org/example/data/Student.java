@@ -66,6 +66,11 @@ public class Student {
 		}
 
 		pattern = valid_pattern.get();
+		Optional<List<Student>> cache_contents = cache.get(pattern);
+		if (cache_contents.isPresent()) {
+			return Result.ok(cache_contents.get());
+		}
+
 		if (!pattern.endsWith("%")) {
 			pattern = pattern.concat("%");
 		}
@@ -106,6 +111,7 @@ public class Student {
 			exists.close();
 			result.close();
 
+			cache.put(valid_pattern.get(), names);
 			return Result.ok(names);
 		} catch (SQLException e) {
 			return Result.err(e.getMessage());
