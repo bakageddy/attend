@@ -1,18 +1,11 @@
 package org.example.api;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Optional;
 
 import org.example.util.Result;
-import org.example.data.Attendance;
 import org.example.util.Parser;
-import org.example.util.Validator;
-
-import com.zaxxer.hikari.pool.HikariPool;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

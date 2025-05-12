@@ -2,23 +2,13 @@ package org.example.api;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.example.data.Subject;
-import org.example.util.LRU;
 import org.example.util.Parser;
 import org.example.util.Result;
 import org.example.util.Serializer;
-import org.example.util.Validator;
-
-import com.google.gson.Gson;
-import com.zaxxer.hikari.pool.HikariPool;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

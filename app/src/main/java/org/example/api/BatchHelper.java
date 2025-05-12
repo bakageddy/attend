@@ -1,19 +1,12 @@
 package org.example.api;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Optional;
 
 import org.example.data.BatchData;
 import org.example.util.Parser;
 import org.example.util.Result;
 
-import com.zaxxer.hikari.pool.HikariPool;
-
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

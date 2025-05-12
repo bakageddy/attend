@@ -1,14 +1,11 @@
 package org.example;
 
-import java.util.List;
-
 import org.example.data.Database;
 import org.example.data.Student;
 import org.example.data.Subject;
 import org.example.data.Teacher;
 import org.example.data.Batch;
 import org.example.data.BatchData;
-import org.example.util.Cache;
 import org.example.util.LRU;
 
 import jakarta.servlet.ServletContextEvent;
