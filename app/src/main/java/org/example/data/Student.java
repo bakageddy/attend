@@ -70,12 +70,12 @@ public class Student {
 			pattern = pattern.concat("%");
 		}
 
-		Result<Connection, String> optional_cnx = Database.get_connection();
-		if (optional_cnx.isErr()) {
-			return Result.err(optional_cnx.err_msg());
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
+		if (optional_cnx.isEmpty()) {
+			return Result.err("Failed to obtain connection");
 		}
 		try (
-			Connection cnx = optional_cnx.unwrap()
+			Connection cnx = optional_cnx.get();
 		){
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Student WHERE Name LIKE ? LIMIT 1;"
