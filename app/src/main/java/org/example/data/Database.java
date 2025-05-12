@@ -1,37 +1,61 @@
 package org.example.data;
 
 import java.sql.Connection;
-import java.util.Optional;
 
-import org.postgresql.jdbc3.Jdbc3PoolingDataSource;
+import org.example.util.Result;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 public class Database {
 
-	private static Jdbc3PoolingDataSource data_source = null;
+	private static HikariDataSource data_source = null;
 
-	public static synchronized Optional<Connection> get_connection() {
+	public static synchronized Result<Void, String> init() throws NullPointerException {
 		try {
-			Class.forName("org.postgres.Driver");
-			if (data_source == null) {
-				String password = System.getenv("PGSQL_DATABASE_PASSWORD");
-				if (password == null) {
-					return Optional.empty();
-				}
-
-				data_source = new Jdbc3PoolingDataSource();
-				data_source.setDatabaseName("college");
-				data_source.setURL("jdbc:postgresql://localhost/");
-				data_source.setUser("postgres");
-				data_source.setPassword(password);
-				data_source.setMaxConnections(8);
+			Class.forName("org.postgresql.Driver");
+			String password = System.getenv("PGSQL_DATABASE_PASSWORD");
+			if (password == null) {
+				return Result.err("Cannot find Password");
 			}
-			return Optional.of(data_source.getConnection());
+
+			HikariConfig config = new HikariConfig();
+			config.setJdbcUrl("jdbc:postgresql://localhost/college");
+			config.setUsername("postgres");
+			config.setPassword(password);
+			config.setConnectionTimeout(2000); // 2s
+			config.setMaximumPoolSize(10);
+
+			data_source = new HikariDataSource(config);
+			if (data_source == null) {
+				return Result.err("Failed to initialize database");
+			}
+
+			return Result.ok(null);
 		} catch (Exception e) {
-			return Optional.empty();
+			return Result.err(e.getMessage());
 		}
 	}
 
-	public static void close() {
-		Database.data_source.close();
+	public static synchronized Result<Connection, String> get_connection() {
+		try {
+			if (data_source == null) {
+				System.out.println("Datasource is null. INITIALIZING");
+				Result<Void, String> result = init();
+				return Result.err(result.err_msg());
+			}
+
+			Connection cnx = data_source.getConnection();
+			if (cnx != null)
+				return Result.ok(cnx);
+			else return Result.err("Datasource gave me a NULL");
+		} catch (Exception e) {
+			return Result.err(e.getMessage());
+		}
+	}
+
+	public static void close() throws InterruptedException {
+		if (data_source != null)
+			Database.data_source.close();
 	}
 }

@@ -28,7 +28,7 @@ public class Attendance {
 			return Result.err("Date must be in the format YYYY-MM-DD");
 		}
 
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
@@ -71,7 +71,7 @@ public class Attendance {
 			return Result.err("Date must be in the format YYYY-MM-DD");
 		}
 
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
@@ -114,10 +114,6 @@ public class Attendance {
 			return Result.err("Date must be in the format YYYY-MM-DD");
 		}
 
-		Optional<Connection> optional_cnx = Database.get_connection();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire Connection from Database");
-		}
 		Optional<BatchData> opt_batchdata = BatchData.search(batchid);
 		if (opt_batchdata.isEmpty()) {
 			return Result.err("There is no batch with the given ID");
@@ -135,6 +131,11 @@ public class Attendance {
 			subjectid,
 			batchdata.students
 		);
+
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
+		if (optional_cnx.isEmpty()) {
+			return Result.err("Failed to acquire Connection from Database");
+		}
 
 		try (
 			Connection cnx = optional_cnx.get();

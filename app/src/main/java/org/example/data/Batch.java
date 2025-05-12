@@ -42,7 +42,7 @@ public class Batch {
 	}
 
 	public static Result<Batch, String> search(long batchid) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
@@ -73,7 +73,7 @@ public class Batch {
 			return Result.err("Expect Valid SQL.");
 		}
 
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
@@ -112,7 +112,7 @@ public class Batch {
 	}
 
 	public static Result<List<Batch>, String> search_teacherid(long teacherid) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
@@ -144,7 +144,7 @@ public class Batch {
 			return Result.err("You shalln't try to hack me T-T");
 		}
 
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
@@ -169,7 +169,7 @@ public class Batch {
 	}
 
 	public static Result<Void, String> delete(long batchid, long teacherid) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}

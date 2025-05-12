@@ -28,7 +28,7 @@ public class Student {
 
 	// TODO: Implement Error enums
 	public static Result<Student, String> search(long rollno) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to open a connection");
 		}
@@ -64,9 +64,13 @@ public class Student {
 		if (valid_pattern.isEmpty()) {
 			return Result.err("Pattern must be alphanumeric, not SQL -___-");
 		}
-		Optional<Connection> optional_cnx = Database.get_connection();
+
+		Result<Connection, String> optional_cnx = Database.get_connection();
+		if (optional_cnx.isErr()) {
+			return Result.err(optional_cnx.err_msg());
+		}
 		try (
-			Connection cnx = optional_cnx.get()
+			Connection cnx = optional_cnx.unwrap()
 		){
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Student WHERE Name LIKE ? LIMIT 1;"
@@ -103,11 +107,11 @@ public class Student {
 		}
 	}
 
-	public long rollno;
+	public long rollNo;
 	public String name;
 
 	public Student(long rollno, String name) {
-		this.rollno = rollno;
+		this.rollNo = rollno;
 		this.name = name;
 	}
 }

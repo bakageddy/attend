@@ -11,8 +11,8 @@ import org.example.util.LRU;
 import org.example.util.Result;
 
 public class BatchData {
-	private static LRU<Long, ArrayList<Student>> cache;
-	public static void set_cache(LRU<Long, ArrayList<Student>> cache) {
+	private static LRU<Long, List<Student>> cache;
+	public static void set_cache(LRU<Long, List<Student>> cache) {
 		if (BatchData.cache != null) {
 			BatchData.cache.flush();
 		}
@@ -27,7 +27,7 @@ public class BatchData {
 	}
 
 	public static Optional<BatchData> search(long batchid) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Optional.empty();
 		}
@@ -64,7 +64,7 @@ public class BatchData {
 	}
 
 	public static Result<Void, String> add(long batchid, long rollno) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
@@ -90,7 +90,7 @@ public class BatchData {
 	}
 
 	public static Result<Void, String> add(long batchid, long[] rollnos) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
@@ -131,7 +131,12 @@ public class BatchData {
 	}
 
 	public static Result<Void, String> delete(long batchid, long rollno) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
+		if (optional_cnx.isEmpty()) {
+			return Result.err("Failed to acquire connection");
+		}
+
 		try (
 			Connection cnx = optional_cnx.get();
 		) {
@@ -151,7 +156,10 @@ public class BatchData {
 	}
 
 	public static Result<Void, String> delete(long batchid, long rollnos[]) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
+		if (optional_cnx.isEmpty()) {
+			return Result.err("Failed to acquire connection");
+		}
 		try (
 			Connection cnx = optional_cnx.get();
 		) {
@@ -184,7 +192,11 @@ public class BatchData {
 	}
 
 	public static Result<Void, String> delete_all(long batchid) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
+		if (optional_cnx.isEmpty()) {
+			return Result.err("Failed to acquire connection");
+		}
+
 		try (
 			Connection cnx = optional_cnx.get();
 		) {

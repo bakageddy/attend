@@ -13,15 +13,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Teacher
- */
 public class Teacher {
 
 	private static LRU<String, List<Teacher>> cache = null;
 
 	public static void set_cache(LRU<String, List<Teacher>> cache) {
-		if (Teacher.cache == null) {
+		if (Teacher.cache != null) {
 			Teacher.cache.flush();
 		}
 		Teacher.cache = cache;
@@ -34,7 +31,7 @@ public class Teacher {
 
 	// TODO: Implement Error enums
 	public static Result<Teacher, String> search(long teacher_id) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to open a connection");
 		}
@@ -69,7 +66,12 @@ public class Teacher {
 		if (valid_pattern.isEmpty()) {
 			return Result.err("Need Valid Pattern. Not SQL T-T");
 		}
-		Optional<Connection> optional_cnx = Database.get_connection();
+
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
+		if (optional_cnx.isEmpty()) {
+			return Result.err("Failed to obtain connection");
+		}
+
 		try (
 			Connection cnx = optional_cnx.get();
 		) {

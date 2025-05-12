@@ -46,7 +46,7 @@ public class Subject {
 
 	// TODO: Implement Error enums
 	public static Result<Subject, String> search(long subject_id) {
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire connection");
 		}
@@ -83,7 +83,10 @@ public class Subject {
 		if (valid_pattern.isEmpty()) {
 			return Result.err("Need Valid Pattern. Not SQL T-T");
 		}
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
+		if (optional_cnx.isEmpty()) {
+			return Result.err("Failed to acquire connection");
+		}
 		try (
 			Connection cnx = optional_cnx.get();
 		) {
@@ -128,7 +131,11 @@ public class Subject {
 		if (valid_pattern.isEmpty()) {
 			return Result.err("Need Valid Pattern. Not SQL T-T");
 		}
-		Optional<Connection> optional_cnx = Database.get_connection();
+		Optional<Connection> optional_cnx = Database.get_connection().asOption();
+		if (optional_cnx.isEmpty()) {
+			return Result.err("Failed to obtain connection");
+		}
+
 		try (
 			Connection cnx = optional_cnx.get();
 		) {

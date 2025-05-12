@@ -33,6 +33,7 @@ public class TeacherSearch extends HttpServlet {
 
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, err);
 				resp.flushBuffer();
+				return;
 			}
 
 			Result<String, String> payload = Serializer.serialize(result.unwrap());

@@ -1,12 +1,15 @@
 package org.example;
 
+import org.example.data.Batch;
+import org.example.data.BatchData;
 import org.example.data.Database;
 import org.example.data.Student;
 import org.example.data.Subject;
 import org.example.data.Teacher;
-import org.example.data.Batch;
-import org.example.data.BatchData;
 import org.example.util.LRU;
+import org.example.util.Result;
+
+import java.util.List;
 
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -16,16 +19,23 @@ import jakarta.servlet.annotation.WebListener;
 public class Context implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		Student.set_cache(new LRU<>(30));
-		Teacher.set_cache(new LRU<>(30));
+		Result<Void, String> result = Database.init();
+		if (result.isErr()) {
+			System.err.println(result.err_msg());
+		}
 
-		Subject.set_name_cache(new LRU<>(30));
-		Subject.set_code_cache(new LRU<>(30));
+		System.out.println("Initialized Database Connection pool");
 
-		Batch.set_owner_cache(new LRU<>(30));
-		Batch.set_pattern_cache(new LRU<>(30));
+		Student.set_cache(new LRU<String, List<Student>>(30));
+		Teacher.set_cache(new LRU<String, List<Teacher>>(30));
 
-		BatchData.set_cache(new LRU<>(30));
+		Subject.set_name_cache(new LRU<String, List<Subject>>(30));
+		Subject.set_code_cache(new LRU<String, List<Subject>>(30));
+
+		Batch.set_owner_cache(new LRU<Long, List<Batch>>(30));
+		Batch.set_pattern_cache(new LRU<String, List<Batch>>(30));
+
+		BatchData.set_cache(new LRU<Long, List<Student>>(30));
 	}
 
 	@Override
