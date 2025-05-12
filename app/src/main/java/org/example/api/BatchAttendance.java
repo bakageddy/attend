@@ -1,24 +1,15 @@
 package org.example.api;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.example.Student;
-import org.example.util.Cache;
-import org.example.util.LRU;
+import org.example.data.Attendance;
+import org.example.data.Student;
 import org.example.util.Parser;
 import org.example.util.Result;
-import org.example.util.Validator;
 
-import com.zaxxer.hikari.pool.HikariPool;
-
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -99,15 +90,6 @@ public class BatchAttendance extends HttpServlet {
 			return;
 		}
 
-		if (!Validator.validate_period(period_param)) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"period must be uppercase roman numeral"
-			);
-			resp.flushBuffer();
-			return;
-		}
-
 		String date_param = req.getParameter("date");
 		if (date_param == null) {
 			resp.sendError(
@@ -118,165 +100,26 @@ public class BatchAttendance extends HttpServlet {
 			return;
 		}
 
-		Optional<String> date = Validator.validate_date(date_param);
-		if (date.isEmpty()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Date must be in the format: YYYY-MM-DD"
-			);
-			resp.flushBuffer();
-			return;
-		}
+		Result<Void, String> result = Attendance.enter_batch(
+			batchid.get(),
+			teacherid.get(),
+			subjectid.get(),
+			period_param,
+			date_param
+		);
 
-		ServletContext ctx = getServletContext();
-		HikariPool pool = (HikariPool) ctx.getAttribute("cnx_pool");
-		try (
-			Connection cnx = pool.getConnection();
-		) {
-			Result<Void, String> result = set_attendance(
-				cnx,
-				batchid.get(),
-				teacherid.get(),
-				subjectid.get(),
-				period_param,
-				date.get()
-			);
-
-			if (result.isErr()) {
-				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					result.err_msg()
-				);
-				resp.flushBuffer();
-				return;
-			}
-
-			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.flushBuffer();
-			return;
-		} catch (SQLException e) {
+		if (result.isErr()) {
 			resp.sendError(
 				HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-				e.getMessage()
+				result.err_msg()
 			);
 			resp.flushBuffer();
 			return;
 		}
-	}
 
-	private Result<List<Student>, String> fetch_students(Connection cnx, long batchid) {
-		try {
-			ServletContext ctx = getServletContext();
-			Cache<Long, List<Student>> batchid_cache = (LRU) ctx.getAttribute("batch_id_cache");
-
-			Optional<List<Student>> cache_contents = batchid_cache.get(batchid);
-			if (!cache_contents.isEmpty()) {
-				return Result.ok(cache_contents.get());
-			}
-
-			PreparedStatement stmt = cnx.prepareStatement(
-				"SELECT RollNo FROM Batch JOIN BatchData ON Batch.BatchID = BatchData.BatchID WHERE Batch.BatchID = ?;"
-			);
-			stmt.setLong(1, batchid);
-
-			ResultSet rst = stmt.executeQuery();
-			List<Student> students = new ArrayList<>();
-			while (rst.next()) {
-				long rollno = rst.getLong(1);
-				students.addLast(new Student(rollno, null));
-			}
-
-			batchid_cache.put(batchid, students);
-			return Result.ok(students);
-		} catch (SQLException e) {
-			return Result.err(e.getMessage());
-		}
-	}
-
-	private Result<Void, String> set_attendance(
-		Connection cnx, 
-		long batchid, 
-		long teacherid, 
-		long subjectid, 
-		String period, 
-		String day
-	) {
-		try {
-			Result<Boolean, String> owns = owns_batch(cnx, batchid, teacherid);
-			if (owns.isErr()) {
-				return Result.err(owns.err_msg());
-			}
-
-			if (!owns.unwrap()) {
-				return Result.err("You do not own this batch!");
-			}
-
-			Result<List<Student>, String> students = fetch_students(cnx, batchid);
-			if (students.isErr()) {
-				return Result.err(students.err_msg());
-			}
-
-			String query = construct_query(
-				day, 
-				period, 
-				teacherid, 
-				subjectid, 
-				students.unwrap()
-			);
-			PreparedStatement stmt = cnx.prepareStatement(query);
-			stmt.executeUpdate();
-
-			return Result.ok(null);
-		} catch (SQLException e) {
-			return Result.err(e.getMessage());
-		}
-	}
-
-	private String construct_query(
-		String day,
-		String period,
-		long teacherid,
-		long subjectid,
-		List<Student> students
-	) {
-		StringBuilder query = new StringBuilder();
-		query.append("INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES");
-
-		var len = students.size();
-		for (int i = 0; i < len; i++) {
-			query.append("('")
-				.append(day)
-				.append("'::date,")
-				.append(students.get(i).rollNo)
-				.append(",'")
-				.append(period)
-				.append("'::period,")
-				.append(subjectid)
-				.append(",")
-				.append(teacherid);
-			String dec = i == len - 1 ? ");" : "),";
-			query.append(dec);
-		}
-		query.append(";");
-		return query.toString();
-	}
-
-	// I have to redundantly do this since there is no authentication
-	private Result<Boolean, String> owns_batch(Connection cnx, long batchid, long teacherid) {
-		try {
-			PreparedStatement stmt = cnx.prepareStatement("SELECT 1 FROM Batch WHERE BatchID=? AND TeacherID=?;");
-			stmt.setLong(1, batchid);
-			stmt.setLong(2, teacherid);
-			ResultSet rst = stmt.executeQuery();
-			if (rst.next()) {
-				long result = rst.getLong(1);
-				return Result.ok(result == 1);
-			} else {
-				return Result.err("Result Set has too many elements");
-			}
-		} catch (SQLException e) {
-			return Result.err(e.getMessage());
-		}
+		resp.setStatus(HttpServletResponse.SC_OK);
+		resp.flushBuffer();
+		return;
 	}
 
 	@Override

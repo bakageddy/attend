@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Optional;
 
 import org.example.util.Result;
+import org.example.data.Attendance;
 import org.example.util.Parser;
 import org.example.util.Validator;
 
@@ -88,61 +89,31 @@ public class Attendance extends HttpServlet {
 			period = "I"; // TODO: Refactor Default Period, there must be something better than this..
 		}
 
-		if (!Validator.validate_period(period)) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Period must Uppercase Roman Numeral => 'I' to 'VIII'"
-			);
-			resp.flushBuffer();
-			return;
-		}
-
 		String date = req.getParameter("date");
 		if (date == null) {
 			date = default_date();
 		}
 
-		Optional<String> valid_date = Validator.validate_date(date);
-		if (valid_date.isEmpty()) {
+		Result<Void, String> result = org.example.data.Attendance.enter_student(
+			parsed_rollno.get(),
+			parsed_teacherid.get(),
+			parsed_subjectid.get(),
+			period,
+			date
+		);
+
+		if (result.isErr()) {
 			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Date must be in YYYY-MM-DD format"
+				HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+				result.err_msg()
 			);
 			resp.flushBuffer();
 			return;
 		}
 
-
-		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
-		try (
-			Connection cnx = pool.getConnection();
-		) {
-			Result<Void, String> result = set_attendance(
-				cnx, 
-				parsed_rollno.get(), 
-				parsed_teacherid.get(), 
-				parsed_subjectid.get(), 
-				period, 
-				valid_date.get()
-			);
-
-			if (result.isErr()) {
-				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					result.err_msg()
-				);
-				resp.flushBuffer();
-				return;
-			}
-
-			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.flushBuffer();
-			return;
-		} catch (SQLException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-			resp.flushBuffer();
-			return;
-		}
+		resp.setStatus(HttpServletResponse.SC_OK);
+		resp.flushBuffer();
+		return;
 	} 
 
 	@Override
@@ -211,137 +182,28 @@ public class Attendance extends HttpServlet {
 		if (period == null) {
 			period = "I";  // TODO: Refactor Default period
 		}
-		if (!Validator.validate_period(period)) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Period must be uppercase roman numeral => 'I' to 'VII'"
-			);
-			resp.flushBuffer();
-			return;
-		}
-
 		String date = req.getParameter("date");
 		if (date == null) {
 			date = default_date();
 		}
 
-		Optional<String> valid_date = Validator.validate_date(date);
-		if (valid_date.isEmpty()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Date must be in YYYY-MM-DD format"
-			);
+		Result<Void, String> result = org.example.data.Attendance.delete_student(
+			parsed_rollno.get(),
+			parsed_teacherid.get(),
+			parsed_subjectid.get(),
+			period,
+			date
+		);
+
+		if (result.isErr()) {
+			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.err_msg());
 			resp.flushBuffer();
 			return;
 		}
 
-		HikariPool pool = (HikariPool) getServletContext().getAttribute("cnx_pool");
-		try (
-			Connection cnx = pool.getConnection();
-		) {
-			Result<Void, String> result = delete_attendance(
-				cnx,
-				parsed_rollno.get(),
-				parsed_teacherid.get(),
-				parsed_subjectid.get(),
-				period,
-				valid_date.get()
-			);
-
-			if (result.isErr()) {
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				resp.flushBuffer();
-				return;
-			}
-
-			resp.setStatus(HttpServletResponse.SC_OK);
-			resp.flushBuffer();
-			return;
-		} catch (SQLException e) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-			resp.flushBuffer();
-			return;
-		}
-	}
-
-	// TODO: refactor the api to use this.
-	// private static Result<Void, String> delete_attendance(
-	// 	Connection cnx,
-	// 	Long student_id,
-	// 	Long teacher_id,
-	// 	Long subject_id,
-	// 	String period
-	// ) {
-	// 	String date = default_date();
-	// 	return delete_attendance(cnx, student_id, teacher_id, subject_id, period, date);
-	// }
-
-	private static Result<Void, String> delete_attendance(
-		Connection cnx,
-		Long student_id,
-		Long teacher_id,
-		Long subject_id,
-		String period,
-		String date
-	) {
-		try {
-			PreparedStatement stmt = cnx.prepareStatement(
-				"DELETE FROM Attendance WHERE Day=?::date AND RollNo=? AND TeacherID=? AND SubjectID=? AND Period=?::period;"
-			);
-			stmt.setString(1, date);
-			stmt.setLong(2, student_id);
-			stmt.setLong(3, teacher_id);
-			stmt.setLong(4, subject_id);
-			stmt.setString(5, period);
-			stmt.executeUpdate();
-			return Result.ok(null);
-		} catch (Exception e) {
-			return Result.err(e.getMessage());
-		}
-	}
-
-	private static Result<Void, String> set_attendance(
-		Connection cnx,
-		Long student_id,
-		Long teacher_id,
-		Long subject_id,
-		String period
-	) {
-		String date = default_date();
-		return set_attendance(cnx, student_id, teacher_id, subject_id, period, date);
-	}
-
-	private static Result<Void, String> set_attendance(
-		Connection cnx,
-		Long student_id,
-		Long teacher_id,
-		Long subject_id,
-		String period,
-		String date
-	) {
-		try {
-			PreparedStatement stmt = cnx.prepareStatement(
-				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?::date, ?, ?::period, ?, ?);"
-			);
-			// You can do this in validation.
-			// DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-			// java.sql.Date d = new java.sql.Date(fmt.parse(date).getTime());
-
-			stmt.setString(1, date);
-			stmt.setLong(2, student_id);
-			stmt.setString(3, period);
-			stmt.setLong(4, subject_id);
-			stmt.setLong(5, teacher_id);
-			int rows = stmt.executeUpdate();
-			if (rows != 1) {
-				return Result.err("Something went wrong");
-			}
-			return Result.ok(null);
-		} catch (SQLException e) {
-			return Result.err(e.getMessage());
-		} catch (Exception e) {
-			return Result.err(e.getMessage());
-		}
+		resp.setStatus(HttpServletResponse.SC_OK);
+		resp.flushBuffer();
+		return;
 	}
 
 	private static String default_date() {

@@ -2,10 +2,13 @@ package org.example.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.Optional;
 
 import org.example.util.Result;
 import org.example.util.Validator;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 public class Attendance {
 	public static Result<Void, String> enter_student(
@@ -148,7 +151,8 @@ public class Attendance {
 		}
 	}
 
-	private String construct_query(
+	@CheckReturnValue
+	private static String construct_query(
 		String day,
 		String period,
 		long teacherid,
@@ -163,7 +167,7 @@ public class Attendance {
 			query.append("('")
 				.append(day)
 				.append("'::date,")
-				.append(students.get(i).rollNo)
+				.append(students.get(i).rollno)
 				.append(",'")
 				.append(period)
 				.append("'::period,")
@@ -177,6 +181,7 @@ public class Attendance {
 		return query.toString();
 	}
 
+	@CheckReturnValue
 	public static Result<Void, String> delete_batch(
 		long batchid,
 		long teacherid,
