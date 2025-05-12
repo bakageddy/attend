@@ -84,6 +84,11 @@ public class Subject {
 			return Result.err("Need Valid Pattern. Not SQL T-T");
 		}
 
+		Optional<List<Subject>> cache_contents = subject_name_cache.get(pattern);
+		if (cache_contents.isPresent()) {
+			return Result.ok(cache_contents.get());
+		}
+
 		pattern = valid_pattern.get();
 		if (!pattern.endsWith("%")) {
 			pattern = pattern.concat("%");
@@ -122,6 +127,7 @@ public class Subject {
 			}
 
 			stmt.close();
+			subject_name_cache.put(pattern, subjects);
 			return Result.ok(subjects);
 
 		} catch (Exception e) {
@@ -137,6 +143,12 @@ public class Subject {
 		if (valid_pattern.isEmpty()) {
 			return Result.err("Need Valid Pattern. Not SQL T-T");
 		}
+
+		Optional<List<Subject>> cache_contents = subject_code_cache.get(code_pattern);
+		if (cache_contents.isPresent()) {
+			return Result.ok(cache_contents.get());
+		}
+
 		code_pattern = valid_pattern.get();
 		if (!code_pattern.endsWith("%")) {
 			code_pattern += "%";
@@ -179,6 +191,8 @@ public class Subject {
 
 			exists_rst.close();
 			stmt.close();
+
+			subject_code_cache.put(code_pattern, subjects);
 			return Result.ok(subjects);
 
 		} catch (Exception e) {
