@@ -30,15 +30,16 @@ public class Context implements ServletContextListener {
 
 			Properties props = new Properties();
 			props.load(in);
-			Database.init(props);
+			Result<Void, String> result = Database.init(props);
+			if (result.isErr()) {
+				System.err.println(result.err_msg());
+				System.exit(1);
+			}
 		} catch (
 			IOException e
 		) {
 			// TODO: Refactor to have better database initialization
-			Result<Void, String> result = Database.init();
-			if (result.isErr()) {
-				System.err.println(result.err_msg());
-			}
+			System.err.println(e.getMessage());
 		}
 
 		Student.set_cache(new LRU<String, List<Student>>(30));
