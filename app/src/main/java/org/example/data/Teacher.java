@@ -73,7 +73,7 @@ public class Teacher {
 			return Result.ok(cache_contents.get());
 		}
 
-		if (pattern.endsWith("%")) {
+		if (!pattern.endsWith("%")) {
 			pattern = pattern.concat("%");
 		}
 
