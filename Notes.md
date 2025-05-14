@@ -1,8 +1,9 @@
 # TODO:
 ~1. Add: batching~
 
-DEFER UI: ~5. Add: Batch Search and Update~
-DEFER: 2. Add: generating attendance report, maybe this is optional?
+2. ADD: Authentication by Teacher and Students
+3. ADD: Attendance Request queue by Students
+
 DEFER: 3. Add: virtual grouping for specific teachers! (like defining your own class and then employ the batching method, on the same feature)
 
 4. Add: inset pagination for searching!
