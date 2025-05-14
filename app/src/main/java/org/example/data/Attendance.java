@@ -124,14 +124,6 @@ public class Attendance {
 			return Result.err("You do not own this batch!");
 		}
 
-		String query = construct_query(
-			date,
-			period,
-			teacherid,
-			subjectid,
-			batchdata.students
-		);
-
 		Optional<Connection> optional_cnx = Database.get_connection().asOption();
 		if (optional_cnx.isEmpty()) {
 			return Result.err("Failed to acquire Connection from Database");
@@ -141,45 +133,27 @@ public class Attendance {
 			Connection cnx = optional_cnx.get();
 		) {
 
-			PreparedStatement stmt = cnx.prepareStatement(query);
-			int no = stmt.executeUpdate();
-			if (no != batchdata.students.size()) {
+			PreparedStatement stmt = cnx.prepareStatement(
+				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?, ?, ?, ?, ?);"
+			);
+			for (Student student : batchdata.students) {
+				stmt.setString(1, date);
+				stmt.setLong(2, student.rollNo);
+				stmt.setString(3, period);
+				stmt.setLong(4, subjectid);
+				stmt.setLong(5, teacherid);
+				stmt.addBatch();
+			}
+
+			int[] no = stmt.executeBatch();
+			if (no.length != batchdata.students.size()) {
 				return Result.err("Failed to insert all the students");
 			}
+
 			return Result.err(null);
 		} catch (Exception e) {
 			return Result.err(e.getMessage());
 		}
-	}
-
-	@CheckReturnValue
-	private static String construct_query(
-		String day,
-		String period,
-		long teacherid,
-		long subjectid,
-		List<Student> students
-	) {
-		StringBuilder query = new StringBuilder();
-		query.append("INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES");
-
-		var len = students.size();
-		for (int i = 0; i < len; i++) {
-			query.append("('")
-				.append(day)
-				.append("'::date,")
-				.append(students.get(i).rollNo)
-				.append(",'")
-				.append(period)
-				.append("'::period,")
-				.append(subjectid)
-				.append(",")
-				.append(teacherid);
-			String dec = i == len - 1 ? ");" : "),";
-			query.append(dec);
-		}
-		query.append(";");
-		return query.toString();
 	}
 
 	@CheckReturnValue

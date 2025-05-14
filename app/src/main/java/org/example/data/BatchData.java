@@ -98,13 +98,18 @@ public class BatchData {
 		try (
 			Connection cnx = optional_cnx.get();
 		) {
-			String query = construct_query(batchid, rollnos);
+			// String query = construct_query(batchid, rollnos);
 			PreparedStatement stmt = cnx.prepareStatement(
-				query
+				"INSERT INTO BatchData (BatchID, RollNo) VALUES (?, ?);"
 			);
+			for (long rollno : rollnos) {
+				stmt.setLong(1, batchid);
+				stmt.setLong(2, rollno);
+				stmt.addBatch();
+			}
 
-			int no_of_rows = stmt.executeUpdate();
-			if (no_of_rows != rollnos.length) {
+			int[] no_of_rows = stmt.executeBatch();
+			if (no_of_rows.length != rollnos.length) {
 				return Result.err("BEEP BOOP, failed to add students");
 			}
 
@@ -112,22 +117,6 @@ public class BatchData {
 		} catch (Exception e) {
 			return Result.err(e.getMessage());
 		}
-	}
-
-	private static String construct_query(long batchid, long[] rollnos) {
-		StringBuilder s = new StringBuilder();
-		s.append("INSERT INTO BatchData(batchid, rollno) VALUES");
-		for (int i = 0; i < rollnos.length; i++) {
-			if (i != 0) s.append(",");
-
-			s.append("(")
-				.append(batchid)
-				.append(",")
-				.append(rollnos[i])
-				.append(")");
-		}
-		s.append(";");
-		return s.toString();
 	}
 
 	public static Result<Void, String> delete(long batchid, long rollno) {
@@ -163,11 +152,18 @@ public class BatchData {
 		try (
 			Connection cnx = optional_cnx.get();
 		) {
-			String query = construct_delete_query(batchid, rollnos);
-			PreparedStatement stmt = cnx.prepareStatement(query);
+			PreparedStatement stmt = cnx.prepareStatement(
+				"DELETE FROM BatchData WHERE BatchID = ? AND RollNo = ?;"
+			);
 
-			int no = stmt.executeUpdate();
-			if (no != rollnos.length) {
+			for (long rollno : rollnos) {
+				stmt.setLong(1, batchid);
+				stmt.setLong(2, rollno);
+				stmt.addBatch();
+			}
+
+			int[] no = stmt.executeBatch();
+			if (no.length != rollnos.length) {
 				return Result.err("BEEP BOOP, cannot delete student from batch");
 			}
 
@@ -175,20 +171,6 @@ public class BatchData {
 		} catch (Exception e) {
 			return Result.err(e.getMessage());
 		}
-	}
-
-	private static String construct_delete_query(long batchid, long[] rollnos) {
-		StringBuilder s = new StringBuilder();
-		s.append("DELETE FROM BatchData WHERE batchid=")
-			.append(batchid)
-			.append(" AND (");
-		for (int i = 0; i < rollnos.length; i++) {
-			if (i != 0) s.append(" OR ");
-			s.append("rollno=")
-				.append(rollnos[i]);
-		}
-		s.append(");");
-		return s.toString();
 	}
 
 	public static Result<Void, String> delete_all(long batchid) {
