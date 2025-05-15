@@ -1,16 +1,20 @@
 package org.example.data;
 
-import java.util.Optional;
-import java.util.ArrayList;
-import java.util.List;
-import org.example.util.Result;
-import org.example.util.Validator;
-import org.example.util.LRU;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
+import org.example.types.Err;
+import org.example.types.ErrKind;
+import org.example.util.LRU;
+import org.example.util.Result;
+
+// TODO: ADD Documentation
 public class Student {
 	private static LRU<String, List<Student>> cache = null;
 
@@ -26,79 +30,90 @@ public class Student {
 		Student.cache = null;
 	}
 
-	// TODO: Implement Error enums
-	public static Result<Student, String> search(long rollno) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to open a connection");
+	// TODO: ADD Documentation
+	public static Result<Student, Err> search(long rollno) {
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
-
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT Name FROM Student WHERE RollNo = ?;"
 			);
-			stmt.setLong(1, rollno);
+		) {
 
+			stmt.setLong(1, rollno);
 			ResultSet rst = stmt.executeQuery();
 			if (!rst.next()) {
-				stmt.close();
-				return Result.err("No Student with the given rollno");
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"No Student with the given rollno"
+				));
 			}
 
 			String name = rst.getString(1);
 			Student std = new Student(rollno, name);
 			return Result.ok(std);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
 	// TODO: Implement Inset pagination
-	// TODO: Implement Error enums
-	// TODO: Cache
-	public static Result<List<Student>, String> search(String pattern) {
-		Optional<String> valid_pattern = Validator.validate_sql(pattern);
-		if (valid_pattern.isEmpty()) {
-			return Result.err("Pattern must be alphanumeric, not SQL -___-");
-		}
-
-		pattern = valid_pattern.get();
+	// TODO: ADD Documentation
+	public static Result<List<Student>, Err> search(String pattern) {
 		Optional<List<Student>> cache_contents = cache.get(pattern);
 		if (cache_contents.isPresent()) {
 			return Result.ok(cache_contents.get());
 		}
 
+		String param = null;
 		if (!pattern.endsWith("%")) {
-			pattern = pattern.concat("%");
+			param = pattern.concat("%");
+		} else {
+			param = pattern;
 		}
 
-		Result<Connection, String> optional_cnx = Database.get_connection();
-		if (optional_cnx.isErr()) {
-			System.out.println(optional_cnx.err_msg());
-			return Result.err("Failed to obtain connection");
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
+
 		try (
-			Connection cnx = optional_cnx.unwrap();
-		){
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Student WHERE Name LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, pattern);
-
-			ResultSet exists_result = exists.executeQuery();
-			if (!exists_result.next()) {
-				exists.close();
-				return Result.err("No results");
-			}
-
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT RollNo, Name FROM Student WHERE Name LIKE ? ORDER BY RollNo LIMIT 20;"
 			);
-			stmt.setString(1, pattern);
+		) {
+			exists.setString(1, param);
+			ResultSet exists_result = exists.executeQuery();
 
+			if (!exists_result.next()) {
+				exists.close();
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"No results for such pattern"
+				));
+			}
+
+			stmt.setString(1, param);
 			ResultSet result = stmt.executeQuery();
 			List<Student> names = new ArrayList<>();
 
@@ -109,13 +124,23 @@ public class Student {
 				names.addLast(new Student(id, name));
 			}
 
-			exists.close();
-			result.close();
-
-			cache.put(valid_pattern.get(), names);
+			cache.put(pattern, names);
 			return Result.ok(names);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
 		} catch (SQLException e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
+		} catch (Exception e) {
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 

@@ -1,5 +1,6 @@
 package org.example.types;
 
+// TODO: Add Documentation
 public enum ErrKind {
 	Null {
 		@Override
@@ -40,6 +41,26 @@ public enum ErrKind {
 	IllegalState {
 		public String toString() {
 			return "IllegalState";
+		}
+	},
+	IllegalArgument {
+		public String toString() {
+			return "IllegalArgument";
+		}
+	},
+	ElementNotFound {
+		public String toString() {
+			return "ElementNotFound";
+		}
+	},
+	DBTimeout {
+		public String toString() {
+			return "DBTimeout";
+		}
+	},
+	DBConnectionErr {
+		public String toString() {
+			return "DBConnectionErr";
 		}
 	};
 	public abstract String toString();

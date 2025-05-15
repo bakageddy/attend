@@ -18,8 +18,10 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 
+// TODO: Add Documentation
 @WebListener
 public class Context implements ServletContextListener {
+	// TODO: Add Documentation
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
@@ -56,6 +58,7 @@ public class Context implements ServletContextListener {
 		BatchData.set_cache(new LRU<Long, List<Student>>(30));
 	}
 
+	// TODO: Add Documentation
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
 		try {

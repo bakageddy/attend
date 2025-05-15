@@ -1,11 +1,11 @@
 package org.example.util;
 
-import java.util.Optional;
-
 import org.example.types.Err;
 import org.example.types.ErrKind;
 
+// TODO: Add Documentation
 public class Parser {
+	// TODO: Add Documentation
 	public static Result<Integer, Err> parse_int(String input) {
 		try {
 			if (input == null) {
@@ -24,6 +24,7 @@ public class Parser {
 		}
 	}
 
+	// TODO: Add Documentation
 	public static Result<Long, Err> parse_long(String input) {
 		try {
 			if (input == null) {
@@ -42,6 +43,7 @@ public class Parser {
 		}
 	}
 
+	// TODO: Add Documentation
 	public static Result<long[], Err> parse_long(String input[]) {
 		try {
 			long[] result = new long[input.length];
