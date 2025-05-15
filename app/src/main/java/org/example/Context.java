@@ -23,23 +23,25 @@ public class Context implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		try {
-			InputStream in = sce.getServletContext().getResourceAsStream("/WEB-INF/classes/config/Application.properties");
-			if (in == null) {
-				throw new IOException();
-			}
-
+			InputStream in = sce.getServletContext()
+								.getResourceAsStream("/WEB-INF/classes/config/Application.properties");
 			Properties props = new Properties();
 			props.load(in);
-			Result<Void, String> result = Database.init(props);
+
+			Result<Void, String> result 
+					= Database.init(props)
+							.map_err(e -> e.toString());
+
 			if (result.isErr()) {
 				System.err.println(result.err_msg());
 				System.exit(1);
 			}
-		} catch (
-			IOException e
-		) {
-			// TODO: Refactor to have better database initialization
-			System.err.println(e.getMessage());
+		} catch ( IOException e ) {
+			System.err.println("Err reading from config file" + e.getMessage());
+		} catch ( IllegalArgumentException e) {
+			System.err.println("Err reading malformed unicode in config" + e.getMessage());
+		} catch ( NullPointerException e) {
+			System.err.println("Err reading from null InputStream config" + e.getMessage());
 		}
 
 		Student.set_cache(new LRU<String, List<Student>>(30));
