@@ -14,22 +14,16 @@ public enum ErrKind {
 			return "OutOfMemory";
 		}
 	},
-	NumberFormat {
+	ClassNotFound {
 		@Override
 		public String toString() {
-			return "NumberFormat";
+			return "ClassNotFound";
 		}
 	},
 	Unreachable {
 		@Override
 		public String toString() {
 			return "Unreachable";
-		}
-	},
-	ClassNotFound {
-		@Override
-		public String toString() {
-			return "ClassNotFound";
 		}
 	},
 	InitiliazationFailure {
@@ -53,6 +47,12 @@ public enum ErrKind {
 			return "ElementNotFound";
 		}
 	},
+	NumberFormat {
+		@Override
+		public String toString() {
+			return "NumberFormat";
+		}
+	},
 	DBTimeout {
 		public String toString() {
 			return "DBTimeout";
@@ -62,6 +62,17 @@ public enum ErrKind {
 		public String toString() {
 			return "DBConnectionErr";
 		}
+	},
+	JsonSerializeError {
+		public String toString() {
+			return "JsonSerializeError";
+		}
+	},
+	JsonIOError {
+		public String toString() {
+			return "JsonIOError";
+		}
 	};
+
 	public abstract String toString();
 }

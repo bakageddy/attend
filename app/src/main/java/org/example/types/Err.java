@@ -1,7 +1,7 @@
 package org.example.types;
 
 public class Err {
-	ErrKind kind;
+	public ErrKind kind;
 	String err;
 	public Err(ErrKind kind, String err) {
 		this.err = err;
