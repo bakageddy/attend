@@ -134,7 +134,7 @@ public class Attendance {
 		) {
 
 			PreparedStatement stmt = cnx.prepareStatement(
-				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?::date, ?, ?::period, ?, ?);"
+				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?, ?, ?, ?, ?);"
 			);
 			for (Student student : batchdata.students) {
 				stmt.setString(1, date);
@@ -150,7 +150,7 @@ public class Attendance {
 				return Result.err("Failed to insert all the students");
 			}
 
-			return Result.ok(null);
+			return Result.err(null);
 		} catch (Exception e) {
 			return Result.err(e.getMessage());
 		}
