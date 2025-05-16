@@ -55,7 +55,7 @@ public class Context implements ServletContextListener {
 		Batch.set_owner_cache(new LRU<Long, List<Batch>>(30));
 		Batch.set_pattern_cache(new LRU<String, List<Batch>>(30));
 
-		BatchData.set_cache(new LRU<Long, List<Student>>(30));
+		BatchData.set_cache(new LRU<Long, BatchData>(30));
 	}
 
 	// TODO: Add Documentation
