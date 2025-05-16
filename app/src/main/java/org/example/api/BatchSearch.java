@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.example.data.Batch;
+import org.example.types.Err;
+import org.example.types.extractors.BatchSearchRequest;
 import org.example.util.Parser;
 import org.example.util.Result;
 import org.example.util.Serializer;
@@ -18,125 +20,57 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = "/api/batch/search")
 public class BatchSearch extends HttpServlet {
+	private static Result<Void, Err> search_and_serialize_to(BatchSearchRequest request, PrintWriter dst) {
+		if (request.getBatchname() != null) {
+			return Batch.search(request.getBatchname())
+				.and_then(results -> Serializer.serialize_to(results, dst));
+		} else if (request.getTeacherid().isPresent()) {
+			return Batch.search(request.getTeacherid().get())
+				.and_then(results -> Serializer.serialize_to(results, dst));
+		} else {
+			return Batch.search(request.getBatchid().get())
+				.and_then(results -> Serializer.serialize_to(results, dst));
+		}
+	}
+
+	private static int err_to_status(Err e) {
+		switch (e.kind) {
+			case ElementNotFound:
+				return HttpServletResponse.SC_NO_CONTENT;
+			case OutOfMemory:
+			case ClassNotFound:
+			case IllegalState:
+			case DBTimeout:
+			case IOError:
+			case JsonSerializeError:
+				return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+			default:
+				return HttpServletResponse.SC_BAD_REQUEST;
+		}
+	}
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String pattern_param = req.getParameter("pattern");
-		if (pattern_param != null) {
-			Result<List<Batch>, String> result = Batch.search(pattern_param);
-			if (result.isErr()) {
-				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					result.err_msg()
-				);
-				resp.flushBuffer();
-				return;
-			}
-
-			Result<String, String> payload = Serializer.serialize(result.unwrap());
-			if (payload.isErr()) {
-				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					payload.err_msg()
-				);
-				resp.flushBuffer();
-				return;
-			}
-
+		try (
 			PrintWriter out = resp.getWriter();
-			resp.setStatus(HttpServletResponse.SC_OK);
-			out.write(payload.unwrap());
-			out.flush();
-			out.close();
-			return;
-		}
+		) {
+			Result<Void, Err> result = Batch.extract(req.getParameterMap())
+						.and_then(search_request -> search_and_serialize_to(search_request, out));
 
-		String teacherid_param = req.getParameter("teacherid");
-		if (teacherid_param != null) {
-			Optional<Long> teacherid = Parser.parse_long(teacherid_param);
-			if (teacherid.isEmpty()) {
-				resp.sendError(
-					HttpServletResponse.SC_BAD_REQUEST, 
-					"teacherid must be numeric"
-				);
-				resp.flushBuffer();
-				return;
-			}
-
-			Result<List<Batch>, String> result = Batch.search_teacherid(teacherid.get());
 			if (result.isErr()) {
+				Err e = result.err_msg();
 				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					result.err_msg()
+					err_to_status(e),
+					e.toString()
 				);
-				resp.flushBuffer();
-				return;
-			}
-
-			Result<String, String> payload = Serializer.serialize(result.unwrap());
-			if (payload.isErr()) {
-				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					payload.err_msg()
+			} else {
+				resp.setStatus(
+					HttpServletResponse.SC_OK
 				);
-				resp.flushBuffer();
-				return;
 			}
-
-			PrintWriter out = resp.getWriter();
-			resp.setStatus(HttpServletResponse.SC_OK);
-			out.write(payload.unwrap());
-			out.flush();
-			out.close();
-			return;
-		}
-
-		String batchid_param = req.getParameter("batchid");
-		if (batchid_param == null) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Should set either pattern or batchid or teacherid"
-			);
 			resp.flushBuffer();
-			return;
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
 		}
-
-		Optional<Long> batchid = Parser.parse_long(batchid_param);
-		if (batchid.isEmpty()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"batchid must be numeric"
-			);
-			resp.flushBuffer();
-			return;
-		}
-
-		Result<Batch, String> result = Batch.search(batchid.get());
-		if (result.isErr()) {
-			if (result.isErr()) {
-				resp.sendError(
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-					result.err_msg()
-				);
-				resp.flushBuffer();
-				return;
-			}
-		}
-
-		Result<String, String> payload = Serializer.serialize(result.unwrap());
-		if (payload.isErr()) {
-			resp.sendError(
-				HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-				payload.err_msg()
-			);
-			resp.flushBuffer();
-			return;
-		}
-
-		resp.setStatus(HttpServletResponse.SC_OK);
-		PrintWriter out = resp.getWriter();
-		out.write(payload.unwrap());
-		out.flush();
-		out.close();
-		return;
 	}
 }
