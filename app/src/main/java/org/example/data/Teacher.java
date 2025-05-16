@@ -88,7 +88,7 @@ public class Teacher {
 		// TODO: you can do better than this dinesh
 		String param = pattern;
 		if (!param.endsWith("%")) {
-			param += pattern.concat("%");
+			param += "%";
 		}
 
 		Result<Connection, Err> result_cnx = Database.get_connection();

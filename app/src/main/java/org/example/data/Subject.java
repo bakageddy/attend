@@ -102,7 +102,7 @@ public class Subject implements Extractor<SubjectSearchRequest> {
 
 		String param = pattern;
 		if (!pattern.endsWith("%")) {
-			param = pattern.concat("%");
+			param += "%";
 		}
 
 		Result<Connection, Err> result_cnx = Database.get_connection();
@@ -172,7 +172,7 @@ public class Subject implements Extractor<SubjectSearchRequest> {
 		// Improve searching
 		String param = code_pattern;
 		if (!code_pattern.endsWith("%")) {
-			param = code_pattern + "%";
+			param += "%";
 		}
 
 		Result<Connection, Err> result_cnx = Database.get_connection();
