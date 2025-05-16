@@ -34,7 +34,7 @@ public class Serializer<T> {
 			return Result.ok(null);
 		} catch (JsonIOException e) {
 			return Result.err(new Err(
-				ErrKind.JsonIOError,
+				ErrKind.IOError,
 				"Failed to serialize object to writer: " + e.getMessage()
 			));
 		} catch (Exception e) {
