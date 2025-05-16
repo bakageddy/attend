@@ -1,18 +1,23 @@
 package org.example.data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.example.util.LRU;
-import org.example.util.Result;
-import org.example.util.Validator;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
+import org.example.types.Err;
+import org.example.types.ErrKind;
+import org.example.types.extractors.TeacherSearchRequest;
+import org.example.util.LRU;
+import org.example.util.Parser;
+import org.example.util.Result;
+
+// TODO: Documentation
 public class Teacher {
 
 	private static LRU<String, List<Teacher>> cache = null;
@@ -29,96 +34,155 @@ public class Teacher {
 		cache = null;
 	}
 
-	// TODO: Implement Error enums
-	public static Result<Teacher, String> search(long teacher_id) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to open a connection");
+	// TODO: Documentation
+	public static Result<Teacher, Err> search(long teacher_id) {
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT Name FROM Teacher WHERE TeacherID = ?;"
 			);
+		) {
 			stmt.setLong(1, teacher_id);
 
 			ResultSet rst = stmt.executeQuery();
 			if (!rst.next()) {
-				stmt.close();
-				return Result.err("No Teacher with such element");
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"No element with such id"
+				));
 			}
 			String name = rst.getString(1);
-
-			stmt.close();
-			return Result.ok(new Teacher(teacher_id, name));
+			Teacher teacher = new Teacher(teacher_id, name);
+			return Result.ok(teacher);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
 		} catch (SQLException e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
+		} catch (Exception e) {
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
+	// TODO: Documentation
 	// TODO: Implement Inset pagination
-	// TODO: Implement Error enums
-	// TODO: Cache
-	public static Result<List<Teacher>, String> search(String pattern) {
-		Optional<String> valid_pattern = Validator.validate_sql(pattern);
-		if (valid_pattern.isEmpty()) {
-			return Result.err("Need Valid Pattern. Not SQL T-T");
-		}
-
-		pattern = valid_pattern.get();
+	public static Result<List<Teacher>, Err> search(String pattern) {
 		Optional<List<Teacher>> cache_contents = cache.get(pattern);
 		if (cache_contents.isPresent()) {
 			return Result.ok(cache_contents.get());
 		}
 
-		if (!pattern.endsWith("%")) {
-			pattern = pattern.concat("%");
+		// TODO: you can do better than this dinesh
+		String param = pattern;
+		if (!param.endsWith("%")) {
+			param += pattern.concat("%");
 		}
 
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to obtain connection");
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Teacher WHERE Name LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, pattern);
-			ResultSet exists_rst = exists.executeQuery();
-
-			if (!exists_rst.next()) {
-				exists.close();
-				exists_rst.close();
-				return Result.err("No results");
-			}
-
+			// NOTE: Hardcode 20 in here. Change it when you implement inset pagination
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT TeacherID, Name FROM Teacher WHERE Name LIKE ? LIMIT 20;"
 			);
+		) {
+			exists.setString(1, param);
+			ResultSet exists_rst = exists.executeQuery();
 
-			stmt.setString(1, pattern);
+			if (!exists_rst.next()) {
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"No Teacher with the given ID"
+				));
+			}
+
+			stmt.setString(1, param);
 			ResultSet rst = stmt.executeQuery();
 
-			List<Teacher> teachers = new ArrayList<>();
+			// NOTE: Hardcode value
+			List<Teacher> teachers = new ArrayList<>(20);
 			while (rst.next()) {
 				long teacher_id = rst.getLong(1);
 				String name = rst.getString(2);
 				teachers.addLast(new Teacher(teacher_id, name));
 			}
 
-			exists_rst.close();
-			rst.close();
-
-			cache.put(valid_pattern.get(), teachers);
+			cache.put(pattern, teachers);
 			return Result.ok(teachers);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
 		} catch (SQLException e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
+		} catch (Exception e) {
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
+	}
+
+	public static Result<TeacherSearchRequest, Err> extract(Map<String, String[]> map) {
+		TeacherSearchRequest out = new TeacherSearchRequest();
+		String[] patterns = map.get("pattern");
+		if (patterns != null) {
+			if (patterns.length != 1) {
+				return Result.err(new Err(
+					ErrKind.IllegalArgument,
+					"pattern must be singular"
+				));
+			}
+			out.setPattern(patterns[0]);
+		}
+
+		String[] ids = map.get("id");
+		if (ids != null) {
+			if (patterns.length != 1) {
+				return Result.err(new Err(
+					ErrKind.IllegalArgument,
+					"rollno must be singular"
+				));
+			}
+			Result<Long, Err> parsed_id = Parser.parse_long(ids[0]);
+			if (parsed_id.isErr()) {
+				return Result.err(parsed_id.err_msg());
+			}
+			out.setTeacherid(parsed_id.unwrap());
+		}
+
+		if (patterns == null && ids == null) {
+			return Result.err(new Err(
+				ErrKind.IllegalArgument,
+				"Search Parameters unfulfilled"
+			));
+		
+		}
+		return Result.ok(out);
 	}
 
 	public long teacher_id;
