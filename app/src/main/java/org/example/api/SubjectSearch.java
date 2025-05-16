@@ -2,11 +2,11 @@ package org.example.api;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.Optional;
+import java.io.Writer;
 
 import org.example.data.Subject;
-import org.example.util.Parser;
+import org.example.types.Err;
+import org.example.types.extractors.SubjectSearchRequest;
 import org.example.util.Result;
 import org.example.util.Serializer;
 
@@ -18,108 +18,52 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = "/api/subject/search")
 public class SubjectSearch extends HttpServlet {
+	private static Result<Void, Err> search_and_serialize_to(SubjectSearchRequest req, Writer dst) {
+		if (req.getSubjectname() != null) {
+			return Subject.search(req.getSubjectname())
+				.and_then(results -> Serializer.serialize_to(results, dst));
+		} else if (req.getSubjectcode() != null) {
+			return Subject.search_code(req.getSubjectcode())
+				.and_then(results -> Serializer.serialize_to(results, dst));
+		} else {
+			return Subject.search(req.getSubjectid())
+				.and_then(results -> Serializer.serialize_to(results, dst));
+		}
+	}
+
+	private static int err_to_status(Err e) {
+		switch (e.kind) {
+			case ElementNotFound:
+				return HttpServletResponse.SC_NO_CONTENT;
+			case OutOfMemory:
+			case ClassNotFound:
+			case IllegalState:
+			case DBTimeout:
+			case JsonIOError:
+			case JsonSerializeError:
+				return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+			default:
+				return HttpServletResponse.SC_BAD_REQUEST;
+		}
+	}
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String pattern_param = req.getParameter("pattern");
-
-		if (pattern_param != null) {
-			Result<List<Subject>, String> result = Subject.search(pattern_param);
-			if (result.isErr()) {
-				String err = result.err_msg();
-				if (err.equals("No results")) {
-					resp.sendError(HttpServletResponse.SC_NO_CONTENT);
-					resp.flushBuffer();
-					return;
-				}
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.err_msg());
-				resp.flushBuffer();
-				return;
-			}
-
-			Result<String, String> payload = Serializer.serialize(result.unwrap());
-			if (payload.isErr()) {
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, payload.err_msg());
-			}
-
+		try (
 			PrintWriter out = resp.getWriter();
-			out.write(payload.unwrap());
-			out.flush();
-			out.close();
-			return;
-		}
-
-		String code_param = req.getParameter("code");
-		if (code_param != null ) {
-			Result<List<Subject>, String> result = Subject.search_code(code_param);
+		) {
+			Result<Void, Err> result = Subject
+				.extract(req.getParameterMap())
+				.and_then(search_request -> search_and_serialize_to(search_request, out));
 			if (result.isErr()) {
-				String err = result.err_msg();
-				if (err.equals("No results")) {
-					resp.sendError(HttpServletResponse.SC_NO_CONTENT);
-					resp.flushBuffer();
-					return;
-				}
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.err_msg());
-				resp.flushBuffer();
-				return;
+				Err e = result.err_msg();
+				resp.sendError(err_to_status(e), e.toString());
+			} else {
+				resp.setStatus(HttpServletResponse.SC_OK);
 			}
-
-			Result<String, String> payload = Serializer.serialize(result.unwrap());
-			if (payload.isErr()) {
-				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, payload.err_msg());
-			}
-
-			PrintWriter out = resp.getWriter();
-			out.write(payload.unwrap());
-			out.flush();
-			out.close();
-			return;
-		}
-
-
-		String id_param = req.getParameter("id");
-		if (id_param == null) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Must set id or code or pattern"
-			);
 			resp.flushBuffer();
-			return;
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
 		}
-
-		Optional<Long> parsed_long = Parser.parse_long(id_param);
-		if (parsed_long.isEmpty()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"ID must be numeric"
-			);
-			resp.flushBuffer();
-			return;
-		}
-
-		Result<Subject, String> result = Subject.search(parsed_long.get());
-		if (result.isErr()) {
-			resp.sendError(
-				HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-				result.err_msg()
-			);
-			resp.flushBuffer();
-			return;
-		}
-
-		Result<String, String> payload = Serializer.serialize(result.unwrap());
-		if (payload.isErr()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				result.err_msg()
-			);
-			resp.flushBuffer();
-			return;
-		}
-
-		PrintWriter out = resp.getWriter();
-		out.write(payload.unwrap());
-		out.flush();
-		out.close();
-		return;
 	}
 }
