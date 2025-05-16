@@ -76,18 +76,16 @@ public class Result<T, E> {
 		}
 	}
 
-	// public <R, F extends Runnable> Result<T, F> execute(Function<T, Result<R, E>> ok_path, Function<E, Result<T, F>> err_path) {
-	// 	if (this.isErr()) {
-	// 		Result<T, F> err_result = err_path.apply(this.err_msg());
-	// 		return err_result;
-	// 	} else {
-	// 		Result<R, E> ok_result = err_path.apply(this.unwrap());
-	// 		return ok_result;
-	// 	}
-	// }
-
 	public Optional<T> asOption() {
 		return type == Variant.Ok ? Optional.of(this.data) : Optional.empty();
+	}
+
+	public static <T, E> Result<T, E> fromOption(Optional<T> o) {
+		if (o.isPresent()) {
+			return Result.ok(o.get());
+		} else {
+			return Result.err(null);
+		}
 	}
 
 	public static <T, E> Result<T, E> ok(T data) {
