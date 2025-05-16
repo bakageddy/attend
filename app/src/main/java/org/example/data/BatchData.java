@@ -3,16 +3,20 @@ package org.example.data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.example.types.Err;
+import org.example.types.ErrKind;
 import org.example.util.LRU;
 import org.example.util.Result;
 
 public class BatchData {
-	private static LRU<Long, List<Student>> cache;
-	public static void set_cache(LRU<Long, List<Student>> cache) {
+	private static LRU<Long, BatchData> cache;
+	public static void set_cache(LRU<Long, BatchData> cache) {
 		if (BatchData.cache != null) {
 			BatchData.cache.flush();
 		}
@@ -26,18 +30,23 @@ public class BatchData {
 		BatchData.cache = null;
 	}
 
-	public static Optional<BatchData> search(long batchid) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Optional.empty();
+	public static Result<BatchData, Err> search(long batchid) {
+		Optional<BatchData> cache_contents = cache.get(batchid);
+		if (cache_contents.isPresent()) {
+			return Result.fromOption(cache_contents);
+		}
+
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
-				"SELECT Teacher.TeacherID, Student.RollNo, Student.Name FROM BatchData JOIN Student ON BatchData.RollNo = Student.RollNo WHERE BatchData.BatchID = ?;"
+				"SELECT Batch.TeacherID, Student.RollNo, Student.Name FROM Batch JOIN BatchData ON Batch.BatchID = BatchData.BatchID JOIN Student ON BatchData.RollNo = Student.RollNo WHERE Batch.BatchID = ?;"
 			);
+		) {
 			stmt.setLong(1, batchid);
 			ResultSet rst = stmt.executeQuery();
 
@@ -53,55 +62,89 @@ public class BatchData {
 
 			if (teacherid.isEmpty()) {
 				students.clear();
-				return Optional.empty();
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"Cannot find batch with the given batchid"
+				));
 			}
-			return Optional.of(new BatchData(batchid, teacherid.get(), students));
+			BatchData data = new BatchData(batchid, teacherid.get(), students);
+			cache.put(batchid, data);
+			return Result.ok(data);
 
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Optional.empty();
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 
 	}
 
-	public static Result<Void, String> add(long batchid, long rollno) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+	public static Result<Void, Err> add(long batchid, long rollno) {
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"INSERT INTO BatchData(batchid, rollno) VALUES(?, ?);"
 			);
+		) {
 			stmt.setLong(1, batchid);
 			stmt.setLong(2, rollno);
 
 			int no_of_rows = stmt.executeUpdate();
 			if (no_of_rows != 1) {
-				return Result.err("BEEP BOOP, Insert failed");
+				return Result.err(new Err(
+					ErrKind.InsertionErr,
+					"Failed to insert batchid and rollno"
+				));
 			}
-
 			return Result.ok(null);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
-	public static Result<Void, String> add(long batchid, long[] rollnos) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+	public static Result<Void, Err> add(long batchid, long[] rollnos) {
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
-			// String query = construct_query(batchid, rollnos);
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"INSERT INTO BatchData (BatchID, RollNo) VALUES (?, ?);"
 			);
+		) {
 			for (long rollno : rollnos) {
 				stmt.setLong(1, batchid);
 				stmt.setLong(2, rollno);
@@ -110,51 +153,88 @@ public class BatchData {
 
 			int[] no_of_rows = stmt.executeBatch();
 			if (no_of_rows.length != rollnos.length) {
-				return Result.err("BEEP BOOP, failed to add students");
+				return Result.err(new Err(
+					ErrKind.InsertionErr,
+					"Failed to insert all of the entries"
+				));
 			}
 
 			return Result.ok(null);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
-	public static Result<Void, String> delete(long batchid, long rollno) {
+	public static Result<Void, Err> delete(long batchid, long rollno) {
 
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
+			Connection cnx = result_cnx.unwrap();
+			PreparedStatement stmt = cnx.prepareStatement(
+				"DELETE FROM BatchData WHERE BatchID = ? AND RollNo = ?;"
+			);
 		) {
-			PreparedStatement stmt = cnx.prepareStatement("DELETE FROM BatchData WHERE BatchID = ? AND RollNo = ?;");
 			stmt.setLong(1, batchid);
 			stmt.setLong(2, rollno);
 
 			int no = stmt.executeUpdate();
 			if (no != 1) {
-				return Result.err("BEEP BOOP, cannot delete student from batch");
+				return Result.err(new Err(
+					ErrKind.DeleteErr,
+					"Failed to delete entry"
+				));
 			}
 
 			return Result.ok(null);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
-	public static Result<Void, String> delete(long batchid, long rollnos[]) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+	public static Result<Void, Err> delete(long batchid, long rollnos[]) {
+		Result<Connection, Err> optional_cnx = Database.get_connection();
+		if (optional_cnx.isErr()) {
+			return Result.err(optional_cnx.err_msg());
 		}
+
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = optional_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"DELETE FROM BatchData WHERE BatchID = ? AND RollNo = ?;"
 			);
+		) {
 
 			for (long rollno : rollnos) {
 				stmt.setLong(1, batchid);
@@ -164,31 +244,66 @@ public class BatchData {
 
 			int[] no = stmt.executeBatch();
 			if (no.length != rollnos.length) {
-				return Result.err("BEEP BOOP, cannot delete student from batch");
+				return Result.err(new Err(
+					ErrKind.DeleteErr,
+					"Failed to delete all of the entries"
+				));
 			}
-
 			return Result.ok(null);
+
+		} catch (SQLTimeoutException e) {
+
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
-	public static Result<Void, String> delete_all(long batchid) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+	public static Result<Void, Err> delete_all(long batchid) {
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
+			Connection cnx = result_cnx.unwrap();
+			PreparedStatement stmt = cnx.prepareStatement(
+				"DELETE FROM BatchData WHERE BatchID = ?;"
+			);
 		) {
-			PreparedStatement stmt = cnx.prepareStatement("DELETE FROM BatchData WHERE BatchID = ?;");
 			stmt.setLong(1, batchid);
-
 			stmt.executeUpdate();
 			return Result.ok(null);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
