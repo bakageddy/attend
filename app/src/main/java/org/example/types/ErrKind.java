@@ -37,6 +37,12 @@ public enum ErrKind {
 			return "IllegalState";
 		}
 	},
+	NumberFormat {
+		@Override
+		public String toString() {
+			return "NumberFormat";
+		}
+	},
 	IllegalArgument {
 		public String toString() {
 			return "IllegalArgument";
@@ -47,10 +53,14 @@ public enum ErrKind {
 			return "ElementNotFound";
 		}
 	},
-	NumberFormat {
-		@Override
+	InsertionErr {
 		public String toString() {
-			return "NumberFormat";
+			return "InsertionErr";
+		}
+	},
+	DeleteErr {
+		public String toString() {
+			return "DeleteErr";
 		}
 	},
 	DBTimeout {
@@ -68,9 +78,9 @@ public enum ErrKind {
 			return "JsonSerializeError";
 		}
 	},
-	JsonIOError {
+	IOError {
 		public String toString() {
-			return "JsonIOError";
+			return "IOError";
 		}
 	};
 

@@ -39,7 +39,7 @@ public class SubjectSearch extends HttpServlet {
 			case ClassNotFound:
 			case IllegalState:
 			case DBTimeout:
-			case JsonIOError:
+			case IOError:
 			case JsonSerializeError:
 				return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 			default:
