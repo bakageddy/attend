@@ -1,18 +1,24 @@
 package org.example.data;
 
-import java.util.Optional;
-
-import org.example.util.LRU;
-import org.example.util.Result;
-import org.example.util.Validator;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.List;
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-public class Batch {
+import org.example.types.Err;
+import org.example.types.ErrKind;
+import org.example.types.extractors.BatchSearchRequest;
+import org.example.util.Extractor;
+import org.example.util.LRU;
+import org.example.util.Result;
+import org.example.util.Parser;
+
+public class Batch implements Extractor<BatchSearchRequest> {
 	private static LRU<Long, List<Batch>> batch_owner_cache = null;
 	private static LRU<String, List<Batch>> batch_pattern_cache = null;
 
@@ -40,70 +46,86 @@ public class Batch {
 			Batch.batch_pattern_cache.flush();
 	}
 
-	public static Result<Batch, String> search(long batchid) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+	public static Result<Batch, Err> search(long batchid) {
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 		try (
-			Connection cnx = optional_cnx.get()
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT BatchID, TeacherID, Name FROM Batch WHERE BatchID = ?;"
 			);
+		) {
 			stmt.setLong(1, batchid);
 			ResultSet rst = stmt.executeQuery();
 
 			if (!rst.next()) {
-				return Result.err("No Batch found with the given ID");
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"Cannot find batch with the given ID"
+				));
 			}
 
 			long teacherid = rst.getLong(2);
 			String name = rst.getString(3);
 			return Result.ok(new Batch(batchid, teacherid, name));
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
-	public static Result<List<Batch>, String> search(String pattern) {
-		Optional<String> validated_pattern = Validator.validate_sql(pattern);
-		if (validated_pattern.isEmpty()) {
-			return Result.err("Expect Valid SQL.");
-		}
+	public static Result<List<Batch>, Err> search(String pattern) {
 
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
-		}
-
-		pattern = validated_pattern.get();
 		Optional<List<Batch>> cache_contents = batch_pattern_cache.get(pattern);
 		if (cache_contents.isPresent()) {
 			return Result.ok(cache_contents.get());
 		}
 
+		String param = pattern;
 		if (!pattern.endsWith("%")) {
-			pattern += "%";
+			param += "%";
+		}
+
+		Result<Connection, Err> optional_cnx = Database.get_connection();
+		if (optional_cnx.isErr()) {
+			return Result.err(optional_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = optional_cnx.unwrap();
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Batch WHERE Name LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, pattern);
-			ResultSet exists_rst = exists.executeQuery();
-
-			if (!exists_rst.next()) {
-				return Result.err("No Batch with the given pattern");
-			}
-
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT BatchID, TeacherID, Name FROM Batch WHERE Name LIKE ? LIMIT 20;"
 			);
-			stmt.setString(1, pattern);
+		) {
+			exists.setString(1, param);
+			ResultSet exists_rst = exists.executeQuery();
+
+			if (!exists_rst.next()) {
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"Cannot find any batch with the given name"
+				));
+			}
+
+			stmt.setString(1, param);
 
 			ResultSet rst = stmt.executeQuery();
 			List<Batch> batches = new ArrayList<>();
@@ -114,31 +136,44 @@ public class Batch {
 				batches.addLast(new Batch(batchid, teacherid, name));
 			}
 
-			exists.close();
-			stmt.close();
-			batch_pattern_cache.put(validated_pattern.get(), batches);
+			batch_pattern_cache.put(pattern, batches);
 			return Result.ok(batches);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
-	public static Result<List<Batch>, String> search_teacherid(long teacherid) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
-		}
+	public static Result<List<Batch>, Err> search_teacherid(long teacherid) {
 		Optional<List<Batch>> cache_contents = batch_owner_cache.get(teacherid);
 		if (cache_contents.isPresent()) {
 			return Result.ok(cache_contents.get());
 		}
 
+		Result<Connection, Err> optional_cnx = Database.get_connection();
+		if (optional_cnx.isErr()) {
+			return Result.err(optional_cnx.err_msg());
+		}
+
 		try (
-			Connection cnx = optional_cnx.get()
-		) {
+			Connection cnx = optional_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
-				"SELECT BatchID, Name FROM Batch WHERE TeacherID = ?;"
+				"SELECT BatchID, Name FROM Batch WHERE TeacherID = ? LIMIT 20;"
 			);
+		) {
 			stmt.setLong(1, teacherid);
 			ResultSet rst = stmt.executeQuery();
 
@@ -149,66 +184,161 @@ public class Batch {
 				batches.addLast(new Batch(batchid, teacherid, name));
 			}
 			return Result.ok(batches);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 
 	}
 
-	public static Result<Long, String> create(long teacherid, String name) {
-		Optional<String> validated_pattern = Validator.validate_sql(name);
-		if (validated_pattern.isEmpty()) {
-			return Result.err("You shalln't try to hack me T-T");
-		}
-
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+	public static Result<Long, Err> create(long teacherid, String name) {
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
+			Connection cnx = result_cnx.unwrap();
+			PreparedStatement stmt = cnx.prepareStatement(
+				"INSERT INTO Batch(Name, TeacherID) VALUES(?, ?) RETURNING BatchID;"
+			);
 		) {
-			PreparedStatement stmt = cnx.prepareStatement("INSERT INTO Batch(Name, TeacherID) VALUES(?, ?) RETURNING BatchID;");
 			stmt.setString(1, name);
 			stmt.setLong(2, teacherid);
 
 			ResultSet rst = stmt.executeQuery();
 			if (!rst.next()) {
-				return Result.err("Failed to create batch");
+				return Result.err(new Err(
+					ErrKind.InsertionErr,
+					"Cannot create batch"
+				));
 			}
 
 			long batchid = rst.getLong(1);
 			return Result.ok(batchid);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
-	public static Result<Void, String> delete(long batchid, long teacherid) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+	public static Result<Void, Err> delete(long batchid, long teacherid) {
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"DELETE FROM Batch WHERE BatchID = ? AND TeacherID = ?;"
 			);
+		) {
 			stmt.setLong(1, batchid);
 			stmt.setLong(2, teacherid);
 
 			int no = stmt.executeUpdate();
 			if (no != 1) {
-				return Result.err("Failed to delete batch");
+				return Result.err(new Err(
+					ErrKind.DeleteErr,
+					"Cannot delete batch with the given batchid and teacherid"
+				));
 			}
 
 			return Result.ok(null);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
+	}
+
+	public static Result<BatchSearchRequest, Err> extract(Map<String, String[]> map) {
+		BatchSearchRequest request = new BatchSearchRequest();
+		String[] patterns = map.get("pattern");
+		if (patterns != null) {
+			if (patterns.length != 1) {
+				return Result.err(new Err(
+					ErrKind.IllegalArgument,
+					"pattern must be singular"
+				));
+			}
+			request.setBatchname(patterns[0]);
+		}
+		String[] teacherid = map.get("teacherid");
+		if (teacherid != null) {
+			if (teacherid.length != 1) {
+				return Result.err(new Err(
+					ErrKind.IllegalArgument,
+					"teacherid must be singular"
+				));
+			}
+			Result<Long, Err> parsed_teacherid = Parser.parse_long(teacherid[0]);
+			if (parsed_teacherid.isErr()) {
+				return Result.err(parsed_teacherid.err_msg());
+			}
+			request.setTeacherid(parsed_teacherid.asOption());
+		}
+
+		String[] batchid = map.get("batchid");
+		if (batchid != null) {
+			if (batchid.length != 1) {
+				return Result.err(new Err(
+					ErrKind.IllegalArgument,
+					"batchid must be singular"
+				));
+			}
+			Result<Long, Err> parsed_batchid = Parser.parse_long(batchid[0]);
+			if (parsed_batchid.isErr()) {
+				return Result.err(parsed_batchid.err_msg());
+			}
+			request.setBatchid(parsed_batchid.asOption());
+		}
+		if (patterns == null && teacherid == null && batchid == null) {
+			return Result.err(new Err(
+				ErrKind.IllegalArgument,
+				"Search parameters: `<pattern>` || `teacherid` || `batchid` unfulfilled"
+			));
+		}
+		return Result.ok(request);
 	}
 
 	long batchid;

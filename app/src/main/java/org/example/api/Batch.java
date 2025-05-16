@@ -2,12 +2,15 @@ package org.example.api;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Optional;
 
 import org.example.data.BatchData;
-import org.example.util.Parser;
+import org.example.types.Err;
+import org.example.types.extractors.BatchCreateRequest;
+import org.example.types.extractors.BatchDataFetchRequest;
+import org.example.types.extractors.BatchDeleteRequest;
 import org.example.util.Result;
 import org.example.util.Serializer;
+import org.example.util.Response;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,149 +24,93 @@ public class Batch extends HttpServlet {
 	// TODO: implement using refactored BatchData
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String param = req.getParameter("batchid");
-		if (param == null) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Must set batchid"
-			);
-			resp.flushBuffer();
-			return;
+		try (PrintWriter out = resp.getWriter()) {
+			BatchDataFetchRequest.extract(req.getParameterMap())
+				.and_then(request -> BatchData.search(request.getBatchid().get()))
+				.and_then(results -> Serializer.serialize_to(results, out))
+				.and_then(_ignore -> set_status(resp, HttpServletResponse.SC_OK))
+				.or_else(err -> send_err(resp, err));
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
 		}
-
-		Optional<Long> batchid = Parser.parse_long(param);
-		if (batchid.isEmpty()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Need Numerical ID"
-			);
-		}
-
-		var result = BatchData.search(batchid.get());
-		if (result.isEmpty()) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "No Batch Members found with the given ID");
-			resp.flushBuffer();
-			return;
-		}
-
-		Result<String, String> payload = Serializer.serialize(result.get());
-		if (payload.isErr()) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, payload.err_msg());
-			resp.flushBuffer();
-			return;
-		}
-
-		PrintWriter out = resp.getWriter();
-		out.write(payload.unwrap());
-		out.flush();
-		out.close();
-		return;
 	}
 
 	// Create Empty Batch
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String teacherid_param = req.getParameter("teacherid");
-		if (teacherid_param == null) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Must set teacherid"
-			);
-			resp.flushBuffer();
+		try (
+			PrintWriter out = resp.getWriter();
+		) {
+			BatchCreateRequest.extract(req.getParameterMap())
+				.and_then(create_request -> handle_creation(create_request))
+				.and_then(id -> Response.send(id, out))
+				.or_else(err -> send_err(resp, err));
 			return;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
 		}
-
-		Optional<Long> teacherid = Parser.parse_long(teacherid_param);
-		if (teacherid.isEmpty()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"TeacherID must be postively numeric"
-			);
-			resp.flushBuffer();
-			return;
-		}
-
-		String name_param = req.getParameter("name");
-		if (name_param == null) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Must set batch name"
-			);
-			resp.flushBuffer();
-			return;
-		}
-
-		var result = org.example.data.Batch.create(teacherid.get(), name_param);
-		if (result.isErr()) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.err_msg());
-			resp.flushBuffer();
-			return;
-		}
-
-		Result<String, String> payload = Serializer.serialize(result.unwrap());
-		if (payload.isErr()) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, payload.err_msg());
-			resp.flushBuffer();
-			return;
-		}
-
-		PrintWriter out = resp.getWriter();
-		out.write(payload.unwrap());
-		out.flush();
-		out.close();
-		return;
 	}
 
 	// Delete Batch
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String batchid_param = req.getParameter("batchid");
-		if (batchid_param == null) {
+		try {
+			BatchDeleteRequest.extract(req.getParameterMap())
+					.and_then(delete_request -> handle_deletion(delete_request))
+					.and_then(_ignore -> set_status(resp, HttpServletResponse.SC_OK))
+					.or_else(e -> send_err(resp, e));
+			return;
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+	}
+
+
+	private static Result<Void, Err> set_status(HttpServletResponse resp, int status) {
+		resp.setStatus(status);
+		return Result.ok(null);
+	}
+
+	private static<T> Result<T, Void> send_err(HttpServletResponse resp, Err e) {
+		try {
 			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Must set batchid"
+				err_to_status(e),
+				e.toString()
 			);
 			resp.flushBuffer();
-			return;
+			return Result.ok(null);
+		} catch (IOException ex) {
+			return Result.err(null);
 		}
+	}
 
-		Optional<Long> batchid = Parser.parse_long(batchid_param);
-		if (batchid.isEmpty()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"batchid must be numeric"
-			);
+
+
+	private static Result<Long, Err> handle_creation(BatchCreateRequest req) {
+		return org.example.data.Batch.create(
+			req.getTeacherid().get(), 
+			req.getName());
+	}
+
+	private static Result<Void, Err> handle_deletion(BatchDeleteRequest req) {
+		return org.example.data.Batch.delete(
+			req.getBatchid().get(),
+			req.getTeacherid().get());
+	}
+
+	private static int err_to_status(Err e) {
+		switch (e.kind) {
+			case ElementNotFound:
+				return HttpServletResponse.SC_NO_CONTENT;
+			case OutOfMemory:
+			case ClassNotFound:
+			case IllegalState:
+			case DBTimeout:
+			case IOError:
+			case JsonSerializeError:
+				return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+			default:
+				return HttpServletResponse.SC_BAD_REQUEST;
 		}
-
-		String teacherid_param = req.getParameter("teacherid");
-		if (teacherid_param == null) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"Must set teacherid"
-			);
-			resp.flushBuffer();
-			return;
-		}
-
-		Optional<Long> teacherid = Parser.parse_long(teacherid_param);
-		if (teacherid.isEmpty()) {
-			resp.sendError(
-				HttpServletResponse.SC_BAD_REQUEST,
-				"teacherid must be numeric"
-			);
-			resp.flushBuffer();
-			return;
-		}
-
-		var result = org.example.data.Batch.delete(batchid.get(), teacherid.get());
-		if (result.isErr()) {
-			resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, result.err_msg());
-			resp.flushBuffer();
-			return;
-		}
-
-		resp.setStatus(HttpServletResponse.SC_OK);
-		resp.flushBuffer();
-		return;
 	}
 }
