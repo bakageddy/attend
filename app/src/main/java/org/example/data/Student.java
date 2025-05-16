@@ -60,15 +60,18 @@ public class Student implements Extractor<StudentSearchRequest> {
 			String name = rst.getString(1);
 			Student std = new Student(rollno, name);
 			return Result.ok(std);
+
 		} catch (SQLTimeoutException e) {
 			return Result.err(new Err(
 				ErrKind.DBTimeout,
 				e.getMessage()
 			));
+
 		} catch (SQLException e) {
 			return Result.err(new Err(
 				ErrKind.DBConnectionErr,
-				e.getMessage()));
+				e.getMessage()
+			));
 		} catch (Exception e) {
 			return Result.err(new Err(
 				ErrKind.Unreachable,
@@ -85,11 +88,9 @@ public class Student implements Extractor<StudentSearchRequest> {
 			return Result.ok(cache_contents.get());
 		}
 
-		String param = null;
+		String param = pattern;
 		if (!pattern.endsWith("%")) {
 			param = pattern.concat("%");
-		} else {
-			param = pattern;
 		}
 
 		Result<Connection, Err> result_cnx = Database.get_connection();
@@ -99,10 +100,12 @@ public class Student implements Extractor<StudentSearchRequest> {
 
 		try (
 			Connection cnx = result_cnx.unwrap();
+
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Student WHERE Name LIKE ? LIMIT 1;"
 			);
-			// Hardcode 20 in here. Change it when you implement inset pagination
+
+			// NOTE: Hardcode 20 in here. Change it when you implement inset pagination
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT RollNo, Name FROM Student WHERE Name LIKE ? ORDER BY RollNo LIMIT 20;"
 			);
@@ -120,8 +123,9 @@ public class Student implements Extractor<StudentSearchRequest> {
 
 			stmt.setString(1, param);
 			ResultSet result = stmt.executeQuery();
-			List<Student> names = new ArrayList<>(20);
 
+			// NOTE: Hardcode value
+			List<Student> names = new ArrayList<>(20);
 			while (result.next()) {
 				long id = result.getLong(1);
 				String name = result.getString(2);
@@ -179,12 +183,12 @@ public class Student implements Extractor<StudentSearchRequest> {
 
 		if (patterns == null || rollnos == null) {
 			return Result.err(new Err(
-				ErrKind.ElementNotFound,
+				ErrKind.IllegalArgument,
 				"Search Parameters unfulfilled"
 			));
-		} else {
-			return Result.ok(out);
 		}
+
+		return Result.ok(out);
 	}
 
 	public long rollNo;
