@@ -30,6 +30,7 @@ public class Serializer<T> {
 				serializer = new Gson();
 			}
 			serializer.toJson(src, dst);
+			dst.flush();
 			return Result.ok(null);
 		} catch (JsonIOException e) {
 			return Result.err(new Err(

@@ -1,21 +1,24 @@
 package org.example.data;
 
-import org.example.util.LRU;
-import org.example.util.Result;
-import org.example.util.Validator;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-/**
- * Subject
- */
-public class Subject {
+import org.example.types.Err;
+import org.example.types.ErrKind;
+import org.example.types.extractors.SubjectSearchRequest;
+import org.example.util.Extractor;
+import org.example.util.LRU;
+import org.example.util.Parser;
+import org.example.util.Result;
+
+public class Subject implements Extractor<SubjectSearchRequest> {
 
 	private static LRU<String, List<Subject>> subject_name_cache;
 	private static LRU<String, List<Subject>> subject_code_cache;
@@ -44,141 +47,159 @@ public class Subject {
 		Subject.subject_code_cache = null;
 	}
 
-	// TODO: Implement Error enums
-	public static Result<Subject, String> search(long subject_id) {
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+	public static Result<Subject, Err> search(long subject_id) {
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT SubjectID, SubjectCode, Name FROM Subject WHERE SubjectID = ?;"
 			);
+		) {
 			stmt.setLong(1, subject_id);
-
 			ResultSet rst = stmt.executeQuery();
+
 			if (!rst.next()) {
 				stmt.close();
-				return Result.err("No subject with the given subjectid");
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"No subject with the given id"
+				));
 			}
 
 			String subject_code = rst.getString(2);
 			String subject_name = rst.getString(3);
+			Subject s = new Subject(subject_id, subject_code, subject_name);
 
-			stmt.close();
-			return Result.ok(new Subject(subject_id, subject_code, subject_name));
+			return Result.ok(s);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
 		} catch (SQLException e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
+		} catch (Exception e) {
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
 	// TODO: Implement Inset pagination
-	// TODO: Implement Error enums
-	// TODO: Cache
-	public static Result<List<Subject>, String> search(String pattern) {
-		Optional<String> valid_pattern = Validator.validate_sql(pattern);
-		if (valid_pattern.isEmpty()) {
-			return Result.err("Need Valid Pattern. Not SQL T-T");
-		}
-
-		pattern = valid_pattern.get();
+	public static Result<List<Subject>, Err> search(String pattern) {
 		Optional<List<Subject>> cache_contents = subject_name_cache.get(pattern);
 		if (cache_contents.isPresent()) {
 			return Result.ok(cache_contents.get());
 		}
 
+		String param = pattern;
 		if (!pattern.endsWith("%")) {
-			pattern = pattern.concat("%");
+			param = pattern.concat("%");
 		}
 
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement exists = cnx.prepareStatement(
-				"SELECT 1 FROM Teacher WHERE Name LIKE ? LIMIT 1;"
+				"SELECT 1 FROM Subject WHERE Name LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, pattern);
-			ResultSet exists_rst = exists.executeQuery();
-
-			if (!exists_rst.next()) {
-				exists_rst.close();
-				return Result.err("No results");
-			}
-
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT SubjectID, SubjectCode, Name FROM Subject WHERE Name LIKE ? LIMIT 20;"
 			);
-			stmt.setString(1, pattern);
-			ResultSet rst = stmt.executeQuery();
+		) {
 
+			exists.setString(1, param);
+
+			ResultSet exists_rst = exists.executeQuery();
+			if (!exists_rst.next()) {
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"No subject with such pattern"
+				));
+			}
+
+			stmt.setString(1, param);
+
+			ResultSet rst = stmt.executeQuery();
 			List<Subject> subjects = new ArrayList<>();
 			while (rst.next()) {
 				long subject_id = rst.getLong(1);
 				String subject_code = rst.getString(2);
 				String subject_name = rst.getString(3);
-				subjects.addLast(new Subject(subject_id, subject_code, subject_name));
+				Subject s = new Subject(subject_id, subject_code, subject_name);
+				subjects.addLast(s);
 			}
 
-			stmt.close();
-			subject_name_cache.put(valid_pattern.get(), subjects);
+			subject_name_cache.put(pattern, subjects);
 			return Result.ok(subjects);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
 
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
 	// TODO: Implement Inset pagination
-	// TODO: Implement Error enums
-	// TODO: Cache Results
-	public static Result<List<Subject>, String> search_code(String code_pattern) {
-		Optional<String> valid_pattern = Validator.validate_sql(code_pattern);
-		if (valid_pattern.isEmpty()) {
-			return Result.err("Need Valid Pattern. Not SQL T-T");
-		}
-
-
-		code_pattern = valid_pattern.get();
+	public static Result<List<Subject>, Err> search_code(String code_pattern) {
 		Optional<List<Subject>> cache_contents = subject_code_cache.get(code_pattern);
 		if (cache_contents.isPresent()) {
 			return Result.ok(cache_contents.get());
 		}
 
 		// Improve searching
+		String param = code_pattern;
 		if (!code_pattern.endsWith("%")) {
-			code_pattern += "%";
+			param = code_pattern + "%";
 		}
 
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to obtain connection");
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement exists = cnx.prepareStatement(
 				"SELECT 1 FROM Subject WHERE SubjectCode LIKE ? LIMIT 1;"
 			);
-			exists.setString(1, code_pattern);
-			ResultSet exists_rst = exists.executeQuery();
-
-			if (!exists_rst.next()) {
-				exists_rst.close();
-				return Result.err("No results");
-			}
-
 			PreparedStatement stmt = cnx.prepareStatement(
 				"SELECT SubjectID, SubjectCode, Name FROM Subject WHERE SubjectCode LIKE ? LIMIT 20;"
 			);
-			stmt.setString(1, code_pattern);
+		) {
+			exists.setString(1, param);
+			ResultSet exists_rst = exists.executeQuery();
+
+			if (!exists_rst.next()) {
+				return Result.err(new Err(
+					ErrKind.ElementNotFound,
+					"No subjects with the given code"
+				));
+			}
+
+			stmt.setString(1, param);
 			ResultSet rst = stmt.executeQuery();
 
 			List<Subject> subjects = new ArrayList<>();
@@ -191,15 +212,72 @@ public class Subject {
 				);
 			}
 
-			exists_rst.close();
-			stmt.close();
-
-			subject_code_cache.put(valid_pattern.get(), subjects);
+			subject_code_cache.put(code_pattern, subjects);
 			return Result.ok(subjects);
 
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
+	}
+
+	public static Result<SubjectSearchRequest, Err> extract(Map<String, String[]> map) {
+		SubjectSearchRequest request = new SubjectSearchRequest();
+		String[] patterns = map.get("pattern");
+		if (patterns != null) {
+			if (patterns.length != 1) {
+				return Result.err(new Err(
+					ErrKind.IllegalArgument,
+					"`pattern` must be singular"
+				));
+			}
+			request.setSubjectname(patterns[0]);
+		}
+		String[] codes = map.get("code");
+		if (codes != null) {
+			if (codes.length != 1) {
+				return Result.err(new Err(
+					ErrKind.IllegalArgument,
+					"`code` must be singular"
+				));
+			}
+			request.setSubjectcode(codes[0]);
+		}
+		String[] id = map.get("id");
+		if (id != null) {
+			if (id.length != 1) {
+				return Result.err(new Err(
+					ErrKind.IllegalArgument,
+					"`code` must be singular"
+				));
+			}
+			Result<Long, Err> parsed_id = Parser.parse_long(id[0]);
+			if (parsed_id.isErr()) {
+				return Result.err(parsed_id.err_msg());
+			}
+			request.setSubjectid(parsed_id.unwrap());
+		}
+		if (patterns == null && codes == null && id == null) {
+			return Result.err(new Err(
+				ErrKind.IllegalArgument,
+				"Search parameters unfulfilled"
+			));
+		}
+
+		return Result.ok(request);
 	}
 
 	public long subject_id;
