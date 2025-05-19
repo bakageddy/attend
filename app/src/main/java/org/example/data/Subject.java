@@ -234,52 +234,6 @@ public class Subject implements Extractor<SubjectSearchRequest> {
 		}
 	}
 
-	public static Result<SubjectSearchRequest, Err> extract(Map<String, String[]> map) {
-		SubjectSearchRequest request = new SubjectSearchRequest();
-		String[] patterns = map.get("pattern");
-		if (patterns != null) {
-			if (patterns.length != 1) {
-				return Result.err(new Err(
-					ErrKind.IllegalArgument,
-					"`pattern` must be singular"
-				));
-			}
-			request.setSubjectname(patterns[0]);
-		}
-		String[] codes = map.get("code");
-		if (codes != null) {
-			if (codes.length != 1) {
-				return Result.err(new Err(
-					ErrKind.IllegalArgument,
-					"`code` must be singular"
-				));
-			}
-			request.setSubjectcode(codes[0]);
-		}
-		String[] id = map.get("id");
-		if (id != null) {
-			if (id.length != 1) {
-				return Result.err(new Err(
-					ErrKind.IllegalArgument,
-					"`code` must be singular"
-				));
-			}
-			Result<Long, Err> parsed_id = Parser.parse_long(id[0]);
-			if (parsed_id.isErr()) {
-				return Result.err(parsed_id.err_msg());
-			}
-			request.setSubjectid(parsed_id.unwrap());
-		}
-		if (patterns == null && codes == null && id == null) {
-			return Result.err(new Err(
-				ErrKind.IllegalArgument,
-				"Search parameters unfulfilled"
-			));
-		}
-
-		return Result.ok(request);
-	}
-
 	public long subject_id;
 	public String subject_code;
 	public String name;

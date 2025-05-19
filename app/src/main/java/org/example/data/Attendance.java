@@ -2,43 +2,36 @@ package org.example.data;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.List;
-import java.util.Optional;
+import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 
+import org.example.types.Err;
+import org.example.types.ErrKind;
 import org.example.util.Result;
-import org.example.util.Validator;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
 public class Attendance {
-	public static Result<Void, String> enter_student(
+
+	@CheckReturnValue
+	public static Result<Void, Err> enter_student(
 		long rollno,
 		long teacherid,
 		long subjectid,
 		String period,
 		String date
 	) {
-		boolean valid_period = Validator.validate_period(period);
-		if (!valid_period) {
-			return Result.err("Period must be Upper Case Roman Numeral I-VIII");
-		}
-
-		Optional<String> valid_date = Validator.validate_date(date);
-		if (valid_date.isEmpty()) {
-			return Result.err("Date must be in the format YYYY-MM-DD");
-		}
-
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?::date, ?, ?::period, ?, ?);"
 			);
+		) {
 			stmt.setString(1, date);
 			stmt.setLong(2, rollno);
 			stmt.setString(3, period);
@@ -46,42 +39,49 @@ public class Attendance {
 			stmt.setLong(5, teacherid);
 			int rows = stmt.executeUpdate();
 			if (rows != 1) {
-				return Result.err("Something went wrong. Cannot put attendance");
+				return Result.err(new Err(
+					ErrKind.InsertionErr,
+					"Failed to insert attendance record"
+				));
 			}
 			return Result.ok(null);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err("NOT IMPLEMENTED");
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
-	public static Result<Void, String> delete_student(
+	public static Result<Void, Err> delete_student(
 		long rollno,
 		long teacherid,
 		long subjectid,
 		String period,
 		String date
 	) {
-		boolean valid_period = Validator.validate_period(period);
-		if (!valid_period) {
-			return Result.err("Period must be Upper Case Roman Numeral I-VIII");
-		}
-
-		Optional<String> valid_date = Validator.validate_date(date);
-		if (valid_date.isEmpty()) {
-			return Result.err("Date must be in the format YYYY-MM-DD");
-		}
-
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire connection");
+		Result<Connection, Err> optional_cnx = Database.get_connection();
+		if (optional_cnx.isErr()) {
+			return Result.err(optional_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
+			Connection cnx = optional_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"DELETE FROM Attendance WHERE Day=?::date AND RollNo=? AND TeacherID=? AND SubjectID=? AND Period=?::period;"
 			);
+		) {
 			stmt.setString(1, date);
 			stmt.setLong(2, rollno);
 			stmt.setLong(3, teacherid);
@@ -90,52 +90,65 @@ public class Attendance {
 
 			int rows = stmt.executeUpdate();
 			if (rows != 1) {
-				return Result.err("Something went wrong. Cannot delete attendance");
+				return Result.err(new Err(
+					ErrKind.DeleteErr,
+					"Failed to delete attendance record"
+				));
 			}
 			return Result.ok(null);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err("NOT IMPLEMENTED");
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 
-	public static Result<Void, String> enter_batch(
+	public static Result<Void, Err> enter_batch(
 		long batchid,
 		long teacherid,
 		long subjectid,
 		String period,
 		String date
 	) {
-		if (!Validator.validate_period(period)) {
-			return Result.err("Period must be roman-numeral: I-VIII");
+		Result<BatchData, Err> opt_batchdata = BatchData.search(batchid);
+		if (opt_batchdata.isErr()) {
+			return Result.err(new Err(
+				ErrKind.IllegalArgument,
+				"BatchID does not exist / it is empty"
+			));
 		}
 
-		Optional<String> valid_date = Validator.validate_date(date);
-		if (valid_date.isEmpty()) {
-			return Result.err("Date must be in the format YYYY-MM-DD");
-		}
-
-		Optional<BatchData> opt_batchdata = BatchData.search(batchid);
-		if (opt_batchdata.isEmpty()) {
-			return Result.err("There is no batch with the given ID");
-		}
-
-		BatchData batchdata = opt_batchdata.get();
+		BatchData batchdata = opt_batchdata.unwrap();
 		if (batchdata.teacherid != teacherid) {
-			return Result.err("You do not own this batch!");
+			return Result.err(new Err(
+				ErrKind.IllegalState, 
+				"You do not own this batch"
+			));
 		}
 
-		Optional<Connection> optional_cnx = Database.get_connection().asOption();
-		if (optional_cnx.isEmpty()) {
-			return Result.err("Failed to acquire Connection from Database");
+		Result<Connection, Err> optional_cnx = Database.get_connection();
+		if (optional_cnx.isErr()) {
+			return Result.err(optional_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.get();
-		) {
-
+			Connection cnx = optional_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?, ?, ?, ?, ?);"
 			);
+		) {
 			for (Student student : batchdata.students) {
 				stmt.setString(1, date);
 				stmt.setLong(2, student.rollNo);
@@ -147,12 +160,29 @@ public class Attendance {
 
 			int[] no = stmt.executeBatch();
 			if (no.length != batchdata.students.size()) {
-				return Result.err("Failed to insert all the students");
+				return Result.err(new Err(
+					ErrKind.InsertionErr,
+					"Failed to insert Attendance Record(s)"
+				));
 			}
 
 			return Result.err(null);
+		} catch (SQLTimeoutException e) {
+			return Result.err(new Err(
+				ErrKind.DBTimeout,
+				e.getMessage()
+			));
+
+		} catch (SQLException e) {
+			return Result.err(new Err(
+				ErrKind.DBConnectionErr,
+				e.getMessage()
+			));
 		} catch (Exception e) {
-			return Result.err(e.getMessage());
+			return Result.err(new Err(
+				ErrKind.Unreachable,
+				e.getMessage()
+			));
 		}
 	}
 

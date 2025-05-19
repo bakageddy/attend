@@ -1,14 +1,10 @@
 package org.example.api;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Optional;
-
 import org.example.data.BatchData;
 import org.example.types.Err;
 import org.example.types.extractors.BatchDataAddRequest;
 import org.example.types.extractors.BatchDataDeleteRequest;
-import org.example.util.Parser;
 import org.example.util.Result;
 
 import jakarta.servlet.ServletException;

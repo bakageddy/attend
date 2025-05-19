@@ -49,7 +49,7 @@ public class StudentSearch extends HttpServlet {
 		try (
 			Writer out = resp.getWriter();
 		) {
-			Result<Void, Err> result = Student.extract(req.getParameterMap())
+			Result<Void, Err> result = StudentSearchRequest.extract(req.getParameterMap())
 				.and_then(search_request -> search_and_serialize_to(search_request, out));
 			if (result.isErr()) {
 				Err e = result.err_msg();
