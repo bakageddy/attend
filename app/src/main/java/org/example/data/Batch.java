@@ -124,7 +124,8 @@ public class Batch {
 			stmt.setString(1, param);
 
 			ResultSet rst = stmt.executeQuery();
-			List<Batch> batches = new ArrayList<>();
+			// NOTE: This is hardcoded, REFACTOR to use Inset Pagination
+			List<Batch> batches = new ArrayList<>(20);
 			while (rst.next()) {
 				long batchid = rst.getLong(1);
 				long teacherid = rst.getLong(2);
@@ -173,7 +174,8 @@ public class Batch {
 			stmt.setLong(1, teacherid);
 			ResultSet rst = stmt.executeQuery();
 
-			List<Batch> batches = new ArrayList<>();
+			// NOTE: 20 is hardcoded, use Inset pagination
+			List<Batch> batches = new ArrayList<>(20);
 			while (rst.next()) {
 				long batchid = rst.getLong(1);
 				String name = rst.getString(2);

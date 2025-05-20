@@ -38,7 +38,6 @@ public class Database {
 	 *		NumberFormat<br/>
 	 */
 
-	@GuardedBy("data_source")
 	public static Result<Void, Err> init(Properties props) {
 		
 		try {
@@ -123,7 +122,6 @@ public class Database {
 		}
 	}
 
-	@GuardedBy("data_source")
 	public static Result<Connection, Err> get_connection() {
 		try {
 			if (data_source == null) {
@@ -133,15 +131,13 @@ public class Database {
 				);
 			}
 
-			synchronized(data_source) {
-				Connection cnx = data_source.getConnection();
-				if (cnx != null)
-					return Result.ok(cnx);
-				else return Result.err(new Err(
-					ErrKind.Null,
-					"DB Connection is null"
-				));
-			}
+			Connection cnx = data_source.getConnection();
+			if (cnx != null)
+				return Result.ok(cnx);
+			else return Result.err(new Err(
+				ErrKind.Null,
+				"DB Connection is null"
+			));
 		} catch (SQLException e) {
 			return Result.err(new Err(
 				ErrKind.InitiliazationFailure,
@@ -153,11 +149,8 @@ public class Database {
 	// Is this fine??
 	// TODO: Analyze if closing the connection pool 
 	//		 releases all the resources the connections hold
-	@GuardedBy("data_source")
 	public static void close() throws InterruptedException {
-		synchronized(data_source) {
-			if (data_source != null)
-				Database.data_source.close();
-		}
+		if (data_source != null)
+			Database.data_source.close();
 	}
 }

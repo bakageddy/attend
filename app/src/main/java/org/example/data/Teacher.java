@@ -147,44 +147,6 @@ public class Teacher {
 		}
 	}
 
-	public static Result<TeacherSearchRequest, Err> extract(Map<String, String[]> map) {
-		TeacherSearchRequest out = new TeacherSearchRequest();
-		String[] patterns = map.get("pattern");
-		if (patterns != null) {
-			if (patterns.length != 1) {
-				return Result.err(new Err(
-					ErrKind.IllegalArgument,
-					"pattern must be singular"
-				));
-			}
-			out.setPattern(patterns[0]);
-		}
-
-		String[] ids = map.get("id");
-		if (ids != null) {
-			if (patterns.length != 1) {
-				return Result.err(new Err(
-					ErrKind.IllegalArgument,
-					"rollno must be singular"
-				));
-			}
-			Result<Long, Err> parsed_id = Parser.parse_long(ids[0]);
-			if (parsed_id.isErr()) {
-				return Result.err(parsed_id.err_msg());
-			}
-			out.setTeacherid(parsed_id.unwrap());
-		}
-
-		if (patterns == null && ids == null) {
-			return Result.err(new Err(
-				ErrKind.IllegalArgument,
-				"Search Parameters unfulfilled"
-			));
-		
-		}
-		return Result.ok(out);
-	}
-
 	public long teacher_id;
 	public String name;
 

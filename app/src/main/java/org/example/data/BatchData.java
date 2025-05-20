@@ -51,7 +51,8 @@ public class BatchData {
 			ResultSet rst = stmt.executeQuery();
 
 			Optional<Long> teacherid = Optional.empty();
-			List<Student> students = new ArrayList<>();
+			// NOTE: This 20 is hardcoded
+			List<Student> students = new ArrayList<>(20);
 			while (rst.next()) {
 				teacherid = Optional.of(rst.getLong(1));
 				long rollno = rst.getLong(2);
