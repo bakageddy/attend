@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 
 import org.example.data.Batch;
 import org.example.types.Err;
+import org.example.types.ErrKind;
 import org.example.types.extractors.BatchSearchRequest;
 import org.example.util.Response;
 import org.example.util.Result;
@@ -18,16 +19,21 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @WebServlet(urlPatterns = "/api/batch/search")
 public class BatchSearch extends HttpServlet {
-	private static Result<Void, Err> search_and_serialize_to(BatchSearchRequest request, PrintWriter dst) {
+	private static Result<String, Err> search_and_serialize(BatchSearchRequest request) {
 		if (request.getBatchname() != null) {
 			return Batch.search(request.getBatchname())
-				.and_then(results -> Serializer.serialize_to(results, dst));
-		} else if (request.getTeacherid().isPresent()) {
-			return Batch.search(request.getTeacherid().get())
-				.and_then(results -> Serializer.serialize_to(results, dst));
-		} else {
+				.and_then(results -> Serializer.serialize(results));
+		} else if (request.getBatchid().isPresent()) {
 			return Batch.search(request.getBatchid().get())
-				.and_then(results -> Serializer.serialize_to(results, dst));
+				.and_then(results -> Serializer.serialize(results));
+		} else if (request.getTeacherid().isPresent()){
+			return Batch.search_teacherid(request.getTeacherid().get())
+				.and_then(results -> Serializer.serialize(results));
+		} else {
+			return Result.err(new Err(
+				ErrKind.Unreachable, 
+				"Something went wrong"
+			));
 		}
 	}
 
@@ -37,7 +43,8 @@ public class BatchSearch extends HttpServlet {
 			PrintWriter out = resp.getWriter();
 		) {
 			BatchSearchRequest.extract(req.getParameterMap())
-				.and_then(search_request -> search_and_serialize_to(search_request, out))
+				.and_then(search_request -> search_and_serialize(search_request))
+				.and_then(results -> Response.send(results, out))
 				.or_else(e -> Response.send_err(resp, e));
 		} catch (IOException e) {
 			System.err.println(e.getMessage());

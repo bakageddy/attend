@@ -119,7 +119,7 @@ public class AttendanceStudentRequest implements Extractor<AttendanceStudentRequ
 		if (date == null) {
 			return Result.err(new Err(
 				ErrKind.IllegalArgument,
-				"Request parameter `date` must be singular"
+				"Request parameter `date` is empty"
 			));
 		}
 

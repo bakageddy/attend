@@ -103,14 +103,13 @@ public class Student {
 
 			// NOTE: Hardcode 20 in here. Change it when you implement inset pagination
 			PreparedStatement stmt = cnx.prepareStatement(
-				"SELECT RollNo, Name FROM Student WHERE Name LIKE ? ORDER BY RollNo LIMIT 20;"
+				"SELECT RollNo, Name FROM Student WHERE Name LIKE ? LIMIT 20;"
 			);
 		) {
 			exists.setString(1, param);
 			ResultSet exists_result = exists.executeQuery();
 
 			if (!exists_result.next()) {
-				exists.close();
 				return Result.err(new Err(
 					ErrKind.ElementNotFound,
 					"No results for such pattern"

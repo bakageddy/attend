@@ -11,6 +11,7 @@ import org.example.data.Database;
 import org.example.data.Student;
 import org.example.data.Subject;
 import org.example.data.Teacher;
+import org.example.types.Err;
 import org.example.util.LRU;
 import org.example.util.Result;
 
@@ -30,14 +31,14 @@ public class Context implements ServletContextListener {
 			Properties props = new Properties();
 			props.load(in);
 
-			Result<Void, String> result 
-					= Database.init(props)
-							.map_err(e -> e.toString());
+			Result<Void, Err> result 
+					= Database.init(props);
 
 			if (result.isErr()) {
 				System.err.println(result.err_msg());
 				System.exit(1);
 			}
+
 		} catch ( IOException e ) {
 			System.err.println("Err reading from config file" + e.getMessage());
 		} catch ( IllegalArgumentException e) {

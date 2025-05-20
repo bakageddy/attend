@@ -87,8 +87,8 @@
 						<option value="VIII">VIII</option>
 					</select>
 					<div class="attendance__input__submit__group">
-						<button class="submit__button attendance__input__element" formaction="/app/api/attendance/"
-							formmethod="post" type="submit">Set</button>
+						<button class="submit__button attendance__input__element"
+							onclick="attendanceFormCreate(); return false" type="submit">Set</button>
 						<button class="submit__button attendance__input__element"
 							onclick="attendanceFormDelete(); return false;" type="submit">Delete</button>
 					</div>

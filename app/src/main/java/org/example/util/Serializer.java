@@ -15,7 +15,9 @@ public class Serializer<T> {
 			if (serializer == null) {
 				serializer = new Gson();
 			}
-			return Result.ok(serializer.toJson(data));
+			String payload = serializer.toJson(data);
+			System.out.println(payload);
+			return Result.ok(payload);
 		} catch (Exception e) {
 			return Result.err(new Err(
 				ErrKind.JsonSerializeError,
@@ -29,7 +31,8 @@ public class Serializer<T> {
 			if (serializer == null) {
 				serializer = new Gson();
 			}
-			serializer.toJson(src, dst);
+			String data = serializer.toJson(src);
+			dst.write(data);
 			dst.flush();
 			return Result.ok(null);
 		} catch (JsonIOException e) {

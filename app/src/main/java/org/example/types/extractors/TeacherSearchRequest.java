@@ -1,6 +1,7 @@
 package org.example.types.extractors;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.example.types.Err;
 import org.example.types.ErrKind;
@@ -9,12 +10,16 @@ import org.example.util.Parser;
 import org.example.util.Result;
 
 public class TeacherSearchRequest implements Extractor<TeacherSearchRequest> {
-	long teacherid;
+	Optional<Long> teacherid = Optional.empty();
 	String pattern;
-	public long getTeacherid() {
+	public Optional<Long> getTeacherid() {
 		return teacherid;
 	}
 	public void setTeacherid(long teacherid) {
+		this.teacherid = Optional.of(teacherid);
+	}
+
+	public void setTeacherid(Optional<Long> teacherid) {
 		this.teacherid = teacherid;
 	}
 	public String getPattern() {
@@ -26,7 +31,17 @@ public class TeacherSearchRequest implements Extractor<TeacherSearchRequest> {
 
 	public static Result<TeacherSearchRequest, Err> extract(Map<String, String[]> map) {
 		TeacherSearchRequest out = new TeacherSearchRequest();
+		String[] ids = map.get("id");
 		String[] patterns = map.get("pattern");
+
+		if (patterns == null && ids == null) {
+			return Result.err(new Err(
+				ErrKind.IllegalArgument,
+				"Search Parameters unfulfilled"
+			));
+		
+		}
+
 		if (patterns != null) {
 			if (patterns.length != 1) {
 				return Result.err(new Err(
@@ -37,9 +52,8 @@ public class TeacherSearchRequest implements Extractor<TeacherSearchRequest> {
 			out.setPattern(patterns[0]);
 		}
 
-		String[] ids = map.get("id");
 		if (ids != null) {
-			if (patterns.length != 1) {
+			if (ids.length != 1) {
 				return Result.err(new Err(
 					ErrKind.IllegalArgument,
 					"rollno must be singular"
@@ -49,16 +63,10 @@ public class TeacherSearchRequest implements Extractor<TeacherSearchRequest> {
 			if (parsed_id.isErr()) {
 				return Result.err(parsed_id.err_msg());
 			}
-			out.setTeacherid(parsed_id.unwrap());
+
+			out.setTeacherid(parsed_id.asOption());
 		}
 
-		if (patterns == null && ids == null) {
-			return Result.err(new Err(
-				ErrKind.IllegalArgument,
-				"Search Parameters unfulfilled"
-			));
-		
-		}
 		return Result.ok(out);
 	}
 }

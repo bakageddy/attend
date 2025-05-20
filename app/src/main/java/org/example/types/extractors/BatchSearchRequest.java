@@ -11,8 +11,8 @@ import org.example.util.Result;
 
 // TODO: Documentation
 public class BatchSearchRequest implements Extractor<BatchSearchRequest> {
-	private Optional<Long> batchid; //id
-	private Optional<Long> teacherid; //owner
+	private Optional<Long> batchid = Optional.empty(); //id
+	private Optional<Long> teacherid = Optional.empty(); //owner
 	private String batchname; //pattern
 
 	public Optional<Long> getBatchid() {
@@ -56,6 +56,7 @@ public class BatchSearchRequest implements Extractor<BatchSearchRequest> {
 			}
 			request.setBatchname(patterns[0]);
 		}
+
 		String[] teacherid = map.get("teacherid");
 		if (teacherid != null) {
 			if (teacherid.length != 1) {

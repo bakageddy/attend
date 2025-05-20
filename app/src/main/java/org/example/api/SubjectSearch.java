@@ -7,6 +7,7 @@ import java.io.Writer;
 import org.example.data.Subject;
 import org.example.types.Err;
 import org.example.types.extractors.SubjectSearchRequest;
+import org.example.util.Response;
 import org.example.util.Result;
 import org.example.util.Serializer;
 
@@ -31,38 +32,16 @@ public class SubjectSearch extends HttpServlet {
 		}
 	}
 
-	private static int err_to_status(Err e) {
-		switch (e.kind) {
-			case ElementNotFound:
-				return HttpServletResponse.SC_NO_CONTENT;
-			case OutOfMemory:
-			case ClassNotFound:
-			case IllegalState:
-			case DBTimeout:
-			case IOError:
-			case JsonSerializeError:
-				return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
-			default:
-				return HttpServletResponse.SC_BAD_REQUEST;
-		}
-	}
-
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try (
 			PrintWriter out = resp.getWriter();
 		) {
-			Result<Void, Err> result = Subject
+			SubjectSearchRequest
 				.extract(req.getParameterMap())
-				.and_then(search_request -> search_and_serialize_to(search_request, out));
-			if (result.isErr()) {
-				Err e = result.err_msg();
-				resp.sendError(err_to_status(e), e.toString());
-			} else {
-				resp.setStatus(HttpServletResponse.SC_OK);
-			}
-			resp.flushBuffer();
-		} catch (IOException e) {
+				.and_then(search_request -> search_and_serialize_to(search_request, out))
+				.or_else(e -> Response.send_err(resp, e));
+		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
 	}

@@ -56,12 +56,13 @@ public class StudentSearchRequest implements Extractor<StudentSearchRequest> {
 			out.setRollno(parsed_elem.unwrap());
 		}
 
-		if (patterns == null || rollnos == null) {
+		if (patterns == null && rollnos == null) {
 			return Result.err(new Err(
 				ErrKind.IllegalArgument,
 				"Search Parameters unfulfilled"
 			));
 		}
+		// System.out.printf("ID: %d, Pattern: %s", out.getRollno(), out.getPattern());
 
 		return Result.ok(out);
 	}

@@ -6,10 +6,11 @@ import java.util.Properties;
 
 import org.example.util.Result;
 import org.example.util.Parser;
-import org.postgresql.ds.PGPoolingDataSource;
 
 import com.google.errorprone.annotations.ThreadSafe;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import org.example.types.Err;
 import org.example.types.ErrKind;
@@ -17,7 +18,7 @@ import org.example.types.ErrKind;
 @ThreadSafe
 public class Database {
 
-	private static PGPoolingDataSource data_source = null;
+	private static HikariDataSource data_source = null;
 
 	/**
 	 * @param props - Properties should contain the following fields<br/>
@@ -56,22 +57,6 @@ public class Database {
 				return Result.err(new Err(
 					ErrKind.NumberFormat,
 					"Cannot parse `db_connection_timeout`"
-				));
-			}
-
-			String db_init_pool = props.getProperty("db_init_pool");
-			if (db_init_pool == null) {
-				return Result.err(new Err(
-					ErrKind.Null, 
-					"`db_init_pool` is null"
-				));
-			}
-
-			Result<Integer, Err> init_pool = Parser.parse_int(db_init_pool);
-			if (init_pool.isErr()) {
-				return Result.err(new Err(
-					ErrKind.NumberFormat,
-					"Cannot parse `db_init_pool`"
 				));
 			}
 
@@ -114,26 +99,21 @@ public class Database {
 				));
 			}
 
-			synchronized (data_source) {
-				data_source = new PGPoolingDataSource();
-				if (data_source == null) {
-					return Result.err(new Err(
-						ErrKind.InitiliazationFailure,
-						"Cannot Initiliaze Connection Pool"
-					));
-				}
-
-				data_source.setConnectTimeout(timeout.unwrap()); // 2s
-				data_source.setInitialConnections(init_pool.unwrap());
-				data_source.setMaxConnections(max_pool_size.unwrap());
-
-				data_source.setServerName("localhost");
-				data_source.setDatabaseName(db_name);
-				data_source.setUser(db_username);
-				data_source.setPassword(db_password);
-
-				return Result.ok(null);
+			HikariConfig config = new HikariConfig();
+			config.setMaximumPoolSize(max_pool_size.unwrap());
+			config.setConnectionTimeout(timeout.unwrap());
+			config.setUsername(db_username);
+			config.setPassword(db_password);
+			config.setJdbcUrl("jdbc:postgresql://localhost/" + db_name);
+			data_source = new HikariDataSource(config);
+			if (data_source == null) {
+				return Result.err(new Err(
+					ErrKind.InitiliazationFailure,
+					"Cannot Initiliaze Connection Pool"
+				));
 			}
+
+			return Result.ok(null);
 		} catch (ClassNotFoundException e) {
 			return Result.err(new Err(ErrKind.ClassNotFound, "Cannot load Postgres Driver"));
 		} catch (IllegalStateException e) {
@@ -149,7 +129,7 @@ public class Database {
 			if (data_source == null) {
 				return Result.err(new Err(
 					ErrKind.InitiliazationFailure, 
-					"cannot get connection before Initiliazation")
+					"Cannot get connection before Initiliazation")
 				);
 			}
 

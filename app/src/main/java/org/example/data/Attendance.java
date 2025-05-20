@@ -71,13 +71,13 @@ public class Attendance {
 		String period,
 		String date
 	) {
-		Result<Connection, Err> optional_cnx = Database.get_connection();
-		if (optional_cnx.isErr()) {
-			return Result.err(optional_cnx.err_msg());
+		Result<Connection, Err> result_cnx = Database.get_connection();
+		if (result_cnx.isErr()) {
+			return Result.err(result_cnx.err_msg());
 		}
 
 		try (
-			Connection cnx = optional_cnx.unwrap();
+			Connection cnx = result_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
 				"DELETE FROM Attendance WHERE Day=?::date AND RollNo=? AND TeacherID=? AND SubjectID=? AND Period=?::period;"
 			);
