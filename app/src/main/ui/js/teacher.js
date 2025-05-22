@@ -87,5 +87,5 @@ const render_teacher = (json_data) => {
 	`;
 }
 
-teacher_id_handle.addEventListener('input', debounce(async (event) => await handleTeacherIdSearch(event)), 500);
+teacher_id_handle.addEventListener('input', async (event) => await handleTeacherIdSearch(event));
 teacher_name_handle.addEventListener('input', debounce(async (event) => await handleTeacherNameSearch(event)), 500); 

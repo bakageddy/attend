@@ -25,10 +25,10 @@ VALUES(?::date, ?, ?::period, ?, ?);
 ```sql
 DELETE FROM Attendance 
 WHERE Day=?::date AND 
-        RollNo=? AND 
-        TeacherID=? AND 
-        SubjectID=? AND 
-        Period=?::period;
+    RollNo=? AND 
+    TeacherID=? AND 
+    SubjectID=? AND 
+    Period=?::period;
 ```
 
 ## Batch

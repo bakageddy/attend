@@ -16,7 +16,7 @@ public class Serializer<T> {
 				serializer = new Gson();
 			}
 			String payload = serializer.toJson(data);
-			System.out.println(payload);
+			// System.out.println(payload);
 			return Result.ok(payload);
 		} catch (Exception e) {
 			return Result.err(new Err(

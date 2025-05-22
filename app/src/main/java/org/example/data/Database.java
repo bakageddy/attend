@@ -59,6 +59,22 @@ public class Database {
 				));
 			}
 
+			String db_init_pool_size = props.getProperty("db_init_pool_size");
+			if (db_init_pool_size == null) {
+				return Result.err(new Err(
+					ErrKind.Null,
+					"`db_init_pool_size` is null"
+				));
+			}
+
+			Result<Integer, Err> db_init_pool = Parser.parse_int(db_init_pool_size);
+			if (db_init_pool.isErr()) {
+				return Result.err(new Err(
+					ErrKind.NumberFormat,
+					"Cannot parse `db_max_pool_size`"
+				));
+			}
+
 			String db_max_pool_size = props.getProperty("db_max_pool_size");
 			if (db_max_pool_size == null) {
 				return Result.err(new Err(
@@ -99,6 +115,7 @@ public class Database {
 			}
 
 			HikariConfig config = new HikariConfig();
+			config.setMinimumIdle(db_init_pool.unwrap());
 			config.setMaximumPoolSize(max_pool_size.unwrap());
 			config.setConnectionTimeout(timeout.unwrap());
 			config.setUsername(db_username);

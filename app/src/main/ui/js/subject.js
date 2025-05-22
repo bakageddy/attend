@@ -116,9 +116,9 @@ const handleSubjectNameSearch = async (event) => {
 	});
 }
 
-subject_id_search.addEventListener('input', debounce((event) => handleSubjectIdSearch(event), 500));
-subject_code_search.addEventListener('input', debounce((event) => handleSubjectCodeSearch(event), 500));
-subject_name_search.addEventListener('input', debounce((event) => handleSubjectNameSearch(event), 500));
+subject_id_search.addEventListener('input', async (event) => await handleSubjectIdSearch(event));
+subject_code_search.addEventListener('input', debounce(async (event) => await handleSubjectCodeSearch(event), 500));
+subject_name_search.addEventListener('input', debounce(async (event) => await handleSubjectNameSearch(event), 500));
 
 const render_subject = (json_data) => {
 	return `

@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class Response {
 	private static int err_to_status(Err e) {
-		System.out.println(e.err);
 		switch (e.kind) {
 			case ElementNotFound:
 				return HttpServletResponse.SC_NO_CONTENT;
@@ -54,7 +53,6 @@ public class Response {
 
 	public static<T> Result<T, Void> send_err(HttpServletResponse resp, Err e) {
 		try {
-			System.out.println(e.toString());
 			resp.sendError(err_to_status(e), e.toString());
 			resp.flushBuffer();
 			return Result.ok(null);

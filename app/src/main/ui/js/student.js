@@ -94,5 +94,5 @@ const render_student_id = (json_data) => {
 	`;
 }
 
-student_id_search.addEventListener('input', debounce(async (event) => await handleStudentIdSearch(event), 500));
+student_id_search.addEventListener('input', async (event) => await handleStudentIdSearch(event));
 student_name_search.addEventListener('input', debounce(async (event) => await handleStudentNameSearch(event), 500));

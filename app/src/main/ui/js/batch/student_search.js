@@ -86,5 +86,5 @@ const render_student = (json_data) => {
 document.getElementById("student_dropzone").addEventListener("dragover", handleDragOver);
 document.getElementById("student_dropzone").addEventListener("drop", handleDrop);
 
-studentid_input_element.addEventListener('input', event => debounce(handleStudentIdInput(event)));
-studentname_input_element.addEventListener('input', event => debounce(handleStudentNameInput(event)));
+studentid_input_element.addEventListener('input', async event => await handleStudentIdInput(event));
+studentname_input_element.addEventListener('input', async event =>  debounce(await handleStudentNameInput(event)));

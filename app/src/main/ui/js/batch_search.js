@@ -150,6 +150,6 @@ const render_batch = (json_data) => {
 	`;
 }
 
-batchid_input.addEventListener("input", debounce_batch(async (event) => await search_by_id(event)));
+batchid_input.addEventListener("input", async (event) => await search_by_id(event));
 name_input.addEventListener("input", debounce_batch(async (event) => await search_by_name(event)));
 teacherid_input.addEventListener("input", debounce_batch(async (event) => await search_by_teacherid(event)));

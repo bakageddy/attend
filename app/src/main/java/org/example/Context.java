@@ -35,7 +35,7 @@ public class Context implements ServletContextListener {
 					= Database.init(props);
 
 			if (result.isErr()) {
-				System.err.println(result.err_msg());
+				System.err.println("DB ERR:" + result.err_msg());
 				System.exit(1);
 			}
 
