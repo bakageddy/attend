@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
+	"os/signal"
+	"sync/atomic"
 )
 
 const API_BASE string = "http://localhost:8080/app/api"
@@ -20,31 +24,8 @@ var TEMPLATES []string = []string{
 	"/subject/search?code=%s",
 }
 
-func request_work(input chan(string)) {
-	for request := range input {
-		url := fmt.Sprintf(API_BASE + TEMPLATES[rand.Intn(len(TEMPLATES))], request)
-		resp, err := http.Get(url)
-		if err != nil {
-			log.Println(err.Error())
-		}
-
-		if (resp.StatusCode == http.StatusNoContent) {
-			continue
-		}
-
-		if (resp.StatusCode == http.StatusOK) {
-			log.Println("Request Successful")
-		}
-
-		if body, err := io.ReadAll(resp.Body); err != nil {
-			log.Println(err.Error())
-		} else {
-			fmt.Printf("REQUEST: %s RESPONSE: %s\n", request, string(body))
-		}
-
-
-	}
-}
+var sucessful_request atomic.Int32
+var normal_request atomic.Int32
 
 func rand_string(length int) string {
 	buffer := make([]byte, length)
@@ -55,16 +36,67 @@ func rand_string(length int) string {
 	return string(buffer)
 }
 
+func worker_pattern(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done(): {
+			return
+		}
+		default: {
+			param := rand_string(rand.Intn(4) + 2)
+
+			url := fmt.Sprintf(
+				API_BASE+TEMPLATES[rand.Intn(len(TEMPLATES))],
+				param,
+			)
+
+			req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			normal_request.Add(1)
+			if resp.StatusCode == http.StatusNoContent {
+				fmt.Printf("Pattern: %s not found\n", param)
+				continue
+			}
+
+			if resp.StatusCode == http.StatusOK {
+				sucessful_request.Add(1)
+				log.Println("Request Successful")
+			}
+
+			if body, err := io.ReadAll(resp.Body); err != nil {
+				log.Println(err.Error())
+			} else {
+				fmt.Printf("Got a result of length: %d\n", len(body))
+			}
+
+		}
+		}
+	}
+}
+
+
 func main() {
-	input := make(chan(string), 20)
-	for i := 0; i < 2; i++ {
-		go request_work(input)
+	interrupt_handler_ctx, _ := signal.NotifyContext(context.Background(), os.Interrupt)
+
+	for i := 0; i < 4; i++ {
+		go worker_pattern(interrupt_handler_ctx)
 	}
 
-	// Random Strings of length, 1 to 3
-	for i := 1; i < 100; i++ {
-		input <- rand_string(rand.Intn(3) + 1)
-	}
 
-	close(input)
+	<-interrupt_handler_ctx.Done()
+
+	fmt.Printf(
+		"Completed %d valid requests with a total of %d requests\n",
+		sucessful_request.Load(),
+		normal_request.Load(),
+	)
+
 }
