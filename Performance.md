@@ -1,5 +1,32 @@
 # Performance Techniques
 ## Applied
+### Database
+During searching with certain inputs, the server chokes up and returns a result in the magnitude of 20s
+    -> Enable auto_explain shared library (dumps the execution plan for certain queries that can be specified)
+    -> dump queries that takes over 1s (searching should be within 20ms imho)
+    -> See parameters to the prepared statements that take over 20s because they are not present
+    -> Database defaults to sequential scan
+    -> The sequential scans only take place when the parameters is not in the table 
+    -> Improve statistics target from 1000 to 100_000 (The Student table is 100_000_000 elements big)
+    -> Database defaults to sequential scan still
+    -> This is due to the use of prepared statements with it's generic plan, which is not based on the stats of the database
+    -> `SET plan_cache_mode = force_custom_plan;`
+    -> This forces the database to come up with a custom plan for the given input each time.
+    -> Increases planning time for all queries, but decreases sudden spikes that go to 6-20s
+```c++
+// explain analyze execute membership('Vijay%');
+                                                       QUERY PLAN
+------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.00..4.20 rows=1 width=4) (actual time=6393.018..6393.019 rows=0 loops=1)
+   ->  Seq Scan on student  (cost=0.00..2098987.00 rows=500000 width=4) (actual time=6393.016..6393.017 rows=0 loops=1)
+         Filter: (name ~~ $1)
+         Rows Removed by Filter: 100000000
+ Planning Time: 0.087 ms
+ Execution Time: 6393.087 ms
+(6 rows)
+```
+
+
 ### Indices
 For searching,
     -> by pattern, included index of type btree-text-pattern-ops, 4 secs to 1ms..
