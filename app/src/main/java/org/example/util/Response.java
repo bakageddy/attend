@@ -30,6 +30,7 @@ public class Response {
 		try {
 			dst.write(payload);
 			dst.flush();
+			payload = null;
 			return Result.ok(null);
 		} catch (IOException e) {
 			return Result.err(new Err(
