@@ -97,6 +97,7 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 		if (value.is_stale()) {
 			Node.remove_self(value);
 			cache.remove(value.key);
+			value = null;
 			return Optional.empty();
 		}
 
@@ -111,8 +112,12 @@ public class LRU<Key, Value> implements Cache<Key, Value> {
 		if (cache.containsKey(key)) {
 			Node<Key,Value> old_value = cache.get(key);
 			Node.remove_self(old_value);
+			old_value = null;
 		}
 
+		// NOTE: Is this ok?, I mean you can do better than this.
+		// get the object from a pool and just reuse the TTL
+		// TODO: Implement a object pool
 		// Create new object to update TTL
 		Node<Key,Value> new_value = new Node<>(key,val);
 		cache.put(key, new_value);
