@@ -1,5 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Comfortaa:wght@300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Comfortaa:wght@300..700&family=Koulen&display=swap');
 
+/* Utility classes */
 html, body {
   height: 100%;
   width: 100%;
@@ -25,7 +26,18 @@ html, body {
   background-color: #A4A7A4;
   color: #24262D;
   padding: 0.2rem 0.4rem;
-  border-radius: 10%;
+  border-radius: 2px;
+}
+
+.form__member {
+  padding: 0.4rem;
+  margin: 0.4rem;
+}
+
+/* Component classes */
+.main {
+  display: flex;
+  justify-content: space-evenly;
 }
 
 .top {
@@ -40,4 +52,30 @@ html, body {
   gap: 1.2rem;
 }
 
+.search, .attendance {
+  width: 100%;
+}
 
+.search__group {
+  display: flex;
+  flex-direction: column;
+  border: unset;
+}
+
+.attendance__form {
+  display: flex;
+  min-width: 100%;
+  flex-direction: column;
+}
+
+.attendance {
+  width: 100%;
+}
+
+.attendance__submit__btn {
+  border: unset;
+  font-family: "Koulen", system-ui;
+  font-weight: 500;
+  padding: 0.6rem 1rem;
+  background-color: #7AA89F;
+}

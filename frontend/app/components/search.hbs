@@ -1,0 +1,23 @@
+<section class="container search">
+  <form class="search__form">
+      <fieldset class="search__student__group search__group" name="student_fieldset">
+        <legend for="student_fieldset">Search Student(s)</legend>
+        <input id="search__student__id" class="form__member search__input" {{on 'input' this.search_student_id}} type="number" placeholder="Search RollNo"/>
+        <input id="search__student__name" class="form__member search__input" type="text" {{on 'input' this.search_student_name}} placeholder="Search Student" />
+      </fieldset>
+
+      <fieldset class="search__teacher__group search__group" name="teacher_fieldset">
+        <legend for="student_fieldset">Search Teacher(s)</legend>
+        <input class="form__member search__input" type="number" placeholder="Search TeacherID"/>
+        <input class="form__member search__input" type="text" placeholder="Search Teacher" />
+      </fieldset>
+
+      <fieldset class="search__subject__group search__group" name="subject_fieldset">
+        <legend for="student_fieldset">Search Subject(s)</legend>
+        <input class="form__member search__input" type="number" placeholder="Search SubjectID"/>
+        <input class="form__member search__input" type="text" placeholder="Search SubjectCode" />
+        <input class="form__member search__input" type="text" placeholder="Search Subject" />
+      </fieldset>
+  </form>
+{{yield}}
+</section>

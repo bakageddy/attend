@@ -1,0 +1,23 @@
+<section class="container attendance">
+  <form class="attendance__form">
+    <input class="form__member" type="number" placeholder="TeacherID"/>
+    <input class="form__member" type="number" placeholder="SubjectID"/>
+    <input class="form__member" type="number" placeholder="Student Rollno"/>
+    <input class="form__member" type="date" placeholder="Date"/>
+    <select class="form__member">
+      <option>I</option>
+      <option>II</option>
+      <option>III</option>
+      <option>IV</option>
+      <option>V</option>
+      <option>VI</option>
+      <option>VII</option>
+      <option>VIII</option>
+    </select>
+    <div class="attendance__submit__group">
+      <button class="form__member btn attendance__submit__btn" type="submit">Set Attendance</button>
+      <button class="form__member btn attendance__submit__btn" type="submit">Delete Attendance</button>
+    </div>
+  </form>
+  {{yield}}
+</section>
