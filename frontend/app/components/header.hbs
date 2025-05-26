@@ -2,14 +2,14 @@
   <nav class="top__nav">
     <ul class="top__collection">
       <li class="top__link btn">
-        <a href="/" >
+        <LinkTo @route="attendance">
           Home
-        </a>
+        </LinkTo>
       </li>
       <li class="top__link btn">
-        <a href="/batch" class="top__link btn">
+        <LinkTo @route="batch">
           Batch
-        </a>
+        </LinkTo>
       </li>
       <li class="top__link btn">
         <a href="https://github.com/bakageddy">
@@ -18,5 +18,4 @@
       </li>
     </ul>
   </nav>
-  {{yield}}
 </header>

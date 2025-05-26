@@ -16,6 +16,18 @@ html, body {
   margin: 0 2rem;
 }
 
+.btn, a:link, a:visited {
+  font-family: Comfortaa, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  text-decoration: none;
+  letter-spacing: -0.001rem;
+  background-color: #A4A7A4;
+  color: #24262D;
+  padding: 0.2rem 0.4rem;
+  border-radius: 10%;
+}
+
 .top {
   justify-content: flex-end;
 }
@@ -28,15 +40,4 @@ html, body {
   gap: 1.2rem;
 }
 
-.btn, a:link, a:visited {
-  display: inline-block;
-  font-family: Comfortaa, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 300;
-  text-decoration: none;
-  letter-spacing: -0.001rem;
-  background-color: #A4A7A4;
-  color: #24262D;
-  padding: 0.2rem 0.4rem;
-  border-radius: 10%;
-}
+
