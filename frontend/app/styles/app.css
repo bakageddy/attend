@@ -62,14 +62,20 @@ html, body {
   border: unset;
 }
 
+.attendance {
+  width: 100%;
+}
+
 .attendance__form {
   display: flex;
   min-width: 100%;
   flex-direction: column;
 }
 
-.attendance {
-  width: 100%;
+.attendance__submit__group {
+  display: flex;
+  flex-grow: 1;
+  min-width: 100%;
 }
 
 .attendance__submit__btn {
@@ -78,4 +84,5 @@ html, body {
   font-weight: 500;
   padding: 0.6rem 1rem;
   background-color: #7AA89F;
+  flex-grow: 1;
 }
