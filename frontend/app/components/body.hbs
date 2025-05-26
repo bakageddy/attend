@@ -1,0 +1,39 @@
+<main class="container main">
+  {{search_component}}
+  <section class="container search">
+    <form>
+      <legend>
+
+        <label for="student_fieldset">Search Student(s)</label>
+        <fieldset name="student_fieldset">
+          <input type="number" placeholder="Search RollNo"/>
+          <input type="text" placeholder="Search Student" />
+        </fieldset>
+
+        <label for="teacher_fieldset">Search Teacher(s)</label>
+        <fieldset name="teacher_fieldset">
+          <input type="number" placeholder="Search TeacherID"/>
+          <input type="text" placeholder="Search Teacher" />
+        </fieldset>
+
+        <label for="subject_fieldset">Search Subject(s)</label>
+        <fieldset name="subject_fieldset">
+          <input type="number" placeholder="Search SubjectID"/>
+          <input type="text" placeholder="Search SubjectCode" />
+          <input type="text" placeholder="Search Subject" />
+        </fieldset>
+      </legend>
+    </form>
+  </section>
+
+  <section class="container results">
+  </section>
+
+  <section class="container attendance">
+    <form>
+      <input type="number" placeholder="TeacherID"/>
+      <input type="number"/>
+    </form>
+  </section>
+  {{yield}}
+</main>

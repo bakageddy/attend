@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Comfortaa:wght@300..700&display=swap');
+
+html, body {
+  height: 100%;
+  width: 100%;
+  background-color: #090E13;
+  color: #C5C9C7;
+  overflow-x: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin: 0 2rem;
+}
+
+.top {
+  justify-content: flex-end;
+}
+
+.top__collection {
+  margin-left: auto;
+  display: flex;
+  flex-direction: row;
+  list-style-type: none;
+  gap: 1.2rem;
+}
+
+.btn, a:link, a:visited {
+  display: inline-block;
+  font-family: Comfortaa, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  text-decoration: none;
+  letter-spacing: -0.001rem;
+  background-color: #A4A7A4;
+  color: #24262D;
+  padding: 0.2rem 0.4rem;
+  border-radius: 10%;
+}
