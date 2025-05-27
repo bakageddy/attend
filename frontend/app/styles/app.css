@@ -1,11 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Comfortaa:wght@300..700&family=Koulen&display=swap');
 
+:root {
+  --ink-primary: #0D0D0D;
+  --ink-secondary: #2C2C2C;
+  --ink-grey: #6A6A6A;
+  --ink-bg: #f0f0f0;
+  --ink-old: #F9F8F6;
+}
+
 /* Utility classes */
 html, body {
   height: 100%;
   width: 100%;
-  background-color: #090E13;
-  color: #C5C9C7;
+  background-color: var(--ink-bg);
+  color: var(--ink-primary);
   overflow-x: hidden;
 }
 
@@ -17,21 +25,37 @@ html, body {
   margin: 0 2rem;
 }
 
-.btn, a:link, a:visited {
+.btn {
   font-family: Comfortaa, sans-serif;
   font-size: 0.75rem;
-  font-weight: 300;
+  font-weight: 900;
+  background-color: var(--ink-secondary);
+  color: var(--ink-old);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+a:link, a:visited {
+  color: var(--ink-bg);
   text-decoration: none;
-  letter-spacing: -0.001rem;
-  background-color: #A4A7A4;
-  color: #24262D;
-  padding: 0.2rem 0.4rem;
-  border-radius: 2px;
 }
 
 .form__member {
   padding: 0.4rem;
   margin: 0.4rem;
+  font-family: Comfortaa, sans-serif;
+  background-color: var(--ink-bg);
+  outline: none;
+  border-style: none;
+  border: 2px solid var(--ink-secondary);
+  border-radius: 2px;
+}
+
+.form__member:focus {
+  transform: translate(-4px, -4px);
+  transition-duration: 400ms;
+  transition: ease-in-out;
+  box-shadow: 8px 8px var(--ink-secondary);
 }
 
 /* Component classes */
@@ -41,19 +65,26 @@ html, body {
 }
 
 .top {
-  justify-content: flex-end;
+  display: flex;
+  flex-direction: row;
+}
+
+.top__logo {
+  font-family: Koulen, system-ui;
+  font-size: 1.25rem;
+  color: var(--ink-primary);
+}
+
+.top__nav {
+  display: block;
+  margin-left: auto;
 }
 
 .top__collection {
-  margin-left: auto;
   display: flex;
   flex-direction: row;
   list-style-type: none;
   gap: 1.2rem;
-}
-
-.search, .attendance {
-  width: 100%;
 }
 
 .search__group {
@@ -62,11 +93,60 @@ html, body {
   border: unset;
 }
 
-.attendance {
-  width: 100%;
+.search__group__legend {
+  font-family: Koulen, system-ui;
+  font-weight: 300;
 }
 
-.attendance__form {
+.results {
+  display: flex;
+  flex-wrap: wrap;
+
+  /* grid-auto-flow: column; */
+  align-items: center;
+}
+
+.result__info {
+  text-align: center;
+  font-family: Koulen, monospace;
+}
+
+.result__element__container {
+  /* grid-row: span 1; */
+  flex-grow: 1;
+  display: grid;
+  font-family: Koulen, monospace;
+  font-size: small;
+  background-color: var(--ink-secondary);
+  color: var(--ink-old);
+  padding: 0.8rem;
+  margin: 0.6rem;
+  border-radius: 0.4rem;
+}
+
+.student__element__container {
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-flow: rows;
+}
+
+.teacher__element__container {
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-flow: rows;
+}
+
+.subject__element__container {
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-flow: rows;
+  gap: 0.3rem;
+}
+
+.attendance {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+}
+
+.attendance__form, .batch__attendance__form{
   display: flex;
   min-width: 100%;
   flex-direction: column;
@@ -80,9 +160,12 @@ html, body {
 
 .attendance__submit__btn {
   border: unset;
-  font-family: "Koulen", system-ui;
+  font-family: Koulen, system-ui;
+  font-size: 14px;
   font-weight: 500;
   padding: 0.6rem 1rem;
-  background-color: #7AA89F;
+  background-color: var(--ink-secondary);
+  color: var(--ink-bg);
   flex-grow: 1;
 }
+

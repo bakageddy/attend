@@ -1,10 +1,10 @@
 <section class="container attendance">
   <form class="attendance__form">
-    <input class="form__member" type="number" placeholder="TeacherID"/>
-    <input class="form__member" type="number" placeholder="SubjectID"/>
-    <input class="form__member" type="number" placeholder="Student Rollno"/>
-    <input class="form__member" type="date" placeholder="Date"/>
-    <select class="form__member">
+    <input id="attendance__form__teacherid" class="form__member" type="number" placeholder="TeacherID"/>
+    <input id="attendance__form__subjectid" class="form__member" type="number" placeholder="SubjectID"/>
+    <input id="attendance__form__rollno" class="form__member" type="number" placeholder="Student Rollno"/>
+    <input id="attendance__form__date" class="form__member" type="date" placeholder="Date"/>
+    <select id="attendance__form__period" class="form__member">
       <option>I</option>
       <option>II</option>
       <option>III</option>
@@ -18,6 +18,24 @@
       <button class="form__member btn attendance__submit__btn" type="submit">Set Attendance</button>
       <button class="form__member btn attendance__submit__btn" type="submit">Delete Attendance</button>
     </div>
+  </form>
+
+  <form class="batch__attendance__form">
+    <input id="batch__attendance__form__batchid" class="form__member" type="number" placeholder="BatchID"/>
+    <input id="batch__attendance__form__teacherid" class="form__member" type="number" placeholder="TeacherID"/>
+    <input id="batch__attendance__form__subjectid" class="form__member" type="number" placeholder="SubjectID"/>
+    <input id="batch__attendance__form__date" class="form__member" type="date" placeholder="Date"/>
+    <select id="batch__attendance__form__period" class="form__member">
+      <option>I</option>
+      <option>II</option>
+      <option>III</option>
+      <option>IV</option>
+      <option>V</option>
+      <option>VI</option>
+      <option>VII</option>
+      <option>VIII</option>
+    </select>
+    <button class="form__member btn attendance__submit__btn" type="submit">Set Attendance</button>
   </form>
   {{yield}}
 </section>

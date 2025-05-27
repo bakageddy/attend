@@ -1,3 +1,40 @@
-<section class="container results">
+<section class="container">
+  {{#if this.service.results}}
+    <div class="results">
+      {{#each this.service.results.data as |row| }}
+        {{#if this.service.isStudent}}
+          <StudentResult
+            class="result__element__container student__element__container"
+            @rollno={{row.rollNo}}
+            @name={{row.name}}
+          />
+        {{else if this.service.isTeacher}}
+          <TeacherResult
+            class="result__element__container teacher__element__container"
+            @teacherid={{row.teacher_id}}
+            @name={{row.name}}
+          />
+        {{else if this.service.isSubject}}
+          <SubjectResult
+            class="result__element__container subject__element__container"
+            @subjectid={{row.subject_id}}
+            @subjectcode={{row.subject_code}}
+            @name={{row.name}}
+          />
+        {{else if this.service.isBatch}}
+          <BatchResult
+            class="result__element__container batch__element__container"
+            @batchid={{row.batchid}}
+            @teacherid={{row.teacherid}}
+            @name={{row.name}}
+          />
+        {{/if}}
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="result__info">
+      <p>No results for now, Search for a valid value</p>
+    </div>
+  {{/if}}
 {{yield}}
 </section>
