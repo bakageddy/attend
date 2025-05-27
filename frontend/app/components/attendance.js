@@ -17,7 +17,9 @@ export default class AttendanceComponent extends Component {
       "date": date
     });
 
-    let _resp = await fetch("http://localhost:8080/app/api/attendance/?" + params.toString());
+    let _resp = await fetch("http://localhost:8080/app/api/attendance/?" + params.toString(), {
+      method: "DELETE"
+    });
     return;
   }
 }
