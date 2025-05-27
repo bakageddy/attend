@@ -13,7 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(urlPatterns = "/api/attendance/")
+@WebServlet(urlPatterns = {"/api/attendance/", "/api/attendance"})
 public class Attendance extends HttpServlet {
 	private static Result<Void, Err> handle_insertion(AttendanceStudentRequest req) {
 		Result<Void, Err> result = org.example.data.Attendance.enter_student(

@@ -1,10 +1,10 @@
 <section class="container attendance">
   <form class="attendance__form">
-    <input id="attendance__form__teacherid" class="form__member" type="number" placeholder="TeacherID"/>
-    <input id="attendance__form__subjectid" class="form__member" type="number" placeholder="SubjectID"/>
-    <input id="attendance__form__rollno" class="form__member" type="number" placeholder="Student Rollno"/>
-    <input id="attendance__form__date" class="form__member" type="date" placeholder="Date"/>
-    <select id="attendance__form__period" class="form__member">
+    <input name="teacherid" id="attendance__form__teacherid" class="form__member" type="number" placeholder="TeacherID"/>
+    <input name="subjectid" id="attendance__form__subjectid" class="form__member" type="number" placeholder="SubjectID"/>
+    <input name="rollno" id="attendance__form__rollno" class="form__member" type="number" placeholder="Student Rollno"/>
+    <input name="date" id="attendance__form__date" class="form__member" type="date" placeholder="Date"/>
+    <select name="period" id="attendance__form__period" class="form__member">
       <option>I</option>
       <option>II</option>
       <option>III</option>
@@ -15,17 +15,29 @@
       <option>VIII</option>
     </select>
     <div class="attendance__submit__group">
-      <button class="form__member btn attendance__submit__btn" type="submit">Set Attendance</button>
-      <button class="form__member btn attendance__submit__btn" type="submit">Delete Attendance</button>
+      <button
+        formmethod="POST"
+        formaction="http://localhost:8080/app/api/attendance/"
+        class="form__member btn attendance__submit__btn"
+        type="submit">
+        Set Attendance
+      </button>
+
+      <button
+        {{on 'submit' this.delete_attendance}}
+        class="form__member btn attendance__submit__btn"
+        type="submit">
+        Delete Attendance
+      </button>
     </div>
   </form>
 
-  <form class="batch__attendance__form">
-    <input id="batch__attendance__form__batchid" class="form__member" type="number" placeholder="BatchID"/>
-    <input id="batch__attendance__form__teacherid" class="form__member" type="number" placeholder="TeacherID"/>
-    <input id="batch__attendance__form__subjectid" class="form__member" type="number" placeholder="SubjectID"/>
-    <input id="batch__attendance__form__date" class="form__member" type="date" placeholder="Date"/>
-    <select id="batch__attendance__form__period" class="form__member">
+  <form action="http://localhost:8080/app/api/attendance/batch" method="POST" class="batch__attendance__form">
+    <input name="batchid" id="batch__attendance__form__batchid" class="form__member" type="number" placeholder="BatchID"/>
+    <input name="teacherid" id="batch__attendance__form__teacherid" class="form__member" type="number" placeholder="TeacherID"/>
+    <input name="subjectid" id="batch__attendance__form__subjectid" class="form__member" type="number" placeholder="SubjectID"/>
+    <input name="date" id="batch__attendance__form__date" class="form__member" type="date" placeholder="Date"/>
+    <select name="period" id="batch__attendance__form__period" class="form__member">
       <option>I</option>
       <option>II</option>
       <option>III</option>
