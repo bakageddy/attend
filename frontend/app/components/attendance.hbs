@@ -1,10 +1,42 @@
 <section class="container attendance">
   <form class="attendance__form">
-    <input name="teacherid" id="attendance__form__teacherid" class="form__member" type="number" placeholder="TeacherID"/>
-    <input name="subjectid" id="attendance__form__subjectid" class="form__member" type="number" placeholder="SubjectID"/>
-    <input name="rollno" id="attendance__form__rollno" class="form__member" type="number" placeholder="Student Rollno"/>
-    <input name="date" id="attendance__form__date" class="form__member" type="date" placeholder="Date"/>
-    <select name="period" id="attendance__form__period" class="form__member">
+    <Input
+      name="teacherid"
+      id="attendance__form__teacherid"
+      class="form__member"
+      type="number"
+      placeholder="TeacherID"
+      @value={{this.teacherid}}
+    />
+    <Input
+      name="subjectid"
+      id="attendance__form__subjectid"
+      class="form__member"
+      type="number"
+      placeholder="SubjectID"
+      @value={{this.subjectid}}
+    />
+    <Input
+      name="rollno"
+      id="attendance__form__rollno"
+      class="form__member"
+      type="number"
+      placeholder="Student Rollno"
+      @value={{this.studentid}}
+    />
+    <Input
+      name="date"
+      id="attendance__form__date"
+      class="form__member"
+      type="date"
+      placeholder="Date"
+      @value={{this.date}}
+    />
+    <select
+      name="period"
+      id="attendance__form__period"
+      class="form__member"
+    >
       <option>I</option>
       <option>II</option>
       <option>III</option>
@@ -16,15 +48,14 @@
     </select>
     <div class="attendance__submit__group">
       <button
-        formmethod="POST"
-        formaction="http://localhost:8080/app/api/attendance/"
+        {{on 'click' this.insert_attendance}}
         class="form__member btn attendance__submit__btn"
         type="submit">
         Set Attendance
       </button>
 
       <button
-        {{on 'submit' this.delete_attendance}}
+        {{on 'click' this.delete_attendance}}
         class="form__member btn attendance__submit__btn"
         type="submit">
         Delete Attendance
@@ -33,10 +64,38 @@
   </form>
 
   <form action="http://localhost:8080/app/api/attendance/batch" method="POST" class="batch__attendance__form">
-    <input name="batchid" id="batch__attendance__form__batchid" class="form__member" type="number" placeholder="BatchID"/>
-    <input name="teacherid" id="batch__attendance__form__teacherid" class="form__member" type="number" placeholder="TeacherID"/>
-    <input name="subjectid" id="batch__attendance__form__subjectid" class="form__member" type="number" placeholder="SubjectID"/>
-    <input name="date" id="batch__attendance__form__date" class="form__member" type="date" placeholder="Date"/>
+    <Input
+      name="batchid"
+      id="batch__attendance__form__batchid"
+      class="form__member"
+      type="number"
+      placeholder="BatchID"
+      @value={{this.batchid}}
+    />
+    <Input
+      name="teacherid"
+      id="batch__attendance__form__teacherid"
+      class="form__member"
+      type="number"
+      placeholder="TeacherID"
+      @value={{this.teacherid}}
+    />
+    <Input
+      name="subjectid"
+      id="batch__attendance__form__subjectid"
+      class="form__member"
+      type="number"
+      placeholder="SubjectID"
+      @value={{this.subjectid}}
+    />
+    <Input
+      name="date"
+      id="batch__attendance__form__date"
+      class="form__member"
+      type="date"
+      placeholder="Date"
+      @value={{this.date}}
+    />
     <select name="period" id="batch__attendance__form__period" class="form__member">
       <option>I</option>
       <option>II</option>

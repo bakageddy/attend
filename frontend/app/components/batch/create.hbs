@@ -1,0 +1,20 @@
+<form class="batch__crud__form">
+  <Input
+    class="form__member"
+    id="batch__crud__create__teacherid"
+    placeholder="Teacher ID"
+    type="number"
+    @value={{this.teacherid}}
+  />
+  <Input
+    class="form__member"
+    id="batch__crud__create__batchname"
+    placeholder="Batch Name"
+    type="text"
+    @value={{this.batchname}}
+  />
+  <button type="button" class="btn form__member batch__crud__btn" {{on 'click' this.handleSubmit}}>
+    Create Batch!
+  </button>
+  {{yield}}
+</form>

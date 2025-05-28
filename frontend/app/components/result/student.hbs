@@ -1,4 +1,8 @@
-<div ...attributes {{on 'click' this.handleClick}}>
+<div
+  ...attributes
+  {{on 'click' this.handleClick}}
+  {{on 'dragstart' this.handleDragStart}}
+>
   <div class="student__result__id">
     {{@rollno}}
   </div>

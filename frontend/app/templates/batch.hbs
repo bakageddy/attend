@@ -1,2 +1,22 @@
 {{page-title "Batch"}}
-TODO
+
+<main class="container batch__main">
+  <div class="batch_wrapper">
+    <Batch class="batch__crud">
+      <Batch::Create/>
+      <Batch::Delete/>
+    </Batch>
+    <Search>
+      <Search::Batch/>
+      <Search::Student/>
+    </Search>
+  </div>
+  <Result/>
+  <Batch class="batch__data__crud">
+    <Batch::Drop/>
+    <Batch::DataCrud/>
+    {{!-- <Batch::AddStudent/> --}}
+    {{!-- <Batch::RemoveStudent/> --}}
+  </Batch>
+  {{yield}}
+</main>

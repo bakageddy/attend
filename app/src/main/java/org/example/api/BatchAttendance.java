@@ -34,7 +34,6 @@ public class BatchAttendance extends HttpServlet {
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// TODO: Think if batch deleting attendance is a good idea...
 		// Maybe, maybe not
-		// Do i need to delete?
 		resp.setStatus(418); // I am a teapot
 	}
 }

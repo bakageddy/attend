@@ -1,7 +1,7 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
 
-export default class SubjectResultComponent extends Component {
+export default class SubjectComponent extends Component {
   @action
   handleClick(ev) {
     let subjectid = ev.currentTarget.querySelector(".subject__result__id").innerText;

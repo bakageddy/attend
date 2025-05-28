@@ -1,7 +1,12 @@
 {{page-title "Attendance"}}
-<main class="container main">
-  <Search/>
-  <Results/>
+<main class="container attendance__main">
+  <Search>
+    <Search::Batch/>
+    <Search::Teacher/>
+    <Search::Subject/>
+    <Search::Student/>
+  </Search>
+  <Result/>
   <Attendance/>
   {{yield}}
 </main>

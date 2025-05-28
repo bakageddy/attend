@@ -3,22 +3,22 @@ import { setupRenderingTest } from 'frontend/tests/helpers';
 import { render } from '@ember/test-helpers';
 import { hbs } from 'ember-cli-htmlbars';
 
-module('Integration | Component | batch-result', function (hooks) {
+module('Integration | Component | result/index', function (hooks) {
   setupRenderingTest(hooks);
 
   test('it renders', async function (assert) {
     // Set any properties with this.set('myProperty', 'value');
     // Handle any actions with this.set('myAction', function(val) { ... });
 
-    await render(hbs`<BatchResult />`);
+    await render(hbs`<Result::Index />`);
 
     assert.dom().hasText('');
 
     // Template block usage:
     await render(hbs`
-      <BatchResult>
+      <Result::Index>
         template block text
-      </BatchResult>
+      </Result::Index>
     `);
 
     assert.dom().hasText('template block text');

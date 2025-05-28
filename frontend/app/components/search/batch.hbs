@@ -1,0 +1,29 @@
+<fieldset class="search__batch__group search__group" name="batch_fieldset">
+  <legend class="search__group__legend" for="batch_fieldset">Search Batch(s)</legend>
+  <Input
+    id="search__batch__id"
+    class="form__member search__input"
+    type="number"
+    placeholder="Search BatchID"
+    @value={{this.batchid}}
+    @input={{this.batchid}}
+    {{on 'input' this.search_batch_id }}
+  />
+  <Input
+    id="search__batch__teacherid"
+    class="form__member search__input"
+    type="number"
+    placeholder="Search BatchOwner/TeacherID"
+    @value={{this.teacherid}}
+    {{on 'input' this.search_batch_teacherid }}
+  />
+  <Input
+    id="search__batch__name"
+    class="form__member search__input"
+    type="text"
+    placeholder="Search Batch"
+    @value={{this.batchname}}
+    {{on 'input' this.search_batch_name }}
+  />
+  {{yield}}
+</fieldset>

@@ -1,0 +1,24 @@
+<form class="batch__crud__form">
+  <Input
+    class="form__member"
+    id="batch__crud__create__teacherid"
+    type="number"
+    placeholder="Teacher ID"
+    @value={{this.teacherid}}
+  />
+  <Input
+    class="form__member"
+    id="batch__crud__create__batchid"
+    type="number"
+    placeholder="Batch ID"
+    @value={{this.batchid}}
+  />
+  <button
+    type="button"
+    class="btn form__member batch__crud__btn"
+    {{on 'click' this.handleSubmit}}
+  >
+    Delete Batch!
+  </button>
+  {{yield}}
+</form>

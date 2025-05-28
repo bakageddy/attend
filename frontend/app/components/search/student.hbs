@@ -1,0 +1,20 @@
+<fieldset class="search__student__group search__group" name="student_fieldset">
+  <legend class="search__group__legend" for="student_fieldset">Search Student(s)</legend>
+  <Input
+    id="search__student__id"
+    class="form__member search__input"
+    type="number"
+    placeholder="Search RollNo"
+    @value={{this.studentid}}
+    {{on "input" this.search_student_id}}
+  />
+  <Input
+    id="search__student__name"
+    class="form__member search__input"
+    type="text"
+    placeholder="Search Student"
+    @value={{this.studentname}}
+    {{on "input" this.search_student_name}}
+  />
+  {{yield}}
+</fieldset>

@@ -1,0 +1,20 @@
+<fieldset class="search__teacher__group search__group" name="teacher_fieldset">
+  <legend class="search__group__legend" for="teacher_fieldset">Search Teacher(s)</legend>
+  <Input
+    id="search__teacher__id"
+    class="form__member search__input"
+    type="number"
+    placeholder="Search TeacherID"
+    @value={{this.teacherid}}
+    {{on 'input' this.search_teacher_id }}
+  />
+  <Input
+    id="search__teacher__name"
+    class="form__member search__input"
+    type="text"
+    placeholder="Search Teacher"
+    @value={{this.teachername}}
+    {{on 'input' this.search_teacher_name }}
+  />
+  {{yield}}
+</fieldset>
