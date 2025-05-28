@@ -146,7 +146,7 @@ public class Attendance {
 		try (
 			Connection cnx = optional_cnx.unwrap();
 			PreparedStatement stmt = cnx.prepareStatement(
-				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?, ?, ?, ?, ?);"
+				"INSERT INTO Attendance(Day, RollNo, Period, SubjectID, TeacherID) VALUES(?::date, ?, ?::period, ?, ?);"
 			);
 		) {
 			for (Student student : batchdata.students) {
