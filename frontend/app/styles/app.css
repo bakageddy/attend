@@ -62,6 +62,7 @@ a:link, a:visited {
 .attendance__main {
   display: flex;
   justify-content: space-evenly;
+  align-items: center;
 }
 
 .top {
@@ -87,6 +88,29 @@ a:link, a:visited {
   gap: 1.2rem;
 }
 
+.search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.search__tab__header {
+  display: flex;
+  flex-direction: row;
+  gap: 1.2rem;
+}
+
+.search__tab__heading {
+  font-family: "Koulen", system-ui;
+  font-size: small;
+  text-transform: uppercase;
+
+  background-color: var(--ink-secondary);
+  color: var(--ink-old);
+  padding: 0.4rem 0.8rem;
+  border-radius: 3px;
+}
+
 .search__group {
   display: flex;
   flex-direction: column;
@@ -103,6 +127,7 @@ a:link, a:visited {
   flex-wrap: wrap;
 
   /* grid-auto-flow: column; */
+  /* max-width: 40%; */
   align-items: center;
 }
 

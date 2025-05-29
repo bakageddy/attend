@@ -1,5 +1,20 @@
 <section class="container search">
+  <div class="search__tab__header">
+    {{#each @fields as |field|}}
+      <div class="search__tab__heading" {{on 'click' (fn this.set_field field)}}>
+        {{field}}
+      </div>
+    {{/each}}
+  </div>
   <form class="search__form">
-  {{yield}}
+    {{#if this.is_batch}}
+      <Search::Batch/>
+    {{else if this.is_teacher}}
+      <Search::Teacher/>
+    {{else if this.is_subject}}
+      <Search::Subject/>
+    {{else if this.is_student}}
+      <Search::Student/>
+    {{/if}}
   </form>
 </section>

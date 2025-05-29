@@ -1,11 +1,6 @@
 {{page-title "Attendance"}}
 <main class="container attendance__main">
-  <Search>
-    <Search::Batch/>
-    <Search::Teacher/>
-    <Search::Subject/>
-    <Search::Student/>
-  </Search>
+  <Search @fields={{array "batch" "teacher" "subject" "student"}}/>
   <Result/>
   <Attendance/>
   {{yield}}

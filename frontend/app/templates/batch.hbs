@@ -6,10 +6,7 @@
       <Batch::Create/>
       <Batch::Delete/>
     </Batch>
-    <Search>
-      <Search::Batch/>
-      <Search::Student/>
-    </Search>
+    <Search @fields={{array "batch" "student"}}/>
   </div>
   <Result/>
   <Batch class="batch__data__crud">
