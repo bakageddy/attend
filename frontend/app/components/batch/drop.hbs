@@ -1,4 +1,13 @@
-<div id="batch__drop__zone">
+<div id="batch__drop__zone" {{on 'drop' this.handleDrop}} {{on 'dragover' this.handleDragOver}}>
   <h4>You can drag and drop students here</h4>
+  <div class="batch__drop__zone__container">
+    {{#each this.students.elements as |element|}}
+      <Result::Student
+        class="batch__drop__zone__element"
+        @rollno={{element.id}}
+        @name={{element.name}}
+      />
+    {{/each}}
+  </div>
   {{yield}}
 </div>

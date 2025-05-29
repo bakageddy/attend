@@ -10,7 +10,8 @@ export default class TeacherComponent extends Component {
   @tracked teachername  = undefined;
 
   @action
-  async search_teacher_id() {
+  async search_teacher_id(ev) {
+    this.teacherid = ev.target.value;
     if (this.teacherid === undefined || this.teacherid <= 0) {
       return;
     }
@@ -37,7 +38,8 @@ export default class TeacherComponent extends Component {
   }
 
   @action
-  async search_teacher_name() {
+  async search_teacher_name(ev) {
+    this.teachername = ev.target.value;
     if (this.teachername.length <= 0) {
       return;
     }

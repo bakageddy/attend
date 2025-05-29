@@ -11,14 +11,12 @@
           />
         {{else if this.service.isTeacher}}
           <Result::Teacher
-            draggable="true"
             class="result__element__container teacher__element__container"
             @teacherid={{row.teacher_id}}
             @name={{row.name}}
           />
         {{else if this.service.isSubject}}
           <Result::Subject
-            draggable="true"
             class="result__element__container subject__element__container"
             @subjectid={{row.subject_id}}
             @subjectcode={{row.subject_code}}

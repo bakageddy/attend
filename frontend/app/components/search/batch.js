@@ -6,9 +6,9 @@ import { tracked } from "@glimmer/tracking";
 export default class BatchComponent extends Component {
   @service('result_handler') service;
 
-  @tracked batchid    = 0;
-  @tracked teacherid  = 0;
-  @tracked batchname  = '';
+  @tracked batchid    = undefined;
+  @tracked teacherid  = undefined;
+  @tracked batchname  = undefined;
 
   set batchid(val) {
     if (val > 0) {
@@ -23,13 +23,14 @@ export default class BatchComponent extends Component {
   }
 
   set batchname(val) {
-    if (val > 0) {
+    if (val.length > 0) {
       this.batchname = val;
     }
   }
 
   @action
-  async search_batch_id(_) {
+  async search_batch_id(ev) {
+    this.batchid = ev.target.value;
     if (this.batchid <= 0) {
       return;
     }
@@ -56,7 +57,8 @@ export default class BatchComponent extends Component {
   }
 
   @action
-  async search_batch_teacherid(_) {
+  async search_batch_teacherid(ev) {
+    this.teacherid = ev.target.value;
     if (this.teacherid <= 0) {
       return;
     }
@@ -83,7 +85,8 @@ export default class BatchComponent extends Component {
   }
 
   @action
-  async search_batch_name(_) {
+  async search_batch_name(ev) {
+    this.batchname = ev.target.value;
     if (this.batchname.length <= 0) {
       return;
     }

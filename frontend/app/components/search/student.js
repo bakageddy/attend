@@ -10,7 +10,8 @@ export default class StudentComponent extends Component {
   @tracked studentname  = undefined;
 
   @action
-  async search_student_id(_) {
+  async search_student_id(ev) {
+    this.studentid = ev.target.value;
     if (this.studentid == undefined || this.studentid <= 0) {
       return;
     }
@@ -38,7 +39,8 @@ export default class StudentComponent extends Component {
   }
 
   @action
-  async search_student_name() {
+  async search_student_name(ev) {
+    this.studentname = ev.target.value;
     if (this.studentname.length <= 0) {
       return;
     }

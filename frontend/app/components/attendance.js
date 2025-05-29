@@ -7,22 +7,22 @@ export default class AttendanceComponent extends Component {
   @tracked studentid  = undefined;
   @tracked teacherid  = undefined;
   @tracked subjectid  = undefined;
-  @tracked date       = undefined;
   @tracked period     = undefined;
   @tracked batchid    = undefined;
+  date                = undefined;
 
   @action
   async delete_attendance(_) {
     if (this.studentid === undefined
       || this.teacherid === undefined
       || this.subjectid === undefined
-      || this.date === undefined
     ) {
       // TODO: Render Err Dialog
       return;
     }
 
     this.period = document.getElementById("attendance__form__period").value;
+    this.date = document.getElementById("attendance__form__date").value;
     let params = new URLSearchParams({
       "rollno":     this.studentid,
       "teacherid":  this.teacherid,
@@ -46,13 +46,13 @@ export default class AttendanceComponent extends Component {
     if (this.studentid === undefined
       || this.teacherid === undefined
       || this.subjectid === undefined
-      || this.date === undefined
     ) {
       // TODO: Render Err Dialog
       return;
     }
 
     this.period = document.getElementById("attendance__form__period").value;
+    this.date = document.getElementById("attendance__form__date").value;
     let params = new URLSearchParams({
       "rollno":     this.studentid,
       "teacherid":  this.teacherid,
@@ -76,13 +76,13 @@ export default class AttendanceComponent extends Component {
     if (this.batchid === undefined
       || this.teacherid === undefined
       || this.subjectid === undefined
-      || this.date === undefined
     ) {
       // TODO: Render Err Dialog
       return;
     }
 
     this.period = document.getElementById("batch__attendance__form__period").value;
+    this.date = document.getElementById("batch__attendance__form__date").value;
 
     let params = new URLSearchParams({
       "batchid":    this.batchid,

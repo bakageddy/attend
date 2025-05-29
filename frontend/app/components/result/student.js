@@ -1,7 +1,10 @@
 import Component from "@glimmer/component";
-import { action } from "@ember/object"
+import { action } from "@ember/object";
+import { service } from "@ember/service";
 
 export default class StudentComponent extends Component {
+  @service('drag_drop') global_state;
+
   @action
   handleClick(ev) {
     let rollno = ev.currentTarget.querySelector(".student__result__id").innerText;
@@ -14,7 +17,10 @@ export default class StudentComponent extends Component {
 
   @action
   handleDragStart(ev) {
-    let rollno = ev.target.querySelector(".student__result__id");
-    ev.dataTransfer.setData("Text", rollno.innerText);
+    let id = ev.target.querySelector(".student__result__id").innerText;
+    id = Number.parseInt(id);
+
+    let name = ev.target.querySelector(".student__result__name").innerText;
+    this.global_state.setElem({id: id, name: name});
   }
 }

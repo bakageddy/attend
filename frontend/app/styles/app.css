@@ -191,7 +191,7 @@ a:link, a:visited {
 
 #batch__drop__zone {
   display:inline-block;
-  width: 100%;
+  width: minmax(300px, 100%);
   height: max-content;
   text-align:center;
   border-radius: 4px;
@@ -199,7 +199,27 @@ a:link, a:visited {
   font-family: Koulen, system-ui;
   color: var(--ink-old);
   background-color: var(--ink-secondary);
+  justify-content:center;
 }
+
+.batch__drop__zone__active {
+  border: 2px dashed var(--ink-old);
+}
+
+.batch__drop__zone__container {
+  display:flex;
+  flex-direction: column;
+}
+
+.batch__drop__zone__element {
+  display: flex;
+  flex-direction: row;
+  justify-content:space-around;
+
+}
+
+
+
 .batch__data__crud {
   width: max-content;
 }
@@ -219,6 +239,6 @@ a:link, a:visited {
 .batch__data__submit__btn {
   background-color: var(--ink-secondary);
   color: var(--ink-old);
-  font-family: "Koulen", system-ui;
+  font-family: Koulen, system-ui;
   flex-grow: 1;
 }

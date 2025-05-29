@@ -10,8 +10,27 @@ export default class SubjectComponent extends Component {
   @tracked subjectcode  = undefined;
   @tracked subjectname  = undefined;
 
+  set subjectid(val) {
+    if (this.subjectid !== undefined) {
+      this.subjectid = val;
+    }
+  }
+
+  set subjectcode(val) {
+    if (this.subjectcode !== undefined) {
+      this.subjectcode = val;
+    }
+  }
+
+  set subjectname(val) {
+    if (this.subjectname !== undefined) {
+      this.subjectname = val;
+    }
+  }
+
   @action
-  async search_subject_id() {
+  async search_subject_id(ev) {
+    this.subjectid = ev.target.value;
     if (this.subjectid === undefined || this.subjectid <= 0) {
       return;
     }
@@ -39,7 +58,8 @@ export default class SubjectComponent extends Component {
   }
 
   @action
-  async search_subject_code() {
+  async search_subject_code(ev) {
+    this.subjectcode = ev.target.value;
     if (this.subjectcode.length <= 0) {
       return;
     }
@@ -67,7 +87,8 @@ export default class SubjectComponent extends Component {
   }
 
   @action
-  async search_subject_name() {
+  async search_subject_name(ev) {
+    this.subjectname = ev.target.value;
     if (this.subjectname.length <= 0) {
       return;
     }

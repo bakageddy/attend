@@ -1,9 +1,39 @@
 <form class="batch__data__crud__form">
-  <input class="form__member" name="teacherid" type="number" placeholder="Teacher ID"/>
-  <input class="form__member" name="batchid" type="number" placeholder="Batch ID"/>
+  <Input
+    id="batch__crud__teacherid__input"
+    class="form__member"
+    name="teacherid"
+    type="number"
+    placeholder="Teacher ID"
+    {{!-- @value={{this.teacherid}} --}}
+    {{!-- {{on 'input' this.handle_teacher_input}} --}}
+  />
+
+  <Input
+    id="batch__crud__batchid__input"
+    class="form__member"
+    name="batchid"
+    type="number"
+    placeholder="Batch ID"
+    {{!-- @value={{this.batchid}} --}}
+    {{!-- {{on 'input' this.handle_batch_input}} --}}
+  />
+
   <div class="batch__data__crud__submit__group">
-    <button class="btn form__member batch__data__submit__btn">Add Students</button>
-    <button class="btn form__member batch__data__submit__btn">Delete Students</button>
+    <button
+      class="btn form__member batch__data__submit__btn"
+      type="submit"
+      {{on 'submit' this.batch_crud_add}}>
+      Add Students
+    </button>
+
+    <button
+      class="btn form__member batch__data__submit__btn"
+      type="submit"
+      {{on 'submit' this.batch_crud_delete}}
+    >
+      Delete Students
+    </button>
   </div>
   {{yield}}
 </form>

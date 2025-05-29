@@ -1,7 +1,28 @@
 <fieldset class="search__subject__group search__group" name="subject_fieldset">
   <legend class="search__group__legend" for="subject_fieldset">Search Subject(s)</legend>
-  <input id="search__subject__id" class="form__member search__input" type="number" {{on 'input' this.search_subject_id }} placeholder="Search SubjectID"/>
-  <input id="search__subject__code" class="form__member search__input" type="text" {{on 'input' this.search_subject_code }} placeholder="Search SubjectCode" />
-  <input id="search__subject__name" class="form__member search__input" type="text" {{on 'input' this.search_subject_name }} placeholder="Search Subject" />
+  <Input
+    id="search__subject__id"
+    class="form__member search__input"
+    type="number"
+    placeholder="Search SubjectID"
+    @value={{this.subjectid}}
+    {{on 'input' this.search_subject_id }}
+  />
+  <Input
+    id="search__subject__code"
+    class="form__member search__input"
+    type="text"
+    placeholder="Search SubjectCode"
+    @value={{this.subjectcode}}
+    {{on 'input' this.search_subject_code }}
+  />
+  <Input
+    id="search__subject__name"
+    class="form__member search__input"
+    type="text"
+    placeholder="Search Subject"
+    @value={{this.subjectname}}
+    {{on 'input' this.search_subject_name }}
+  />
   {{yield}}
 </fieldset>
