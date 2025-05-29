@@ -3,7 +3,7 @@
 :root {
   --ink-primary: #0D0D0D;
   --ink-secondary: #2C2C2C;
-  --ink-grey: #6A6A6A;
+  --ink-grey: #5E5E5E;
   --ink-bg: #f0f0f0;
   --ink-old: #F9F8F6;
 }
@@ -189,6 +189,17 @@ a:link, a:visited {
   margin: 0.6rem;
 }
 
+.batch__crud__helper__group {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.batch__crud__remove__duplicate {
+  background-color: var(--ink-grey);
+  color: var(--ink-old);
+  border: unset;
+}
+
 #batch__drop__zone {
   display:inline-block;
   width: minmax(300px, 100%);
@@ -202,10 +213,6 @@ a:link, a:visited {
   justify-content:center;
 }
 
-.batch__drop__zone__active {
-  border: 2px dashed var(--ink-old);
-}
-
 .batch__drop__zone__container {
   display:flex;
   flex-direction: column;
@@ -217,8 +224,6 @@ a:link, a:visited {
   justify-content:space-around;
 
 }
-
-
 
 .batch__data__crud {
   width: max-content;
