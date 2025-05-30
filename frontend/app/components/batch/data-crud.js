@@ -4,6 +4,8 @@ import { action } from "@ember/object";
 
 export default class DataCrudComponent extends Component {
   @service('batch_students') students;
+  @service("error_service") error;
+  @service router;
 
   @action
   async batch_crud_add(event) {
@@ -24,8 +26,14 @@ export default class DataCrudComponent extends Component {
       {method: "POST"}
     );
 
-    if (resp.status != 200) {
-      return;
+    if (resp.statusCode != 200) {
+      if (resp.statusCode !== 400) {
+        this.error.set("Something Went Wrong! Double check the form for more errors");
+        router.transitionTo("error");
+      } else if (resp.statusCode !== 500) {
+        this.error.set("Something Went Wrong with the server! We are fixing it!");
+        router.transitionTo("error");
+      }
     }
   }
 
@@ -47,10 +55,15 @@ export default class DataCrudComponent extends Component {
       {method: "DELETE"}
     );
 
-    if (resp.status != 200) {
-      return;
+    if (resp.statusCode != 200) {
+      if (resp.statusCode !== 400) {
+        this.error.set("Something Went Wrong! Double check the form for more errors");
+        this.router.transitionTo("error");
+      } else if (resp.statusCode !== 500) {
+        this.error.set("Something Went Wrong with the server! We are fixing it!");
+        this.router.transitionTo("error");
+      }
     }
-
   }
 
   @action

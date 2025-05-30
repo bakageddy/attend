@@ -1,0 +1,11 @@
+{{#if this.error.error_message}}
+  <div class="error__container">
+    <h1 class="error__header">Oops.</h1>
+    <h4 class="error__content">{{this.error.error}}</h4>
+    <div class="error__btn__group">
+      <button class="btn error__btn__confirmation" type="button" {{on 'click' this.clearAndGoBack}}>
+        Go Back
+      </button>
+    </div>
+  </div>
+{{/if}}

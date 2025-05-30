@@ -1,8 +1,12 @@
 import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
+import { service } from "@ember/service";
 
 export default class DeleteComponent extends Component {
+  @service("error_service") error;
+  @service router;
+
   @tracked teacherid = undefined;
   @tracked batchid = undefined;
 
@@ -23,8 +27,13 @@ export default class DeleteComponent extends Component {
       { method: "DELETE" }
     );
 
-    if (resp.status !== 200) {
-      // TODO: Render err dialog
+    if (resp.statusCode !== 200) {
+      if (resp.statusCode !== 400) {
+        this.error.set("Something went wrong! Double Check the input form");
+      } else if (resp.statusCode !== 500) {
+        this.error.set("Something went wrong with the server! We are fixing it");
+      }
+      this.router.transitionTo("error");
       return;
     }
     console.log("Deletion successful");

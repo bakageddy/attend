@@ -1,8 +1,12 @@
 import Component from "@glimmer/component";
 import {action} from "@ember/object";
 import { tracked } from "@glimmer/tracking";
+import { service } from "@ember/service";
 
 export default class CreateComponent extends Component {
+  @service("error_service") error;
+  @service router;
+
   @tracked teacherid = undefined;
   @tracked batchname = undefined;
 
@@ -22,9 +26,14 @@ export default class CreateComponent extends Component {
       method: "POST"
     });
 
-    if (resp.status == 200) {
-      // TODO: Show some response dialog
-      console.log("Created batch!");
+    if (resp.statusCode !== 200) {
+      if (resp.statusCode !== 400) {
+        this.error.set("Something Went Wrong! Double check the form for more errors");
+        router.transitionTo("error");
+      } else if (resp.statusCode !== 500) {
+        this.error.set("Something Went Wrong with the server! We are fixing it!");
+        router.transitionTo("error");
+      }
     }
   }
 }
