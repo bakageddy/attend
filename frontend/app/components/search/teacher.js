@@ -5,6 +5,7 @@ import { tracked } from "@glimmer/tracking";
 
 export default class TeacherComponent extends Component {
   @service('result_handler') service;
+  @service('error_service') error;
 
   @tracked teacherid    = undefined;
   @tracked teachername  = undefined;
@@ -24,7 +25,14 @@ export default class TeacherComponent extends Component {
       "http://localhost:8080/app/api/teacher/search?" + params,
     );
 
-    if (response.status != 200) {
+    if (response.status !== 200) {
+      if (response.status === 400) {
+        this.error.set("Something went wrong! Try checking your search parameters (expect number)")
+      } else if (response.status === 204) {
+        this.error.set("No teacher found with the given ID");
+      } else if (response.status === 500) {
+        this.error.set("Something went wrong with the server! We are working on it!");
+      }
       return;
     }
 
@@ -52,7 +60,14 @@ export default class TeacherComponent extends Component {
       "http://localhost:8080/app/api/teacher/search?" + params,
     );
 
-    if (response.status != 200) {
+    if (response.status !== 200) {
+      if (response.status === 400) {
+        this.error.set("Something went wrong! Try checking your search parameters (expect number)")
+      } else if (response.status === 204) {
+        this.error.set("No teacher found with the given ID");
+      } else if (response.status === 500) {
+        this.error.set("Something went wrong with the server! We are working on it!");
+      }
       return;
     }
 

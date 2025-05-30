@@ -9,4 +9,5 @@ export default class Router extends EmberRouter {
 Router.map(function () {
   this.route('batch');
   this.route('attendance');
+  this.route('error');
 });

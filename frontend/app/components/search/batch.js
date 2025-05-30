@@ -5,6 +5,8 @@ import { tracked } from "@glimmer/tracking";
 
 export default class BatchComponent extends Component {
   @service('result_handler') service;
+  @service("error_service") error;
+  @service router;
 
   @tracked batchid    = undefined;
   @tracked teacherid  = undefined;
@@ -44,6 +46,16 @@ export default class BatchComponent extends Component {
     );
 
     if (response.status != 200) {
+      if (response.status === 400) {
+        this.error.set("Something went wrong! Try checking your search parameters (expect text)");
+        console.log(this.error.from);
+        this.router.transitionTo("error");
+      } else if (response.status === 204) {
+        this.service.clear();
+      } else if (response.status === 500) {
+        this.error.set("Something went wrong with the server! We are working on it!");
+        this.router.transitionTo("error");
+      }
       return;
     }
 
@@ -72,6 +84,15 @@ export default class BatchComponent extends Component {
     );
 
     if (response.status != 200) {
+      if (response.status === 400) {
+        this.error.set("Something went wrong! Try checking your search parameters (expect text)");
+        this.router.transitionTo("error");
+      } else if (response.status === 204) {
+        this.service.clear();
+      } else if (response.status === 500) {
+        this.error.set("Something went wrong with the server! We are working on it!");
+        this.router.transitionTo("error");
+      }
       return;
     }
 
@@ -99,7 +120,17 @@ export default class BatchComponent extends Component {
       "http://localhost:8080/app/api/batch/search?" + params
     );
 
-    if (response.status != 200) {
+    if (response.status !== 200) {
+      if (response.status === 400) {
+        this.error.set("Something went wrong! Try checking your search parameters (expect text)");
+        this.router.transitionTo("error");
+      } else if (response.status === 204) {
+        this.error.set("No such batch with the given Name/Pattern");
+        this.service.clear();
+      } else if (response.status === 500) {
+        this.error.set("Something went wrong with the server! We are working on it!");
+        this.router.transitionTo("error");
+      }
       return;
     }
 
@@ -111,7 +142,4 @@ export default class BatchComponent extends Component {
     this.service.results = results;
     console.log(results);
   }
-
 }
-
-

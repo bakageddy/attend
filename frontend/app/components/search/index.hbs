@@ -1,11 +1,4 @@
 <section class="container search">
-  <div class="search__tab__header">
-    {{#each @fields as |field|}}
-      <div class="search__tab__heading" {{on 'click' (fn this.set_field field)}}>
-        {{field}}
-      </div>
-    {{/each}}
-  </div>
   <form class="search__form">
     {{#if this.is_batch}}
       <Search::Batch/>
@@ -17,4 +10,12 @@
       <Search::Student/>
     {{/if}}
   </form>
+  <div class="search__tab__header">
+    {{#each @fields as |field|}}
+      <div class="search__tab__heading" {{on 'click' (fn this.set_field field)}}>
+        {{field}}
+      </div>
+    {{/each}}
+  </div>
+  {{yield}}
 </section>

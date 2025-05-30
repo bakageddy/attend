@@ -59,6 +59,37 @@ a:link, a:visited {
 }
 
 /* Component classes */
+.error__header {
+  font-family: Koulen, monospace;
+  font-size: 8rem;
+  font-weight: 100;
+  gap: 2rem;
+}
+
+.error__container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  margin: 2rem;
+}
+
+.error__content {
+  font-family: Comfortaa, sans-serif;
+  font-size: 2rem;
+  font-weight: 200;
+}
+
+.error__btn__group {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.error__btn__confirmation {
+  font-family: "Koulen", monospace;
+  margin: 2rem;
+}
+
 .attendance__main {
   display: flex;
   justify-content: space-evenly;
@@ -95,16 +126,16 @@ a:link, a:visited {
 }
 
 .search__tab__header {
+  flex-grow: 1;
   display: flex;
   flex-direction: row;
   gap: 1.2rem;
 }
 
 .search__tab__heading {
-  font-family: "Koulen", system-ui;
+  font-family: Koulen, system-ui;
   font-size: small;
   text-transform: uppercase;
-
   background-color: var(--ink-secondary);
   color: var(--ink-old);
   padding: 0.4rem 0.8rem;
@@ -127,6 +158,7 @@ a:link, a:visited {
   flex-wrap: wrap;
 
   /* grid-auto-flow: column; */
+
   /* max-width: 40%; */
   align-items: center;
 }

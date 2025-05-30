@@ -4,6 +4,10 @@ import { tracked } from '@glimmer/tracking';
 export default class ResultHandlerService extends Service {
   @tracked results = undefined;
 
+  clear() {
+    this.results = undefined;
+  }
+
   set results(value) {
     if (this.results !== undefined) {
       this.results = undefined;

@@ -1,8 +1,12 @@
 import Component from "@glimmer/component";
 import { action } from "@ember/object";
 import { tracked } from "@glimmer/tracking";
+import { service } from "@ember/service";
 
 export default class AttendanceComponent extends Component {
+
+  @service("error-service") error;
+  @service router;
 
   @tracked studentid  = undefined;
   @tracked teacherid  = undefined;
@@ -97,7 +101,13 @@ export default class AttendanceComponent extends Component {
     });
 
     if (resp.statusCode != 200) {
-      // Render dialog
+      if (resp.statusCode !== 400) {
+        this.error.set("Something Went Wrong! Double check the form for more errors");
+        router.transitionTo("error");
+      } else if (resp.statusCode !== 500) {
+        this.error.set("Something Went Wrong with the server! We are fixing it!");
+        router.transitionTo("error");
+      }
     }
     return;
   }

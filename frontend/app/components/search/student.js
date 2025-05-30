@@ -5,6 +5,8 @@ import { tracked } from "@glimmer/tracking";
 
 export default class StudentComponent extends Component {
   @service('result_handler') service;
+  @service('error_service') error;
+  @service router;
 
   @tracked studentid    = undefined;
   @tracked studentname  = undefined;
@@ -25,6 +27,16 @@ export default class StudentComponent extends Component {
     );
 
     if (response.status != 200) {
+      // This is a bad request with malformed parameters
+      if (response.status == 400) {
+        this.error.set("Something went wrong! Try checking your search parameters (expect number)");
+        this.router.transitionTo("error");
+      } else if (response.status == 204) {
+        this.service.results = [];
+      } else if (response.status == 500) {
+        this.error.set("Something went wrong with the server! We are working on it!");
+        this.router.transitionTo("error");
+      }
       return;
     }
 
@@ -53,7 +65,16 @@ export default class StudentComponent extends Component {
       "http://localhost:8080/app/api/student/search?" + params,
     );
 
-    if (response.status != 200) {
+    if (response.status !== 200) {
+      if (response.status === 400) {
+        this.error.set("Something went wrong! Try checking your search parameters (expect text)");
+        this.router.transitionTo("error");
+      } else if (response.status == 204) {
+        this.service.results = [];
+      } else if (response.status == 500) {
+        this.error.set("Something went wrong with the server! We are working on it!");
+        this.router.transitionTo("error");
+      }
       return;
     }
 
