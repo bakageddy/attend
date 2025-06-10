@@ -13,7 +13,8 @@ export default class CreateComponent extends Component {
   @action
   async handleSubmit(_) {
     if (this.teacherid === undefined && this.batchname === undefined) {
-      // TODO: Render error dialog
+      this.error.set("Something Went Wrong! Double check the form for more errors");
+      router.transitionTo("error");
       return;
     }
 

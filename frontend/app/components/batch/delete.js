@@ -13,7 +13,8 @@ export default class DeleteComponent extends Component {
   @action
   async handleSubmit(_) {
     if (this.teacherid === undefined && this.batchid === undefined) {
-      // TODO: Render err dialog
+      this.error.set("Do not submit with empty fields");
+      this.router.transitionTo("error");
       return;
     }
 

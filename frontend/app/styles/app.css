@@ -59,6 +59,28 @@ a:link, a:visited {
 }
 
 /* Component classes */
+.index__content {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.index__subtext {
+  font-family: 'Koulen', monospace;
+  font-size: 1rem;
+}
+
+.index__message {
+  font-family: Koulen, monospace;
+  text-transform: uppercase;
+  font-size: 4rem;
+  margin: unset;
+  padding: unset;
+}
+
 .error__header {
   font-family: Koulen, monospace;
   font-size: 8rem;
