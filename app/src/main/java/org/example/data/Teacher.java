@@ -7,14 +7,11 @@ import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.example.types.Err;
 import org.example.types.ErrKind;
-import org.example.types.extractors.TeacherSearchRequest;
 import org.example.util.LRU;
-import org.example.util.Parser;
 import org.example.util.Result;
 
 // TODO: Documentation

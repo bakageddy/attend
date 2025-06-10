@@ -4,16 +4,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.example.util.Result;
-import org.example.util.Parser;
-
-import com.google.errorprone.annotations.ThreadSafe;
-import com.google.errorprone.annotations.concurrent.GuardedBy;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
 import org.example.types.Err;
 import org.example.types.ErrKind;
+import org.example.util.Parser;
+import org.example.util.Result;
+
+import com.google.errorprone.annotations.ThreadSafe;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 @ThreadSafe
 public class Database {

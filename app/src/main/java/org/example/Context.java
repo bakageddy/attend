@@ -12,6 +12,7 @@ import org.example.data.Student;
 import org.example.data.Subject;
 import org.example.data.Teacher;
 import org.example.types.Err;
+import org.example.util.FIFO;
 import org.example.util.LRU;
 import org.example.util.Result;
 

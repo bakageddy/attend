@@ -8,9 +8,9 @@ import org.example.types.Err;
 import org.example.types.extractors.BatchCreateRequest;
 import org.example.types.extractors.BatchDataFetchRequest;
 import org.example.types.extractors.BatchDeleteRequest;
+import org.example.util.Response;
 import org.example.util.Result;
 import org.example.util.Serializer;
-import org.example.util.Response;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

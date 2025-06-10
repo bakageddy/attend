@@ -1,6 +1,7 @@
 package org.example.api;
 
 import java.io.IOException;
+
 import org.example.data.BatchData;
 import org.example.types.Err;
 import org.example.types.extractors.BatchDataAddRequest;

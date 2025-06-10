@@ -2,7 +2,6 @@ package org.example.api;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 
 import org.example.data.Subject;
 import org.example.types.Err;
